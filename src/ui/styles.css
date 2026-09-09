@@ -44,7 +44,12 @@ html, body, #root {
   --panel-w: 372px;
   --top-h: 46px;
 
-  /* Recortes do aparelho (notch/ilha). Zero em telas comuns. */
+  /*
+   * Recortes do aparelho (notch/ilha).
+   * Atenção: no PWA em standalone o Safari nem sempre resolve env() lido
+   * através de custom property — por isso o CSS abaixo chama env() direto
+   * em cada propriedade, e estas variáveis ficam só como referência.
+   */
   --safe-t: env(safe-area-inset-top, 0px);
   --safe-r: env(safe-area-inset-right, 0px);
   --safe-b: env(safe-area-inset-bottom, 0px);
@@ -64,7 +69,7 @@ button { font-family: inherit; }
 /* ---------------------------------------------------------------- topbar -- */
 
 .topbar {
-  position: absolute; top: calc(8px + var(--safe-t)); left: 50%; transform: translateX(-50%);
+  position: absolute; top: calc(8px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%);
   display: flex; align-items: stretch; gap: 4px;
   padding: 5px;
   background: var(--panel);
@@ -120,7 +125,7 @@ button { font-family: inherit; }
 /* ------------------------------------------------------------------ rail -- */
 
 .rail {
-  position: absolute; left: calc(8px + var(--safe-l)); top: 50%; transform: translateY(-50%);
+  position: absolute; left: calc(8px + env(safe-area-inset-left, 0px)); top: 50%; transform: translateY(-50%);
   display: flex; flex-direction: column; gap: 4px;
   padding: 5px; background: var(--panel);
   border: 1px solid var(--stroke); border-radius: var(--radius);
@@ -144,7 +149,7 @@ button { font-family: inherit; }
 /* ---------------------------------------------------------------- painel -- */
 
 .panel {
-  position: absolute; top: calc(var(--top-h) + 12px + var(--safe-t)); right: calc(10px + var(--safe-r));
+  position: absolute; top: calc(var(--top-h) + 12px + env(safe-area-inset-top, 0px)); right: calc(10px + env(safe-area-inset-right, 0px));
   width: var(--panel-w); max-height: calc(100% - var(--top-h) - 24px);
   display: flex; flex-direction: column;
   background: var(--panel); border: 1px solid var(--stroke);
@@ -152,7 +157,7 @@ button { font-family: inherit; }
   box-shadow: 0 20px 50px rgba(0,0,0,.5);
   overflow: hidden;
 }
-.panel.left { left: calc(var(--rail) + 14px + var(--safe-l)); right: auto; }
+.panel.left { left: calc(var(--rail) + 14px + env(safe-area-inset-left, 0px)); right: auto; }
 
 .panel-head {
   display: flex; align-items: center; gap: 10px;
@@ -314,7 +319,7 @@ button { font-family: inherit; }
 /* --------------------------------------------------------------- minimapa -- */
 
 .minimap {
-  position: absolute; left: calc(8px + var(--safe-l)); bottom: calc(8px + var(--safe-b));
+  position: absolute; left: calc(8px + env(safe-area-inset-left, 0px)); bottom: calc(8px + env(safe-area-inset-bottom, 0px));
   background: var(--panel); border: 1px solid var(--stroke);
   border-radius: 10px; padding: 6px; backdrop-filter: blur(14px);
 }
@@ -329,7 +334,7 @@ button { font-family: inherit; }
 /* ----------------------------------------------------------------- toast -- */
 
 .toast {
-  position: absolute; bottom: calc(18px + var(--safe-b)); left: 50%; transform: translateX(-50%);
+  position: absolute; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%);
   padding: 10px 16px; border-radius: 10px; max-width: 70vw; text-align: center;
   background: rgba(9,14,24,.94); border: 1px solid var(--stroke-strong);
   font-size: 12.5px; font-weight: 600; letter-spacing: .2px;
@@ -341,7 +346,7 @@ button { font-family: inherit; }
 /* -------------------------------------------------------------- tutorial -- */
 
 .tutorial {
-  position: absolute; left: calc(var(--rail) + 14px + var(--safe-l)); top: calc(var(--top-h) + 12px + var(--safe-t));
+  position: absolute; left: calc(var(--rail) + 14px + env(safe-area-inset-left, 0px)); top: calc(var(--top-h) + 12px + env(safe-area-inset-top, 0px));
   width: 292px; padding: 12px 14px;
   background: linear-gradient(180deg, rgba(21,30,47,.95), rgba(13,19,30,.95));
   border: 1px solid rgba(242,195,61,.28); border-left: 3px solid var(--gold);
@@ -392,7 +397,7 @@ button { font-family: inherit; }
 /* ----------------------------------------------------------------- debug -- */
 
 .debug {
-  position: absolute; left: calc(var(--rail) + 14px + var(--safe-l)); bottom: calc(10px + var(--safe-b)); width: 200px;
+  position: absolute; left: calc(var(--rail) + 14px + env(safe-area-inset-left, 0px)); bottom: calc(10px + env(safe-area-inset-bottom, 0px)); width: 200px;
   background: var(--panel); border: 1px solid var(--stroke);
   border-radius: 10px; padding: 9px; font-size: 11px;
 }
@@ -426,6 +431,15 @@ button { font-family: inherit; }
 /* ======================================================= telas pequenas == */
 
 /* Celular deitado: altura curta é o gargalo, não a largura. */
+/* Em paisagem o notch fica na lateral: garante folga mesmo sem env(). */
+@media (orientation: landscape) and (pointer: coarse) {
+  .rail { left: max(14px, calc(8px + env(safe-area-inset-left, 0px))); }
+  .panel.left { left: max(calc(var(--rail) + 20px), calc(var(--rail) + 14px + env(safe-area-inset-left, 0px))); }
+  .tutorial { left: max(calc(var(--rail) + 20px), calc(var(--rail) + 14px + env(safe-area-inset-left, 0px))); }
+  .panel { right: max(14px, calc(10px + env(safe-area-inset-right, 0px))); }
+  .topbar { max-width: calc(100vw - 28px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)); }
+}
+
 @media (max-height: 560px) {
   :root { --panel-w: 318px; --rail: 44px; --top-h: 40px; }
   /* Em tela baixa, o painel manda: o tutorial some para não brigar por espaço. */
@@ -452,12 +466,12 @@ button { font-family: inherit; }
   .tutorial .title { font-size: 12.5px; }
   .tutorial .text { font-size: 11px; }
   /* Trilho ancorado abaixo da barra: em 360px de altura, centralizar colide. */
-  .rail { top: calc(var(--top-h) + 10px + var(--safe-t)); transform: none; }
+  .rail { top: calc(var(--top-h) + 10px + env(safe-area-inset-top, 0px)); transform: none; }
   /* No celular o minimapa vai para a direita: à esquerda ele bate no trilho. */
   .minimap {
     padding: 4px;
     left: auto;
-    right: calc(8px + var(--safe-r));
+    right: calc(8px + env(safe-area-inset-left, 0px) + env(safe-area-inset-right, 0px));
   }
   .minimap canvas { width: 112px !important; height: 66px !important; }
   .minimap .zoomrow button { height: 22px; font-size: 11px; }
