@@ -200,3 +200,23 @@ export const RESOURCE_HINT: Record<ResourceKind, string> = {
   iron: 'Refinado. Armas e tropas pesadas.',
   coin: 'Moeda. Salários, contratações e diplomacia.',
 };
+
+/** Elos: abre o painel da cadeia produtiva. */
+export function IconChain({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <path
+        d="M10 13.5a3.6 3.6 0 005.1 0l2.6-2.6a3.6 3.6 0 10-5.1-5.1l-1 1"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        strokeLinecap="round"
+      />
+      <path
+        d="M14 10.5a3.6 3.6 0 00-5.1 0l-2.6 2.6a3.6 3.6 0 105.1 5.1l1-1"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}

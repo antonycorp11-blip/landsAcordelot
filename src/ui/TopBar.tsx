@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { Game } from '../game/Game';
-import { RAW_RESOURCES, REFINED_RESOURCES, type GameState, type ResourceKind } from '../game/types';
-import { IconPop, RESOURCE_HINT, RESOURCE_ICON, RESOURCE_LABEL } from './icons';
+import type { GameState, ResourceKind } from '../game/types';
+import { IconChain, IconPop, RESOURCE_HINT, RESOURCE_ICON, RESOURCE_LABEL } from './icons';
 
 function fmt(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
@@ -50,8 +50,25 @@ function Chip({
   );
 }
 
-/** HUD superior: brutos, refinados, população e controle de tempo (§36/§76). */
-export function TopBar({ game, state }: { game: Game; state: GameState }) {
+/**
+ * O que fica na barra é o que se gasta: ouro, comida e os três refinados.
+ * Os brutos (madeira, pedra, minério) são intermediários — vivem no painel de
+ * economia, a um toque, junto com os gargalos que explicam o número.
+ */
+const PRIMARY: ResourceKind[] = ['coin', 'food', 'planks', 'bricks', 'iron'];
+
+/** HUD superior: essenciais, população e controle de tempo (§36/§76). */
+export function TopBar({
+  game,
+  state,
+  economyOpen,
+  onToggleEconomy,
+}: {
+  game: Game;
+  state: GameState;
+  economyOpen: boolean;
+  onToggleEconomy: () => void;
+}) {
   const kingdom = state.kingdoms[state.playerKingdomId];
   const rates = game.economy.kingdomNet(kingdom.id);
   const cap = Math.round(game.economy.kingdomStorage(kingdom.id));
@@ -65,19 +82,22 @@ export function TopBar({ game, state }: { game: Game; state: GameState }) {
     workers += t.hiredWorkers;
   }
 
+  // Alerta discreto quando algo da cadeia está travado.
+  let stalled = 0;
+  for (const t of Object.values(state.territories)) {
+    if (t.ownerId !== kingdom.id) continue;
+    for (const id of t.buildingIds) {
+      const b = state.buildings[id];
+      if (b && b.construction === 0 && b.workers === 0) stalled++;
+    }
+  }
+
   return (
     <div className="topbar">
       <div className="res-group">
-        {RAW_RESOURCES.map((k) => (
+        {PRIMARY.map((k) => (
           <Chip key={k} kind={k} value={kingdom.resources[k]} rate={rates[k]} cap={cap} />
         ))}
-      </div>
-      <div className="res-group">
-        {REFINED_RESOURCES.map((k) => (
-          <Chip key={k} kind={k} value={kingdom.resources[k]} rate={rates[k]} cap={cap} />
-        ))}
-      </div>
-      <div className="res-group">
         <div className="res" title="População / trabalhadores contratados">
           <span className="icon">
             <IconPop />
@@ -85,6 +105,14 @@ export function TopBar({ game, state }: { game: Game; state: GameState }) {
           <span className="val">{fmt(population)}</span>
           <span className="rate">{workers}t</span>
         </div>
+        <button
+          className={`econ-toggle ${economyOpen ? 'active' : ''} ${stalled > 0 ? 'alert' : ''}`}
+          onClick={onToggleEconomy}
+          title="Economia do reino: brutos, estoque e gargalos"
+        >
+          <IconChain />
+          {stalled > 0 && <i className="dot" />}
+        </button>
       </div>
 
       <div className="clock">

@@ -82,8 +82,10 @@ export class Game {
   claimable = new Set<string>();
   /** Depósito em foco na aba de construção (destacado no mapa). */
   focusedDepositId: string | null = null;
+  /** Construção selecionada no mapa (abre o cartão de detalhe). */
+  selectedBuildingId: string | null = null;
   /** Aba que o painel deve abrir na próxima seleção (vem de cliques no mapa). */
-  requestedTab: 'view' | 'build' | 'work' | 'army' | 'borders' | null = null;
+  requestedTab: 'view' | 'build' | 'work' | 'army' | 'trade' | 'borders' | null = null;
 
   constructor() {
     const bundle = createWorld();
@@ -183,6 +185,7 @@ export class Game {
       this.renderer.selectedId = this.selectedId;
       this.renderer.claimableIds = this.claimable;
       this.renderer.focusedDepositId = this.focusedDepositId;
+      this.renderer.selectedBuildingId = this.selectedBuildingId;
       this.renderer.update(dt);
       if (this.ctx) this.renderer.draw(this.ctx, this.state, this.time, this.dpr);
     }
@@ -453,7 +456,10 @@ export class Game {
   select(id: string | null) {
     const changed = id !== this.selectedId;
     this.selectedId = id;
-    if (changed) this.focusedDepositId = null;
+    if (changed) {
+      this.focusedDepositId = null;
+      this.selectedBuildingId = null;
+    }
     this.claimable = new Set();
     if (id) {
       const t = this.state.territories[id];
@@ -475,15 +481,18 @@ export class Game {
    */
   selectAt(screenX: number, screenY: number) {
     const world = this.camera.screenToWorld(screenX, screenY);
-    const radius = 46 / Math.max(0.4, this.camera.zoom);
+    // Alvo generoso: no celular o dedo não tem a precisão do mouse.
+    const radius = (this.coarsePointer ? 74 : 52) / Math.max(0.4, this.camera.zoom);
 
     let bestBuilding: string | null = null;
     let bestDeposit: string | null = null;
     let bestDist = radius;
 
     for (const b of Object.values(this.state.buildings)) {
+      // Prédio maior é mais fácil de acertar.
+      const reach = radius * (0.75 + b.level * 0.12);
       const d = Math.hypot(b.position.x - world.x, b.position.y - world.y);
-      if (d < bestDist) {
+      if (d < reach && d < bestDist) {
         bestDist = d;
         bestBuilding = b.id;
         bestDeposit = null;
@@ -513,6 +522,9 @@ export class Game {
       const owned = this.state.territories[b.territoryId]?.ownerId === this.state.playerKingdomId;
       this.requestedTab = owned ? 'work' : 'view';
       this.select(b.territoryId);
+      // Selecionar depois de `select`, que limpa o foco ao trocar de território.
+      this.selectedBuildingId = owned ? bestBuilding : null;
+      this.touch();
       return;
     }
 
@@ -526,6 +538,13 @@ export class Game {
     if (!t) return;
     const castle = t.castleId ? this.state.castles[t.castleId] : null;
     this.camera.focus(castle?.position ?? t.center, zoom);
+  }
+
+  selectBuilding(buildingId: string | null) {
+    this.selectedBuildingId = buildingId;
+    const b = buildingId ? this.state.buildings[buildingId] : null;
+    if (b) this.camera.focus(b.position, Math.max(this.camera.zoom, 0.85));
+    this.touch();
   }
 
   focusDeposit(depositId: string | null) {

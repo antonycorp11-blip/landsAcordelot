@@ -5,6 +5,7 @@ import { WORKFORCE } from '../game/config/balance';
 import type { UnitStack } from '../game/managers/ArmyManager';
 import {
   RESOURCE_KINDS,
+  type ResourceKind,
   type Building,
   type Deposit,
   type GameState,
@@ -41,13 +42,14 @@ const KIND_LABEL: Record<string, string> = {
   ruin: 'Ruínas',
 };
 
-type Tab = 'view' | 'build' | 'work' | 'army' | 'borders';
+type Tab = 'view' | 'build' | 'work' | 'army' | 'trade' | 'borders';
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'view', label: 'Visão' },
   { id: 'build', label: 'Construir' },
   { id: 'work', label: 'Trabalho' },
   { id: 'army', label: 'Militar' },
+  { id: 'trade', label: 'Comércio' },
   { id: 'borders', label: 'Fronteiras' },
 ];
 
@@ -174,6 +176,7 @@ export function CityPanel({
           <WorkTab game={game} territory={territory} buildings={buildings} report={report} wallet={wallet} />
         )}
         {tab === 'army' && isPlayer && <ArmyTab game={game} state={state} territory={territory} wallet={wallet} />}
+        {tab === 'trade' && isPlayer && <TradeTab game={game} territory={territory} wallet={wallet} />}
         {tab === 'borders' && <BordersTab game={game} state={state} territory={territory} />}
       </div>
     </div>
@@ -382,6 +385,7 @@ function WorkTab({
 }) {
   const hire = game.buildings.canHire(territory);
   const cost = game.buildings.hireCost();
+  const focused = buildings.find((b) => b.id === game.selectedBuildingId) ?? null;
 
   return (
     <>
@@ -426,6 +430,8 @@ function WorkTab({
         </div>
       </div>
 
+      {focused && <BuildingCard game={game} building={focused} report={report} />}
+
       <div className="section-title">Construções ({buildings.length})</div>
       {buildings.length === 0 && (
         <div className="empty">Nada construído aqui. Vá para a aba CONSTRUIR.</div>
@@ -438,7 +444,14 @@ function WorkTab({
         const starved = !building && b.workers > 0 && b.efficiency < 0.55;
         const up = game.buildings.checkUpgrade(b);
         return (
-          <div className={`row ${idle ? 'idle' : starved ? 'busy' : ''}`} key={b.id}>
+          <div
+            className={`row ${idle ? 'idle' : starved ? 'busy' : ''} ${
+              b.id === game.selectedBuildingId ? 'picked' : ''
+            }`}
+            key={b.id}
+            onClick={() => game.selectBuilding(b.id)}
+            style={{ cursor: 'pointer' }}
+          >
             <Thumb sprite={BUILDING_WORKER[b.defId]} fallback="🏗" />
             <div className="grow">
               <span className="name">
@@ -493,6 +506,103 @@ function WorkTab({
         );
       })}
     </>
+  );
+}
+
+/**
+ * Cartão da construção clicada no mapa: o lugar de evoluir, ajustar equipe e
+ * demolir sem caçar a linha certa na lista.
+ */
+function BuildingCard({
+  game,
+  building,
+  report,
+}: {
+  game: Game;
+  building: Building;
+  report: ReturnType<Game['economy']['report']>;
+}) {
+  const def = BUILDING_DEFS[building.defId];
+  const jobs = def.jobsPerLevel * Math.max(1, building.level);
+  const up = game.buildings.checkUpgrade(building);
+  const wallet = game.playerKingdom.resources;
+  const underConstruction = building.construction > 0;
+
+  return (
+    <div className="focus-card">
+      <div className="focus-head">
+        <Thumb sprite={BUILDING_WORKER[building.defId]} fallback="🏗" />
+        <div className="grow">
+          <span className="name">
+            {def.name} <span style={{ color: 'var(--muted)' }}>Nv {building.level || 1}</span>
+          </span>
+          <span className="meta">
+            {underConstruction
+              ? `Em obra — ${Math.ceil(building.construction)}s`
+              : describeFlow(def)}
+          </span>
+        </div>
+        <button className="close" title="Fechar" onClick={() => game.selectBuilding(null)}>
+          ×
+        </button>
+      </div>
+
+      {!underConstruction && jobs > 0 && (
+        <div className="focus-row">
+          <span className="meta">Equipe</span>
+          <div className="stepper">
+            <button onClick={() => game.assignWorker(building.id, -1)} disabled={building.workers <= 0}>
+              −
+            </button>
+            <span className="n">
+              {building.workers}/{jobs}
+            </span>
+            <button
+              onClick={() => game.assignWorker(building.id, +1)}
+              disabled={building.workers >= jobs || report.idleWorkers <= 0}
+            >
+              +
+            </button>
+          </div>
+          <span className="meta" style={{ marginLeft: 'auto' }}>
+            Eficiência {Math.round(building.efficiency * 100)}%
+          </span>
+        </div>
+      )}
+
+      {building.level < def.maxLevel && (
+        <>
+          <div className="meta" style={{ marginTop: 8 }}>
+            Evoluir para o nível {building.level + 1} — {up.time}s de obra
+          </div>
+          <Cost cost={up.cost} have={wallet} />
+        </>
+      )}
+
+      <div className="focus-actions">
+        <button
+          className="btn sm primary grow"
+          disabled={!up.ok}
+          title={up.reason}
+          onClick={() => game.upgradeBuilding(building.id)}
+        >
+          {building.level >= def.maxLevel ? 'Nível máximo' : 'Evoluir'}
+        </button>
+        <button className="btn sm" onClick={() => game.selectBuilding(building.id)}>
+          Ver
+        </button>
+        <button
+          className="btn sm danger"
+          title="Demolir (devolve 40%)"
+          onClick={() => {
+            game.demolishBuilding(building.id);
+            game.selectBuilding(null);
+          }}
+        >
+          Demolir
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -774,6 +884,153 @@ function ArmyTab({
           </div>
         </>
       )}
+    </>
+  );
+}
+
+// -------------------------------------------------------------- Comércio ----
+
+const TRADEABLE: ResourceKind[] = [
+  'food',
+  'wood',
+  'stone',
+  'ore',
+  'goldOre',
+  'planks',
+  'bricks',
+  'iron',
+  'coin',
+];
+
+/**
+ * Aba de comércio: excedente vira o que falta. A caravana cobra margem, leva
+ * um teto por viagem e demora a voltar — é logística, não conversão infinita.
+ */
+function TradeTab({
+  game,
+  territory,
+  wallet,
+}: {
+  game: Game;
+  territory: Territory;
+  wallet: ResourceBag;
+}) {
+  const [give, setGive] = useState<ResourceKind>('wood');
+  const [receive, setReceive] = useState<ResourceKind>('food');
+  const [amount, setAmount] = useState(50);
+
+  const level = game.trade.marketLevel(territory);
+  const quote = game.trade.quote(territory, give, amount, receive);
+
+  if (level <= 0) {
+    return (
+      <div className="empty">
+        Sem Mercado neste território.
+        <br />
+        Erga um na aba <strong>CONSTRUIR</strong> para abrir a região às caravanas.
+      </div>
+    );
+  }
+
+  const maxByStock = Math.floor(wallet[give]);
+  const maxByCaravan = Math.floor(quote.capacity / game.trade.valueOf(give));
+  const max = Math.max(1, Math.min(maxByStock, maxByCaravan));
+
+  return (
+    <>
+      <div className="stat-grid">
+        <div className="stat">
+          <div className="k">Mercado</div>
+          <div className="v">Nv {level}</div>
+        </div>
+        <div className="stat">
+          <div className="k">Margem da caravana</div>
+          <div className="v">{Math.round(quote.spread * 100)}%</div>
+        </div>
+      </div>
+
+      <div className="section-title">Oferecer</div>
+      <div className="target-row">
+        {TRADEABLE.filter((k) => k !== receive).map((k) => {
+          const Icon = RESOURCE_ICON[k];
+          return (
+            <button
+              key={`g-${k}`}
+              className={`target ${give === k ? 'active' : ''}`}
+              onClick={() => setGive(k)}
+              title={RESOURCE_LABEL[k]}
+            >
+              <Icon />
+              {Math.floor(wallet[k])}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="row">
+        <div className="grow">
+          <span className="name">Quantidade</span>
+          <span className="meta">
+            até {max} · caravana leva {Math.round(quote.capacity)} de valor
+          </span>
+          <input
+            className="slider"
+            type="range"
+            min={1}
+            max={max}
+            value={Math.min(amount, max)}
+            onChange={(e) => setAmount(Number(e.target.value))}
+          />
+        </div>
+        <span className="right">
+          <span className="n">{Math.min(amount, max)}</span>
+        </span>
+      </div>
+
+      <div className="section-title">Receber</div>
+      <div className="target-row">
+        {TRADEABLE.filter((k) => k !== give).map((k) => {
+          const Icon = RESOURCE_ICON[k];
+          return (
+            <button
+              key={`r-${k}`}
+              className={`target ${receive === k ? 'active' : ''}`}
+              onClick={() => setReceive(k)}
+              title={RESOURCE_LABEL[k]}
+            >
+              <Icon />
+              {Math.floor(wallet[k])}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className={`forecast ${quote.ok ? 'win' : 'lose'}`}>
+        <div className="verdict">
+          {Math.min(amount, max)} {RESOURCE_LABEL[give].toLowerCase()} →{' '}
+          {quote.receiveAmount} {RESOURCE_LABEL[receive].toLowerCase()}
+        </div>
+        <div className="lines">
+          <span>{quote.reason}</span>
+        </div>
+      </div>
+
+      <div className="actions">
+        <button
+          className="btn gold wide"
+          disabled={!quote.ok}
+          onClick={() => game.executeTrade(territory.id, give, Math.min(amount, max), receive)}
+        >
+          {quote.cooldown > 0
+            ? `Caravana volta em ${Math.ceil(quote.cooldown)}s`
+            : 'Fechar negócio'}
+        </button>
+      </div>
+
+      <div className="hint">
+        O mercado troca pelo valor relativo de cada recurso. Evoluir o mercado
+        reduz a margem e aumenta o que cabe em cada viagem.
+      </div>
     </>
   );
 }

@@ -418,5 +418,50 @@
     "w": 170,
     "h": 93,
     "ay": 0.9
+  },
+  "buildings/lumberjack": {
+    "w": 300,
+    "h": 269,
+    "ay": 0.86
+  },
+  "buildings/brickworks": {
+    "w": 300,
+    "h": 294,
+    "ay": 0.86
+  },
+  "buildings/foundry": {
+    "w": 300,
+    "h": 283,
+    "ay": 0.86
+  },
+  "buildings/mint": {
+    "w": 300,
+    "h": 268,
+    "ay": 0.86
+  },
+  "buildings/house": {
+    "w": 280,
+    "h": 272,
+    "ay": 0.86
+  },
+  "buildings/warehouse": {
+    "w": 300,
+    "h": 270,
+    "ay": 0.86
+  },
+  "buildings/market": {
+    "w": 300,
+    "h": 298,
+    "ay": 0.86
+  },
+  "buildings/market_b": {
+    "w": 300,
+    "h": 284,
+    "ay": 0.86
+  },
+  "buildings/market_c": {
+    "w": 300,
+    "h": 292,
+    "ay": 0.86
   }
 }

@@ -34,13 +34,53 @@ export function settlementScale(castle: Castle): number {
   return base * (0.82 + castle.level * 0.07);
 }
 
+/**
+ * Arte por construção. O que ainda não tem sprite dedicado cai no desenho
+ * vetorial de fallback — basta acrescentar a chave aqui quando o PNG chegar.
+ */
 export const BUILDING_SPRITE: Partial<Record<BuildingKind, string>> = {
-  lumberjack: null as unknown as string, // vetorial: cabana + toras
+  lumberjack: 'buildings/lumberjack',
   sawmill: 'buildings/sawmill',
   quarry: 'buildings/quarry',
   iron_mine: 'buildings/iron_mine',
   gold_mine: 'buildings/gold_mine',
   farm: 'buildings/farm',
+  brickworks: 'buildings/brickworks',
+  foundry: 'buildings/foundry',
+  mint: 'buildings/mint',
+  house: 'buildings/house',
+  warehouse: 'buildings/warehouse',
+  market: 'buildings/market',
+  // Enquanto o quartel de pedra não chega, o acampamento militar dá o recado.
+  barracks: 'buildings/war_camp',
+};
+
+/**
+ * Variações da mesma construção. Duas praças de mercado lado a lado ficavam
+ * idênticas; a variante é escolhida pelo id do prédio, então é estável.
+ */
+export const BUILDING_VARIANTS: Partial<Record<BuildingKind, string[]>> = {
+  market: ['buildings/market', 'buildings/market_b', 'buildings/market_c'],
+};
+
+/** Sprite da construção, já resolvendo a variante quando existir. */
+export function buildingSprite(defId: BuildingKind, buildingId: string): string | undefined {
+  const variants = BUILDING_VARIANTS[defId];
+  if (variants && variants.length > 0) {
+    let h = 0;
+    for (let i = 0; i < buildingId.length; i++) h = (h * 31 + buildingId.charCodeAt(i)) >>> 0;
+    return variants[h % variants.length];
+  }
+  return BUILDING_SPRITE[defId];
+}
+
+/** Brasão de cada reino, quando existir arte dedicada. */
+export const KINGDOM_CREST: Record<string, string> = {
+  k_valdoria: 'crests/valdoria',
+  k_karneth: 'crests/karneth',
+  k_aurenna: 'crests/aurenna',
+  k_silvarden: 'crests/silvarden',
+  k_morvath: 'crests/morvath',
 };
 
 export const UNIT_SPRITE: Record<UnitKind, string> = {
@@ -65,6 +105,7 @@ export const BUILDING_WORKER: Partial<Record<BuildingKind, string>> = {
   mint: 'people/gold_miner',
   warehouse: 'people/carpenter',
   barracks: 'people/smith',
+  market: 'people/weaver',
 };
 
 export const DEPOSIT_LABEL: Record<DepositKind, string> = {

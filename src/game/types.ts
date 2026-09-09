@@ -102,6 +102,7 @@ export type BuildingKind =
   | 'mint'
   | 'house'
   | 'warehouse'
+  | 'market'
   | 'barracks';
 
 export type BuildingCategory = 'extraction' | 'refining' | 'civic' | 'military';

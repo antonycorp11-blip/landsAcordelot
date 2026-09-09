@@ -106,6 +106,27 @@ TERRAIN_WIDTH = {
 }
 
 
+# Arquivos novos entregues com nome próprio: mapeados por nome, não por posição.
+# Basta soltar o PNG em AssetsAcordKingdons/ com um destes nomes.
+NAMED_MAP = {
+    'lumberjack.png':  ('buildings', 'lumberjack', 300, 0.86),
+    'brickworks.png':  ('buildings', 'brickworks', 300, 0.86),
+    'foundry.png':     ('buildings', 'foundry',    300, 0.86),
+    'mint.png':        ('buildings', 'mint',       300, 0.86),
+    'house.png':       ('buildings', 'house',      280, 0.86),
+    'warehouse.png':   ('buildings', 'warehouse',  300, 0.86),
+    'market.png':      ('buildings', 'market',     300, 0.86),
+    'market_b.png':    ('buildings', 'market_b',   300, 0.86),
+    'market_c.png':    ('buildings', 'market_c',   300, 0.86),
+    'barracks.png':    ('buildings', 'barracks',   320, 0.86),
+    'crest_valdoria.png':  ('crests', 'valdoria',  200, 0.5),
+    'crest_karneth.png':   ('crests', 'karneth',   200, 0.5),
+    'crest_aurenna.png':   ('crests', 'aurenna',   200, 0.5),
+    'crest_silvarden.png': ('crests', 'silvarden', 200, 0.5),
+    'crest_morvath.png':   ('crests', 'morvath',   200, 0.5),
+}
+
+
 def trim(im: Image.Image, threshold: int = 10) -> Image.Image:
     alpha = im.getchannel('A')
     bbox = alpha.point(lambda v: 255 if v > threshold else 0).getbbox()
@@ -182,7 +203,9 @@ def slice_sheet(im: Image.Image, downsample: int = 4, min_area: int = 400):
 
 
 def main():
-    files = sorted(f for f in os.listdir(SRC) if f.lower().endswith('.png'))
+    files = sorted(
+        f for f in os.listdir(SRC) if f.lower().endswith('.png') and f not in NAMED_MAP
+    )
     manifest: dict[str, dict] = {}
 
     for idx, (category, name, width, anchorY) in MAP.items():
@@ -191,6 +214,16 @@ def main():
         im = Image.open(os.path.join(SRC, files[idx])).convert('RGBA')
         size = save(im, category, name, width)
         manifest[f'{category}/{name}'] = {**size, 'ay': anchorY}
+
+    # Assets entregues com nome próprio.
+    for filename, (category, name, width, anchorY) in NAMED_MAP.items():
+        path = os.path.join(SRC, filename)
+        if not os.path.exists(path):
+            continue
+        im = Image.open(path).convert('RGBA')
+        size = save(im, category, name, width)
+        manifest[f'{category}/{name}'] = {**size, 'ay': anchorY}
+        print(f'nomeado: {category}/{name}')
 
     sheet = Image.open(os.path.join(SRC, files[TERRAIN_SHEET_INDEX])).convert('RGBA')
     pieces = slice_sheet(sheet)

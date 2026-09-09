@@ -5,6 +5,7 @@ import { assets } from './game/render/AssetManager';
 import { CampaignPanel } from './ui/CampaignPanel';
 import { CityPanel } from './ui/CityPanel';
 import { DebugPanel } from './ui/DebugPanel';
+import { EconomyPanel } from './ui/EconomyPanel';
 import { IconBug, IconCastle, IconHammer, IconHelp, IconMap, IconSave, IconSword } from './ui/icons';
 import { KingdomPanel } from './ui/KingdomPanel';
 import { LoreIntro } from './ui/LoreIntro';
@@ -20,6 +21,7 @@ export function App() {
   const [snap, setSnap] = useState<GameSnapshot | null>(null);
   const [rail, setRail] = useState<Rail>(null);
   const [dragging, setDragging] = useState(false);
+  const [economyOpen, setEconomyOpen] = useState(false);
   const [started, setStarted] = useState(false);
   const [hasSave, setHasSave] = useState(false);
   const isDev = import.meta.env.DEV;
@@ -227,7 +229,16 @@ export function App() {
 
       {started && game && snap && (
         <div className={`hud ${selected || rail ? 'panel-open' : ''}`}>
-          <TopBar game={game} state={snap.state} />
+          <TopBar
+            game={game}
+            state={snap.state}
+            economyOpen={economyOpen}
+            onToggleEconomy={() => setEconomyOpen((v) => !v)}
+          />
+
+          {economyOpen && (
+            <EconomyPanel game={game} state={snap.state} onClose={() => setEconomyOpen(false)} />
+          )}
 
           <div className="rail">
             <button

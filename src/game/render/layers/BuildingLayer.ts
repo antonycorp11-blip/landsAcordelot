@@ -1,9 +1,11 @@
 import { CAMERA } from '../../config/balance';
 import { BUILDING_DEFS } from '../../data/defs';
-import type { Building, Deposit, GameState } from '../../types';
+import type { Building, Castle, Deposit, GameState } from '../../types';
 import { assets } from '../AssetManager';
 import { drawBuildingVector, drawConstruction } from '../sprites/buildings';
-import { BUILDING_SPRITE, DEPOSIT_COLOR } from '../spriteCatalog';
+import { drawSettlement } from '../sprites/castle';
+import { buildingSprite, DEPOSIT_COLOR } from '../spriteCatalog';
+import { drawSmoke } from './PropLayer';
 import type { Bounds } from './TerrainLayer';
 
 /**
@@ -16,29 +18,58 @@ import type { Bounds } from './TerrainLayer';
 export class BuildingLayer {
   /** Depósito destacado pela UI (aba Construir). */
   focusedDepositId: string | null = null;
+  /** Construção selecionada no mapa. */
+  selectedBuildingId: string | null = null;
   selectedTerritoryId: string | null = null;
 
+  /**
+   * Depósitos, construções e castelos em uma passada só.
+   *
+   * Castelo e oficina precisam ser ordenados juntos por Y: desenhar todos os
+   * castelos depois das construções fazia o castelo cobrir tudo que estivesse
+   * ao sul dele.
+   */
   draw(ctx: CanvasRenderingContext2D, state: GameState, bounds: Bounds, zoom: number, time: number) {
-    if (zoom < CAMERA.lodBuildings) return;
+    const inView = (x: number, y: number) =>
+      x > bounds.minX && x < bounds.maxX && y > bounds.minY && y < bounds.maxY;
 
-    const visibleDeposits: Deposit[] = [];
-    for (const d of Object.values(state.deposits)) {
-      if (d.buildingId) continue;
-      if (d.position.x < bounds.minX || d.position.x > bounds.maxX) continue;
-      if (d.position.y < bounds.minY || d.position.y > bounds.maxY) continue;
-      visibleDeposits.push(d);
+    // 1. Depósitos livres ficam no chão, sob tudo.
+    if (zoom >= CAMERA.lodBuildings) {
+      for (const d of Object.values(state.deposits)) {
+        if (d.buildingId || !inView(d.position.x, d.position.y)) continue;
+        this.drawDeposit(ctx, d, zoom, time);
+      }
     }
 
-    const visibleBuildings: Building[] = [];
-    for (const b of Object.values(state.buildings)) {
-      if (b.position.x < bounds.minX || b.position.x > bounds.maxX) continue;
-      if (b.position.y < bounds.minY || b.position.y > bounds.maxY) continue;
-      visibleBuildings.push(b);
-    }
-    visibleBuildings.sort((a, b) => a.position.y - b.position.y);
+    // 2. Estruturas ordenadas por Y — quem está mais ao sul desenha por cima.
+    type Entry = { y: number; building?: Building; castle?: Castle };
+    const entries: Entry[] = [];
 
-    for (const d of visibleDeposits) this.drawDeposit(ctx, d, zoom, time);
-    for (const b of visibleBuildings) this.drawBuilding(ctx, state, b, zoom, time);
+    if (zoom >= CAMERA.lodBuildings) {
+      for (const b of Object.values(state.buildings)) {
+        if (!inView(b.position.x, b.position.y)) continue;
+        entries.push({ y: b.position.y, building: b });
+      }
+    }
+    for (const c of Object.values(state.castles)) {
+      if (!inView(c.position.x, c.position.y)) continue;
+      entries.push({ y: c.position.y, castle: c });
+    }
+    entries.sort((a, b) => a.y - b.y);
+
+    const detail = zoom >= CAMERA.lodProps;
+    for (const e of entries) {
+      if (e.building) {
+        this.drawBuilding(ctx, state, e.building, zoom, time);
+      } else if (e.castle) {
+        const t = state.territories[e.castle.territoryId];
+        const kingdom = t?.ownerId ? state.kingdoms[t.ownerId] : null;
+        drawSettlement(ctx, e.castle, kingdom, time, detail);
+        if (detail && e.castle.kind !== 'ruin') {
+          drawSmoke(ctx, e.castle.position.x - 28, e.castle.position.y - 46, time + e.castle.position.x * 0.01, 1.1);
+        }
+      }
+    }
   }
 
   private drawDeposit(ctx: CanvasRenderingContext2D, d: Deposit, zoom: number, time: number) {
@@ -99,7 +130,24 @@ export class BuildingLayer {
     }
 
     const scale = 0.5 + b.level * 0.09;
-    const key = BUILDING_SPRITE[b.defId];
+
+    // Anel de seleção: mostra qual construção o painel está editando.
+    if (b.id === this.selectedBuildingId) {
+      ctx.save();
+      ctx.strokeStyle = `rgba(255,255,255,${0.6 + Math.sin(time * 4) * 0.3})`;
+      ctx.lineWidth = 3 / zoom + 1.5;
+      ctx.beginPath();
+      ctx.ellipse(x, y + 4, 62 * scale, 26 * scale, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.strokeStyle = 'rgba(242,195,61,0.8)';
+      ctx.lineWidth = 2 / zoom;
+      ctx.beginPath();
+      ctx.ellipse(x, y + 4, 70 * scale, 30 * scale, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    const key = buildingSprite(b.defId, b.id);
     const isPlayerColor = kingdom?.ownerKind === 'PLAYER';
     const drew =
       key &&
