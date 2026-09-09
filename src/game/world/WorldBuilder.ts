@@ -329,7 +329,8 @@ export function buildWorld(seeds: TerritorySeedInput[]): BuiltWorld {
   const deposits = buildDeposits(seeds, polygons, grid);
   const citySlots: Record<string, Vec2[]> = {};
   for (let k = 0; k < seeds.length; k++) {
-    citySlots[seeds[k].id] = buildCitySlots(anchors[seeds[k].id], polygons[seeds[k].id], grid);
+    const id = seeds[k].id;
+    citySlots[id] = buildCitySlots(id, anchors[id], polygons[id], grid, deposits);
   }
 
   const bucketSize = 512;
@@ -447,58 +448,86 @@ function buildDeposits(
     ensure('stone', 1, isRocky);
     ensure('ore', 1, isRocky);
 
-    // Ouro não é garantido: nasce no relevo e é o que faz certas regiões
-    // valerem uma guerra (§26).
+    // Todo território tem ao menos um veio de ouro, para a cadeia até a Casa
+    // da Moeda ser aprendível em casa. O que muda é a riqueza: planície dá um
+    // filete, montanha dá o veio que faz uma região valer uma guerra (§26).
     const rocky = s.biome === 'hills' || s.biome === 'mountains';
-    if (countOf('gold') === 0 && rocky && rng() < 0.45) place('gold', isRocky);
+    ensure('gold', 1, rocky ? isRocky : () => true);
+    for (const d of out) {
+      if (d.territoryId !== s.id || d.kind !== 'gold') continue;
+      d.richness = rocky
+        ? Math.round(range(rng, 1.0, 1.45) * 100) / 100
+        : Math.round(range(rng, 0.4, 0.62) * 100) / 100;
+    }
   }
 
   return out;
 }
 
 /**
- * Vagas urbanas: anéis de posições válidas ao redor do castelo.
+ * Vagas urbanas: onde as oficinas podem nascer.
  *
- * O castelo é o maior sprite do mapa e se estende bastante para cima da própria
- * âncora. Por isso reservamos uma caixa de exclusão à volta dele: sem isso as
- * oficinas nascem por baixo do castelo e o jogador não consegue nem vê-las.
+ * Antes eram anéis colados no castelo e a cidade virava um amontoado. Agora
+ * varremos o território inteiro numa grade com sacudida, respeitando:
+ *  - a caixa de exclusão do castelo (o sprite se estende muito para cima);
+ *  - distância mínima entre oficinas;
+ *  - distância dos depósitos, que já têm dono.
+ * A ordem é do castelo para fora, então a cidade cresce de dentro para a borda.
  */
-const CASTLE_KEEPOUT = { halfWidth: 210, top: 330, bottom: 90 };
+const CASTLE_KEEPOUT = { halfWidth: 230, top: 360, bottom: 110 };
+const SLOT_GAP = 146;
+const SLOT_GAP_DEPOSIT = 128;
+const MAX_SLOTS = 26;
 
-function buildCitySlots(anchor: Vec2 | undefined, poly: Vec2[] | undefined, grid: WorldGrid): Vec2[] {
+function buildCitySlots(
+  id: string,
+  anchor: Vec2 | undefined,
+  poly: Vec2[] | undefined,
+  grid: WorldGrid,
+  deposits: DepositSeed[],
+): Vec2[] {
   if (!anchor || !poly || poly.length < 3) return [];
-  const slots: Vec2[] = [];
-  const rings = [
-    { r: 250, n: 8, phase: 0.35 },
-    { r: 345, n: 10, phase: 0.75 },
-    { r: 445, n: 12, phase: 1.15 },
-    { r: 545, n: 14, phase: 1.55 },
-  ];
+  const bb = boundsOf(poly);
+  const rng = makeRng(hashString('slots_' + id));
+  const step = 74;
 
-  const blocked = (p: Vec2) => {
+  const candidates: Vec2[] = [];
+  for (let y = bb.minY; y <= bb.maxY; y += step) {
+    for (let x = bb.minX; x <= bb.maxX; x += step) {
+      candidates.push({ x: x + range(rng, -26, 26), y: y + range(rng, -26, 26) });
+    }
+  }
+  candidates.sort(
+    (a, b) =>
+      Math.hypot(a.x - anchor.x, a.y - anchor.y) - Math.hypot(b.x - anchor.x, b.y - anchor.y),
+  );
+
+  const mine = deposits.filter((d) => d.territoryId === id);
+  const slots: Vec2[] = [];
+
+  for (const p of candidates) {
+    if (slots.length >= MAX_SLOTS) break;
+
     const dx = p.x - anchor.x;
     const dy = p.y - anchor.y;
-    return (
+    if (
       Math.abs(dx) < CASTLE_KEEPOUT.halfWidth &&
       dy < CASTLE_KEEPOUT.bottom &&
       dy > -CASTLE_KEEPOUT.top
-    );
-  };
-
-  for (const ring of rings) {
-    for (let i = 0; i < ring.n; i++) {
-      const a = (i / ring.n) * Math.PI * 2 + ring.phase;
-      // Elipse: o mundo tem leitura levemente isométrica.
-      const p = { x: anchor.x + Math.cos(a) * ring.r * 1.2, y: anchor.y + Math.sin(a) * ring.r * 0.72 };
-      if (blocked(p)) continue;
-      const idx = sampleCell(grid, p.x, p.y);
-      if (idx < 0 || !grid.land[idx]) continue;
-      if (grid.biome[idx] === BIOME_CODE.mountains || grid.biome[idx] === BIOME_CODE.snow) continue;
-      if (!pointInPolygon(p, poly)) continue;
-      // Oficinas não se empilham.
-      if (slots.some((q) => Math.hypot(q.x - p.x, q.y - p.y) < 130)) continue;
-      slots.push(p);
+    ) {
+      continue;
     }
+
+    const idx = sampleCell(grid, p.x, p.y);
+    if (idx < 0 || !grid.land[idx]) continue;
+    if (grid.biome[idx] === BIOME_CODE.mountains || grid.biome[idx] === BIOME_CODE.snow) continue;
+    if (!pointInPolygon(p, poly)) continue;
+    if (mine.some((d) => Math.hypot(d.position.x - p.x, d.position.y - p.y) < SLOT_GAP_DEPOSIT)) {
+      continue;
+    }
+    if (slots.some((q) => Math.hypot(q.x - p.x, q.y - p.y) < SLOT_GAP)) continue;
+
+    slots.push(p);
   }
   return slots;
 }

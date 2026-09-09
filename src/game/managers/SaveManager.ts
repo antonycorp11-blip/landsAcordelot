@@ -162,6 +162,23 @@ export class SaveManager {
     for (const t of Object.values(state.territories)) {
       t.buildingIds = t.buildingIds.filter((id) => state.buildings[id]);
     }
+    // Um depósito só continua ocupado se a construção existir e apontar de
+    // volta para ele. Sem isso um vínculo velho trava o depósito para sempre.
+    for (const d of Object.values(state.deposits)) {
+      if (!d.buildingId) continue;
+      const b = state.buildings[d.buildingId];
+      if (!b || b.depositId !== d.id) d.buildingId = null;
+    }
+    // E uma construção órfã de depósito também não pode ficar pendurada.
+    for (const b of Object.values(state.buildings)) {
+      if (!b.depositId) continue;
+      const d = state.deposits[b.depositId];
+      if (!d) {
+        delete state.buildings[b.id];
+        const t = state.territories[b.territoryId];
+        if (t) t.buildingIds = t.buildingIds.filter((id) => id !== b.id);
+      }
+    }
     return true;
   }
 

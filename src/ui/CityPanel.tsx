@@ -385,7 +385,6 @@ function WorkTab({
 }) {
   const hire = game.buildings.canHire(territory);
   const cost = game.buildings.hireCost();
-  const focused = buildings.find((b) => b.id === game.selectedBuildingId) ?? null;
 
   return (
     <>
@@ -430,8 +429,6 @@ function WorkTab({
         </div>
       </div>
 
-      {focused && <BuildingCard game={game} building={focused} report={report} />}
-
       <div className="section-title">Construções ({buildings.length})</div>
       {buildings.length === 0 && (
         <div className="empty">Nada construído aqui. Vá para a aba CONSTRUIR.</div>
@@ -442,15 +439,11 @@ function WorkTab({
         const building = b.construction > 0;
         const idle = !building && jobs > 0 && b.workers === 0;
         const starved = !building && b.workers > 0 && b.efficiency < 0.55;
-        const up = game.buildings.checkUpgrade(b);
         return (
-          <div
-            className={`row ${idle ? 'idle' : starved ? 'busy' : ''} ${
-              b.id === game.selectedBuildingId ? 'picked' : ''
-            }`}
+          <button
+            className={`row clickable ${idle ? 'idle' : starved ? 'busy' : ''}`}
             key={b.id}
             onClick={() => game.selectBuilding(b.id)}
-            style={{ cursor: 'pointer' }}
           >
             <Thumb sprite={BUILDING_WORKER[b.defId]} fallback="🏗" />
             <div className="grow">
@@ -466,143 +459,19 @@ function WorkTab({
                       ? `Sem insumo · ${Math.round(b.efficiency * 100)}%`
                       : describeFlow(def)}
               </span>
+            </div>
+            <span className="right">
               {!building && jobs > 0 && (
-                <div className="stepper" style={{ marginTop: 6 }}>
-                  <button onClick={() => game.assignWorker(b.id, -1)} disabled={b.workers <= 0}>
-                    −
-                  </button>
-                  <span className="n">
-                    {b.workers}/{jobs}
-                  </span>
-                  <button
-                    onClick={() => game.assignWorker(b.id, +1)}
-                    disabled={b.workers >= jobs || report.idleWorkers <= 0}
-                  >
-                    +
-                  </button>
-                </div>
+                <span className={`n ${idle ? 'neg' : ''}`}>
+                  {b.workers}/{jobs}
+                </span>
               )}
-            </div>
-            <div className="stepper">
-              <button
-                className="btn sm"
-                disabled={!up.ok}
-                title={`${up.reason} (${Object.entries(up.cost)
-                  .map(([k, v]) => `${v} ${RESOURCE_LABEL[k as keyof ResourceBag]}`)
-                  .join(', ')})`}
-                onClick={() => game.upgradeBuilding(b.id)}
-              >
-                ▲
-              </button>
-              <button
-                className="btn sm danger"
-                title="Demolir (devolve 40%)"
-                onClick={() => game.demolishBuilding(b.id)}
-              >
-                ✕
-              </button>
-            </div>
-          </div>
+              <span style={{ fontSize: 15, color: 'var(--muted)' }}>›</span>
+            </span>
+          </button>
         );
       })}
     </>
-  );
-}
-
-/**
- * Cartão da construção clicada no mapa: o lugar de evoluir, ajustar equipe e
- * demolir sem caçar a linha certa na lista.
- */
-function BuildingCard({
-  game,
-  building,
-  report,
-}: {
-  game: Game;
-  building: Building;
-  report: ReturnType<Game['economy']['report']>;
-}) {
-  const def = BUILDING_DEFS[building.defId];
-  const jobs = def.jobsPerLevel * Math.max(1, building.level);
-  const up = game.buildings.checkUpgrade(building);
-  const wallet = game.playerKingdom.resources;
-  const underConstruction = building.construction > 0;
-
-  return (
-    <div className="focus-card">
-      <div className="focus-head">
-        <Thumb sprite={BUILDING_WORKER[building.defId]} fallback="🏗" />
-        <div className="grow">
-          <span className="name">
-            {def.name} <span style={{ color: 'var(--muted)' }}>Nv {building.level || 1}</span>
-          </span>
-          <span className="meta">
-            {underConstruction
-              ? `Em obra — ${Math.ceil(building.construction)}s`
-              : describeFlow(def)}
-          </span>
-        </div>
-        <button className="close" title="Fechar" onClick={() => game.selectBuilding(null)}>
-          ×
-        </button>
-      </div>
-
-      {!underConstruction && jobs > 0 && (
-        <div className="focus-row">
-          <span className="meta">Equipe</span>
-          <div className="stepper">
-            <button onClick={() => game.assignWorker(building.id, -1)} disabled={building.workers <= 0}>
-              −
-            </button>
-            <span className="n">
-              {building.workers}/{jobs}
-            </span>
-            <button
-              onClick={() => game.assignWorker(building.id, +1)}
-              disabled={building.workers >= jobs || report.idleWorkers <= 0}
-            >
-              +
-            </button>
-          </div>
-          <span className="meta" style={{ marginLeft: 'auto' }}>
-            Eficiência {Math.round(building.efficiency * 100)}%
-          </span>
-        </div>
-      )}
-
-      {building.level < def.maxLevel && (
-        <>
-          <div className="meta" style={{ marginTop: 8 }}>
-            Evoluir para o nível {building.level + 1} — {up.time}s de obra
-          </div>
-          <Cost cost={up.cost} have={wallet} />
-        </>
-      )}
-
-      <div className="focus-actions">
-        <button
-          className="btn sm primary grow"
-          disabled={!up.ok}
-          title={up.reason}
-          onClick={() => game.upgradeBuilding(building.id)}
-        >
-          {building.level >= def.maxLevel ? 'Nível máximo' : 'Evoluir'}
-        </button>
-        <button className="btn sm" onClick={() => game.selectBuilding(building.id)}>
-          Ver
-        </button>
-        <button
-          className="btn sm danger"
-          title="Demolir (devolve 40%)"
-          onClick={() => {
-            game.demolishBuilding(building.id);
-            game.selectBuilding(null);
-          }}
-        >
-          Demolir
-        </button>
-      </div>
-    </div>
   );
 }
 

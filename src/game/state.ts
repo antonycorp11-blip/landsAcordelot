@@ -19,7 +19,7 @@ import { buildWorld, type BuiltWorld, type TerritorySeedInput } from './world/Wo
 const TERRITORY_DEFS = territoriesRaw as TerritoryDef[];
 const KINGDOM_DEFS = kingdomsRaw as KingdomDef[];
 
-export const STATE_VERSION = 3;
+export const STATE_VERSION = 4;
 
 export interface WorldBundle {
   state: GameState;
@@ -60,10 +60,16 @@ export function createWorld(): WorldBundle {
   const armies: Record<string, Army> = {};
 
   // Depósitos gerados pelo mundo.
-  let depIndex = 0;
+  //
+  // O id é derivado do território e do tipo, nunca da posição na lista: um id
+  // posicional fazia qualquer mudança na geração do mundo apontar um save
+  // antigo para o depósito errado.
+  const depCount: Record<string, number> = {};
   const depositsByTerritory: Record<string, string[]> = {};
   for (const d of world.deposits) {
-    const id = `dep_${depIndex++}`;
+    const slot = `${d.territoryId}_${d.kind}`;
+    const n = (depCount[slot] = (depCount[slot] ?? 0) + 1);
+    const id = `dep_${slot}_${n}`;
     deposits[id] = {
       id,
       territoryId: d.territoryId,

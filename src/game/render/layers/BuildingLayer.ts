@@ -129,7 +129,9 @@ export class BuildingLayer {
       return;
     }
 
-    const scale = 0.5 + b.level * 0.09;
+    // O castelo é o marco visual da região; a oficina fica bem menor para o
+    // domínio inteiro caber na tela sem virar amontoado.
+    const scale = 0.33 + b.level * 0.055;
 
     // Anel de seleção: mostra qual construção o painel está editando.
     if (b.id === this.selectedBuildingId) {
@@ -137,12 +139,12 @@ export class BuildingLayer {
       ctx.strokeStyle = `rgba(255,255,255,${0.6 + Math.sin(time * 4) * 0.3})`;
       ctx.lineWidth = 3 / zoom + 1.5;
       ctx.beginPath();
-      ctx.ellipse(x, y + 4, 62 * scale, 26 * scale, 0, 0, Math.PI * 2);
+      ctx.ellipse(x, y + 4, 96 * scale, 40 * scale, 0, 0, Math.PI * 2);
       ctx.stroke();
       ctx.strokeStyle = 'rgba(242,195,61,0.8)';
       ctx.lineWidth = 2 / zoom;
       ctx.beginPath();
-      ctx.ellipse(x, y + 4, 70 * scale, 30 * scale, 0, 0, Math.PI * 2);
+      ctx.ellipse(x, y + 4, 108 * scale, 46 * scale, 0, 0, Math.PI * 2);
       ctx.stroke();
       ctx.restore();
     }
@@ -155,7 +157,7 @@ export class BuildingLayer {
         tint: isPlayerColor ? undefined : accent,
         tintAlpha: 0.26,
       });
-    if (!drew) drawBuildingVector(ctx, b.defId, x, y, scale * 1.15, accent);
+    if (!drew) drawBuildingVector(ctx, b.defId, x, y, scale * 1.5, accent);
 
     if (zoom < CAMERA.lodPeople) return;
 
@@ -163,13 +165,13 @@ export class BuildingLayer {
     if (b.workers > 0) {
       const sway = Math.sin(time * 0.6 + x * 0.01) * 6;
       if (b.defId === 'farm') {
-        assets.draw(ctx, 'terrain/cattle', x - 62 * scale + sway, y + 16 * scale, 0.16);
+        assets.draw(ctx, 'terrain/cattle', x - 88 * scale + sway, y + 20 * scale, 0.13);
       } else if (b.defId === 'lumberjack' || b.defId === 'sawmill') {
-        assets.draw(ctx, 'terrain/wagon_logs', x + 66 * scale - sway, y + 14 * scale, 0.15, {
+        assets.draw(ctx, 'terrain/wagon_logs', x + 94 * scale - sway, y + 18 * scale, 0.12, {
           flip: sway > 0,
         });
       } else {
-        assets.draw(ctx, 'terrain/peasants', x - 58 * scale + sway, y + 14 * scale, 0.12);
+        assets.draw(ctx, 'terrain/peasants', x - 82 * scale + sway, y + 18 * scale, 0.1);
       }
     }
 
@@ -178,8 +180,8 @@ export class BuildingLayer {
     if (jobs <= 0) return;
     const idle = b.workers === 0;
     const starving = !idle && b.efficiency < 0.55;
-    const bx = x + 26 * scale;
-    const by = y - 54 * scale;
+    const bx = x + 34 * scale;
+    const by = y - 82 * scale;
 
     ctx.fillStyle = idle ? 'rgba(120,26,32,0.9)' : starving ? 'rgba(140,96,20,0.9)' : 'rgba(10,16,26,0.82)';
     ctx.beginPath();

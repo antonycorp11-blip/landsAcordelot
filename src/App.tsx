@@ -3,6 +3,7 @@ import { CAMERA } from './game/config/balance';
 import { Game, type GameSnapshot } from './game/Game';
 import { assets } from './game/render/AssetManager';
 import { CampaignPanel } from './ui/CampaignPanel';
+import { BuildingPanel } from './ui/BuildingPanel';
 import { CityPanel } from './ui/CityPanel';
 import { DebugPanel } from './ui/DebugPanel';
 import { EconomyPanel } from './ui/EconomyPanel';
@@ -189,6 +190,12 @@ export function App() {
     return snap.state.territories[snap.selectedId] ?? null;
   }, [snap]);
 
+  // Construção aberta tem tela própria e toma o lugar do painel do território.
+  const openBuilding = useMemo(() => {
+    if (!game || !snap?.selectedBuildingId) return null;
+    return snap.state.buildings[snap.selectedBuildingId] ?? null;
+  }, [game, snap]);
+
   const idleWarnings = useMemo(() => {
     if (!game || !snap) return 0;
     let n = 0;
@@ -228,7 +235,7 @@ export function App() {
       )}
 
       {started && game && snap && (
-        <div className={`hud ${selected || rail ? 'panel-open' : ''}`}>
+        <div className={`hud ${selected || rail || openBuilding ? 'panel-open' : ''}`}>
           <TopBar
             game={game}
             state={snap.state}
@@ -351,13 +358,22 @@ export function App() {
             </div>
           )}
 
-          {selected && (
-            <CityPanel
+          {openBuilding ? (
+            <BuildingPanel
               game={game}
               state={snap.state}
-              territory={selected}
-              onClose={() => game.select(null)}
+              building={openBuilding}
+              onClose={() => game.selectBuilding(null)}
             />
+          ) : (
+            selected && (
+              <CityPanel
+                game={game}
+                state={snap.state}
+                territory={selected}
+                onClose={() => game.select(null)}
+              />
+            )
           )}
 
           <Minimap game={game} version={snap.revision} />

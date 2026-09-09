@@ -289,23 +289,61 @@ button { font-family: inherit; }
 
 .empty { font-size: 11.5px; color: var(--muted); text-align: center; padding: 18px 10px; line-height: 1.5; }
 
-/* ----------------------------------------------- cartão da construção -- */
+/* ------------------------------------------- tela da construção -- */
 
-.focus-card {
-  margin-bottom: 12px; padding: 11px 12px; border-radius: 11px;
-  background: linear-gradient(180deg, rgba(77,143,240,.14), rgba(255,255,255,.04));
-  border: 1px solid rgba(77,143,240,.35);
+.building-panel { padding: 0; }
+
+.bld-hero {
+  position: relative; flex: 0 0 auto;
+  background: radial-gradient(ellipse at 50% 30%, rgba(77,143,240,.22), rgba(13,19,30,0) 70%),
+    linear-gradient(180deg, rgba(255,255,255,.05), rgba(0,0,0,.18));
+  border-bottom: 1px solid var(--stroke);
+  padding: 10px 14px 12px;
 }
-.focus-head { display: flex; align-items: flex-start; gap: 9px; }
-.focus-head .name { font-weight: 650; font-size: 13px; display: block; }
-.focus-head .meta { font-size: 10.5px; color: var(--muted); display: block; margin-top: 2px; line-height: 1.4; }
-.focus-head .close { width: 24px; height: 24px; font-size: 14px; }
-.focus-row { display: flex; align-items: center; gap: 10px; margin-top: 9px; }
-.focus-row .meta { font-size: 10.5px; color: var(--muted); }
-.focus-actions { display: flex; gap: 6px; margin-top: 10px; }
-.focus-actions .grow { flex: 1; }
+.bld-art {
+  display: block; width: 100%; max-width: 210px; margin: 0 auto;
+  filter: drop-shadow(0 10px 20px rgba(0,0,0,.45));
+}
+.bld-close { position: absolute; top: 10px; right: 12px; }
+.bld-title { text-align: center; margin-top: 4px; }
+.bld-title .name { font-size: 16px; font-weight: 700; letter-spacing: .2px; }
+.bld-title .sub {
+  font-size: 10.5px; color: var(--muted); margin-top: 2px;
+  text-transform: uppercase; letter-spacing: .8px;
+}
 
-.row.picked { border-color: var(--accent); background: rgba(77,143,240,.14); }
+.worker-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+  gap: 6px; margin-bottom: 9px;
+}
+.worker-slot {
+  aspect-ratio: 1; border-radius: 10px; display: grid; place-items: center;
+  background: rgba(255,255,255,.04); border: 1px dashed var(--stroke-strong);
+  overflow: hidden;
+}
+.worker-slot.filled {
+  background: rgba(77,143,240,.14); border: 1px solid rgba(77,143,240,.45);
+  border-style: solid;
+}
+.worker-art { width: 100%; height: 100%; object-fit: contain; padding: 3px; }
+.worker-slot .empty-mark { color: var(--muted); font-size: 17px; opacity: .55; }
+.worker-actions { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+.worker-actions .meta { font-size: 10.5px; color: var(--muted); }
+
+.flow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+.flow-cap {
+  font-size: 9.5px; text-transform: uppercase; letter-spacing: .8px;
+  color: var(--muted); min-width: 60px;
+}
+.flow-item {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 9px; border-radius: 8px; font-size: 12px; font-weight: 600;
+  background: rgba(255,255,255,.05); border: 1px solid var(--stroke);
+  font-variant-numeric: tabular-nums;
+}
+.flow-item svg { width: 15px; height: 15px; }
+.flow-item.pos { color: var(--good); border-color: rgba(75,208,127,.3); }
+.flow-item.neg { color: var(--bad); border-color: rgba(240,97,106,.3); }
 
 .slider {
   width: 100%; margin-top: 7px; accent-color: var(--accent);
@@ -464,6 +502,9 @@ button { font-family: inherit; }
 }
 
 @media (max-height: 560px) {
+  .bld-art { max-width: 130px; }
+  .bld-title .name { font-size: 14px; }
+  .worker-grid { grid-template-columns: repeat(auto-fill, minmax(42px, 1fr)); gap: 5px; }
   :root { --panel-w: 318px; --rail: 44px; --top-h: 40px; }
   /* Em tela baixa, o painel manda: o tutorial some para não brigar por espaço. */
   .hud.panel-open .tutorial { display: none; }

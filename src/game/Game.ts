@@ -33,6 +33,7 @@ import type { BuiltWorld } from './world/WorldBuilder';
 export interface GameSnapshot {
   state: GameState;
   selectedId: string | null;
+  selectedBuildingId: string | null;
   hoveredId: string | null;
   claimable: Set<string>;
   fps: number;
@@ -392,6 +393,7 @@ export class Game {
     return {
       state: this.state,
       selectedId: this.selectedId,
+      selectedBuildingId: this.selectedBuildingId,
       hoveredId: this.hoveredId,
       claimable: this.claimable,
       fps: this.fps,
@@ -540,11 +542,21 @@ export class Game {
     this.camera.focus(castle?.position ?? t.center, zoom);
   }
 
+  /** Abre a tela da construção (e leva a câmera até ela). */
   selectBuilding(buildingId: string | null) {
     this.selectedBuildingId = buildingId;
     const b = buildingId ? this.state.buildings[buildingId] : null;
-    if (b) this.camera.focus(b.position, Math.max(this.camera.zoom, 0.85));
+    if (b) {
+      this.selectedId = b.territoryId;
+      this.camera.focus(b.position, Math.max(this.camera.zoom, 0.9));
+    }
     this.touch();
+  }
+
+  /** Só move a câmera, sem mexer na seleção. */
+  focusBuilding(buildingId: string) {
+    const b = this.state.buildings[buildingId];
+    if (b) this.camera.focus(b.position, Math.max(this.camera.zoom, 1.1));
   }
 
   focusDeposit(depositId: string | null) {

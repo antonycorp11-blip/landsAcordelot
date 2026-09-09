@@ -177,7 +177,7 @@ export const TRADE = {
 } as const;
 
 export const SAVE = {
-  key: 'acord-kingdoms:save:v3',
+  key: 'acord-kingdoms:save:v4',
   autosaveEverySeconds: 20,
 } as const;
 
