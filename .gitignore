@@ -1,0 +1,26 @@
+# Dependências e build
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
+
+# Arte original (PNG de ~115 MB, fora do deploy).
+# O que o jogo usa é `public/assets/`, gerado por `tools/prepare_assets.py`.
+AssetsAcordKingdons/
+
+# Sistema e editores
+.DS_Store
+.idea/
+*.log
+npm-debug.log*
+
+# Ambiente
+.env
+.env.*
+!.env.example
+
+# Vercel
+.vercel
+
+# Preferências locais do Claude Code (por máquina)
+.claude/settings.local.json

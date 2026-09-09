@@ -1,0 +1,422 @@
+{
+  "settlements/metropolis": {
+    "w": 620,
+    "h": 409,
+    "ay": 0.88
+  },
+  "settlements/citadel": {
+    "w": 600,
+    "h": 400,
+    "ay": 0.88
+  },
+  "settlements/castle_l4": {
+    "w": 470,
+    "h": 478,
+    "ay": 0.86
+  },
+  "settlements/castle_l2": {
+    "w": 430,
+    "h": 429,
+    "ay": 0.86
+  },
+  "settlements/castle_l5": {
+    "w": 520,
+    "h": 515,
+    "ay": 0.86
+  },
+  "settlements/castle_grand": {
+    "w": 540,
+    "h": 540,
+    "ay": 0.86
+  },
+  "settlements/village": {
+    "w": 380,
+    "h": 331,
+    "ay": 0.86
+  },
+  "settlements/walled_city": {
+    "w": 560,
+    "h": 555,
+    "ay": 0.86
+  },
+  "settlements/harbor_town": {
+    "w": 460,
+    "h": 428,
+    "ay": 0.86
+  },
+  "settlements/castle_l3": {
+    "w": 470,
+    "h": 450,
+    "ay": 0.86
+  },
+  "settlements/ruin": {
+    "w": 430,
+    "h": 433,
+    "ay": 0.86
+  },
+  "settlements/castle_besieged": {
+    "w": 470,
+    "h": 455,
+    "ay": 0.86
+  },
+  "buildings/gold_mine": {
+    "w": 300,
+    "h": 266,
+    "ay": 0.86
+  },
+  "buildings/sawmill": {
+    "w": 300,
+    "h": 275,
+    "ay": 0.86
+  },
+  "buildings/iron_mine": {
+    "w": 300,
+    "h": 293,
+    "ay": 0.86
+  },
+  "buildings/quarry": {
+    "w": 300,
+    "h": 297,
+    "ay": 0.86
+  },
+  "buildings/farm": {
+    "w": 300,
+    "h": 290,
+    "ay": 0.86
+  },
+  "buildings/herbalist": {
+    "w": 280,
+    "h": 273,
+    "ay": 0.86
+  },
+  "buildings/weaver": {
+    "w": 280,
+    "h": 264,
+    "ay": 0.86
+  },
+  "buildings/shipyard": {
+    "w": 340,
+    "h": 316,
+    "ay": 0.86
+  },
+  "buildings/war_camp": {
+    "w": 320,
+    "h": 305,
+    "ay": 0.86
+  },
+  "buildings/palisade": {
+    "w": 260,
+    "h": 243,
+    "ay": 0.9
+  },
+  "units/militia": {
+    "w": 230,
+    "h": 233,
+    "ay": 0.95
+  },
+  "units/spearman": {
+    "w": 230,
+    "h": 221,
+    "ay": 0.95
+  },
+  "units/archer": {
+    "w": 230,
+    "h": 222,
+    "ay": 0.95
+  },
+  "units/cavalry": {
+    "w": 250,
+    "h": 279,
+    "ay": 0.95
+  },
+  "units/swordsman": {
+    "w": 230,
+    "h": 210,
+    "ay": 0.95
+  },
+  "units/catapult": {
+    "w": 230,
+    "h": 214,
+    "ay": 0.95
+  },
+  "units/guard": {
+    "w": 230,
+    "h": 228,
+    "ay": 0.95
+  },
+  "units/knights": {
+    "w": 250,
+    "h": 253,
+    "ay": 0.95
+  },
+  "people/gold_miner": {
+    "w": 150,
+    "h": 285,
+    "ay": 0.95
+  },
+  "people/miner": {
+    "w": 150,
+    "h": 255,
+    "ay": 0.95
+  },
+  "people/lumberjack": {
+    "w": 150,
+    "h": 224,
+    "ay": 0.95
+  },
+  "people/farmer": {
+    "w": 150,
+    "h": 242,
+    "ay": 0.95
+  },
+  "people/fisher": {
+    "w": 150,
+    "h": 232,
+    "ay": 0.95
+  },
+  "people/mason": {
+    "w": 150,
+    "h": 235,
+    "ay": 0.95
+  },
+  "people/carpenter": {
+    "w": 150,
+    "h": 223,
+    "ay": 0.95
+  },
+  "people/smith": {
+    "w": 150,
+    "h": 176,
+    "ay": 0.95
+  },
+  "people/herbalist": {
+    "w": 150,
+    "h": 168,
+    "ay": 0.95
+  },
+  "people/weaver": {
+    "w": 150,
+    "h": 137,
+    "ay": 0.95
+  },
+  "props/supply_cart": {
+    "w": 200,
+    "h": 197,
+    "ay": 0.92
+  },
+  "props/supply_wagon": {
+    "w": 220,
+    "h": 222,
+    "ay": 0.92
+  },
+  "props/market_cart": {
+    "w": 200,
+    "h": 191,
+    "ay": 0.92
+  },
+  "props/planks": {
+    "w": 160,
+    "h": 136,
+    "ay": 0.92
+  },
+  "props/tent": {
+    "w": 180,
+    "h": 161,
+    "ay": 0.9
+  },
+  "props/ram": {
+    "w": 200,
+    "h": 198,
+    "ay": 0.92
+  },
+  "props/siege_tower": {
+    "w": 200,
+    "h": 266,
+    "ay": 0.92
+  },
+  "props/engineers": {
+    "w": 220,
+    "h": 210,
+    "ay": 0.92
+  },
+  "nature/tree_big": {
+    "w": 150,
+    "h": 151,
+    "ay": 0.9
+  },
+  "nature/tree_oak": {
+    "w": 150,
+    "h": 137,
+    "ay": 0.9
+  },
+  "nature/grove_wide": {
+    "w": 340,
+    "h": 218,
+    "ay": 0.88
+  },
+  "nature/grove_mixed": {
+    "w": 320,
+    "h": 236,
+    "ay": 0.88
+  },
+  "nature/forest_dense": {
+    "w": 360,
+    "h": 237,
+    "ay": 0.88
+  },
+  "portraits/prince": {
+    "w": 420,
+    "h": 603,
+    "ay": 0.5
+  },
+  "portraits/queen": {
+    "w": 420,
+    "h": 626,
+    "ay": 0.5
+  },
+  "portraits/king": {
+    "w": 420,
+    "h": 643,
+    "ay": 0.5
+  },
+  "portraits/princess": {
+    "w": 420,
+    "h": 646,
+    "ay": 0.5
+  },
+  "portraits/lord": {
+    "w": 420,
+    "h": 561,
+    "ay": 0.5
+  },
+  "terrain/tree_lone": {
+    "w": 190,
+    "h": 213,
+    "ay": 0.9
+  },
+  "terrain/grove_small": {
+    "w": 260,
+    "h": 254,
+    "ay": 0.9
+  },
+  "terrain/mountain_snow": {
+    "w": 257,
+    "h": 260,
+    "ay": 0.9
+  },
+  "terrain/boulders": {
+    "w": 210,
+    "h": 200,
+    "ay": 0.9
+  },
+  "terrain/mountain_rock": {
+    "w": 236,
+    "h": 181,
+    "ay": 0.9
+  },
+  "terrain/green_hill": {
+    "w": 240,
+    "h": 183,
+    "ay": 0.9
+  },
+  "terrain/river_bend": {
+    "w": 220,
+    "h": 226,
+    "ay": 0.9
+  },
+  "terrain/lake": {
+    "w": 220,
+    "h": 192,
+    "ay": 0.9
+  },
+  "terrain/bridge_wood": {
+    "w": 190,
+    "h": 135,
+    "ay": 0.9
+  },
+  "terrain/bridge_stone": {
+    "w": 200,
+    "h": 146,
+    "ay": 0.9
+  },
+  "terrain/road_dirt": {
+    "w": 220,
+    "h": 180,
+    "ay": 0.9
+  },
+  "terrain/road_stone": {
+    "w": 220,
+    "h": 188,
+    "ay": 0.9
+  },
+  "terrain/beach": {
+    "w": 220,
+    "h": 190,
+    "ay": 0.9
+  },
+  "terrain/cliff_falls": {
+    "w": 220,
+    "h": 196,
+    "ay": 0.9
+  },
+  "terrain/field_plowed": {
+    "w": 220,
+    "h": 170,
+    "ay": 0.9
+  },
+  "terrain/riders": {
+    "w": 190,
+    "h": 180,
+    "ay": 0.9
+  },
+  "terrain/pack_horse": {
+    "w": 139,
+    "h": 134,
+    "ay": 0.9
+  },
+  "terrain/peasants": {
+    "w": 132,
+    "h": 134,
+    "ay": 0.9
+  },
+  "terrain/ship": {
+    "w": 229,
+    "h": 172,
+    "ay": 0.9
+  },
+  "terrain/wagon_covered": {
+    "w": 170,
+    "h": 85,
+    "ay": 0.9
+  },
+  "terrain/cattle": {
+    "w": 170,
+    "h": 109,
+    "ay": 0.9
+  },
+  "terrain/fishing_boat": {
+    "w": 189,
+    "h": 151,
+    "ay": 0.9
+  },
+  "terrain/longship": {
+    "w": 166,
+    "h": 167,
+    "ay": 0.9
+  },
+  "terrain/wagon_logs": {
+    "w": 170,
+    "h": 89,
+    "ay": 0.9
+  },
+  "terrain/wagon_stone": {
+    "w": 170,
+    "h": 93,
+    "ay": 0.9
+  },
+  "terrain/wagon_food": {
+    "w": 170,
+    "h": 93,
+    "ay": 0.9
+  }
+}

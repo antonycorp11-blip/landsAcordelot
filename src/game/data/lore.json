@@ -1,0 +1,67 @@
+{
+  "title": "Acord Kingdoms",
+  "chapter": "Capítulo I — A Herança de Valdória",
+  "intro": [
+    "O Alto Rei morreu sem herdeiro, e o Acordo que unia as casas por trezentos anos morreu com ele.",
+    "Restou a você um único castelo às margens do Rio Sereno, um punhado de moedas e o direito de reivindicar as terras que fazem fronteira com as suas.",
+    "Karneth já afia o ferro a leste. Aurenna compra lealdades a oeste. Morvath observa dos pântanos.",
+    "Nenhum reino cresce por decreto: cresce por madeira serrada, pedra cozida, ferro fundido e homens dispostos a marchar."
+  ],
+  "closing": "Comece pequeno. Termine dono de tudo o que enxerga.",
+  "tutorial": [
+    {
+      "id": "select_capital",
+      "title": "Seu domínio",
+      "text": "Valdória é tudo o que você tem. Clique no seu território para abrir o painel de administração.",
+      "hint": "O território com fronteira dourada é seu."
+    },
+    {
+      "id": "open_build",
+      "title": "Os recursos do solo",
+      "text": "Abra a aba CONSTRUIR. Cada depósito no mapa — floresta, pedra, minério, ouro — é um ponto onde se instala uma exploração.",
+      "hint": "Os depósitos livres aparecem marcados no mapa quando o território está selecionado."
+    },
+    {
+      "id": "build_lumberjack",
+      "title": "Madeira primeiro",
+      "text": "Construa uma Cabana do Lenhador sobre um depósito de floresta. Sem madeira não existe nada depois dela.",
+      "hint": "Aba CONSTRUIR → depósito de floresta → Cabana do Lenhador."
+    },
+    {
+      "id": "hire_worker",
+      "title": "Braços para trabalhar",
+      "text": "Um prédio vazio não produz. Contrate um trabalhador e aloque-o na cabana.",
+      "hint": "Aba TRABALHO → Contratar → depois use + na cabana."
+    },
+    {
+      "id": "build_sawmill",
+      "title": "A primeira refinaria",
+      "text": "Madeira bruta não constrói muralha. Erga uma Serraria: ela transforma madeira em tábuas.",
+      "hint": "Aba CONSTRUIR → Serraria (ocupa uma vaga urbana, não um depósito)."
+    },
+    {
+      "id": "build_barracks",
+      "title": "Homens de armas",
+      "text": "Levante um Quartel. Sem ele, nenhum súdito seu pega em armas.",
+      "hint": "O Quartel exige tábuas, tijolos e ferro — a cadeia inteira funcionando."
+    },
+    {
+      "id": "recruit",
+      "title": "A primeira tropa",
+      "text": "Recrute uma Milícia na aba MILITAR. Ela ficará estacionada no território, visível no mapa.",
+      "hint": "Cada soldado tira um habitante da força de trabalho e custa manutenção."
+    },
+    {
+      "id": "claim",
+      "title": "Expandir",
+      "text": "Selecione um vizinho destacado em dourado e reivindique-o. Só se disputa terra que faz fronteira com a sua.",
+      "hint": "Territórios neutros aceitam negociação. Reinos rivais exigirão campanha militar."
+    },
+    {
+      "id": "campaign",
+      "title": "A guerra tem preço",
+      "text": "Territórios de outros reinos não se compram: monte uma expedição na aba MILITAR, escolha o alvo na fronteira e marche.",
+      "hint": "A prévia mostra quantos soldados voltam. Vencer e valer a pena são coisas diferentes."
+    }
+  ]
+}

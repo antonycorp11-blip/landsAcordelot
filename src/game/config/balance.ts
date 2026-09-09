@@ -1,0 +1,222 @@
+/**
+ * Balanceamento centralizado (§43). Nenhum número mágico espalhado no código.
+ */
+
+import type { ResourceBag } from '../types';
+
+export const WORLD = {
+  width: 5200,
+  height: 3000,
+  cell: 16,
+  chunkSize: 1024,
+  seed: 20260909,
+} as const;
+
+/**
+ * Qualidade adaptativa (§40). O celular não aguenta o mesmo orçamento de
+ * pixels do desktop: começamos mais baixo e caímos mais se o quadro sofrer.
+ */
+export const QUALITY = {
+  maxDprDesktop: 2,
+  maxDprMobile: 1.5,
+  /** Abaixo disto por `dropAfterSeconds`, reduz a resolução interna. */
+  minFps: 34,
+  dropAfterSeconds: 3,
+  /** Passo e piso da redução. */
+  scaleStep: 0.15,
+  minScale: 0.6,
+  /** Chunks de terreno mantidos em memória. */
+  chunkCacheDesktop: 48,
+  chunkCacheMobile: 16,
+} as const;
+
+export const CAMERA = {
+  minZoom: 0.22,
+  maxZoom: 2.4,
+  startZoom: 0.62,
+  zoomStep: 1.12,
+  lodProps: 0.5,
+  lodPeople: 0.85,
+  lodLabels: 0.34,
+  /** A partir daqui aparecem ícones de depósito e barras de obra. */
+  lodBuildings: 0.42,
+  panInertia: 0.86,
+} as const;
+
+export const TIME = {
+  /** Segundos reais para 1 dia de jogo em velocidade 1x. */
+  secondsPerDay: 12,
+  /**
+   * Passo fixo da simulação econômica. Não roda a cada frame: acumula e
+   * processa em blocos, o que mantém o custo estável em mapas grandes (§77).
+   */
+  economyStep: 0.25,
+  /** Frequência do passo de simulação (independente do quadro de vídeo). */
+  simIntervalMs: 200,
+  /** Maior fatia processada de uma vez — evita travar ao voltar de uma ausência. */
+  maxSimChunk: 1,
+  /** Teto de recuperação de tempo real por chamada (5 min de progresso offline). */
+  maxCatchUpSeconds: 300,
+} as const;
+
+/** Recursos iniciais do jogador (§68). */
+export const STARTING_RESOURCES: ResourceBag = {
+  food: 320,
+  wood: 260,
+  stone: 140,
+  ore: 40,
+  goldOre: 0,
+  planks: 60,
+  bricks: 40,
+  iron: 15,
+  coin: 400,
+};
+
+/** Recursos iniciais de um reino de IA (ainda não simulados a fundo). */
+export const AI_STARTING_RESOURCES: ResourceBag = {
+  food: 400,
+  wood: 300,
+  stone: 200,
+  ore: 60,
+  goldOre: 10,
+  planks: 80,
+  bricks: 60,
+  iron: 30,
+  coin: 500,
+};
+
+export const BUILD = {
+  /** Custo do nível N = custo base * mult^(N-1). */
+  levelCostMult: 1.85,
+  levelTimeMult: 1.55,
+  /** Produção do nível N = base * N. */
+  levelOutputMult: 1,
+  /** Devolução ao demolir. */
+  refundRatio: 0.4,
+} as const;
+
+export const WORKFORCE = {
+  /** Habitantes necessários para liberar 1 vaga de trabalhador. */
+  populationPerWorker: 25,
+  /** Custo de contratação (uma vez). */
+  hireCost: 30,
+  /** Salário por trabalhador empregado, por minuto. */
+  wagePerMinute: 0.55,
+  /** Eficiência mínima de um prédio sem trabalhador nenhum. */
+  idleEfficiency: 0,
+} as const;
+
+export const ECONOMY = {
+  /** Imposto por habitante por minuto, modulado pela felicidade. */
+  taxPerPopPerMinute: 0.012,
+  /** Consumo de comida por habitante por minuto. */
+  foodPerPopPerMinute: 0.01,
+  /** Crescimento populacional por minuto quando há comida e moradia. */
+  growthPerMinute: 0.008,
+  /** Perda populacional por minuto em fome. */
+  starvationPerMinute: 0.02,
+  /** Moradia garantida pelo próprio assentamento, por nível. */
+  baseHousingPerLevel: 900,
+} as const;
+
+/** Multiplicador de produção conforme nível do castelo do território. */
+export const CASTLE_LEVEL_YIELD_MULT = [1, 1, 1.12, 1.24, 1.38, 1.55];
+
+export const CASTLE_LEVELS = [
+  null,
+  { maxHp: 600, defense: 12, storage: 1500, garrison: 40 },
+  { maxHp: 1000, defense: 20, storage: 2400, garrison: 80 },
+  { maxHp: 1600, defense: 32, storage: 3600, garrison: 140 },
+  { maxHp: 2400, defense: 48, storage: 5200, garrison: 220 },
+  { maxHp: 3600, defense: 70, storage: 8000, garrison: 340 },
+] as const;
+
+export const MILITARY = {
+  /** Moral inicial de um exército recém-formado. */
+  startingMorale: 70,
+  /** Habitantes por ponto de manpower. */
+  populationPerManpower: 8,
+} as const;
+
+/**
+ * Reivindicação pacífica (§19 — conquista econômica/diplomática).
+ * Só vale para territórios neutros; domínios de outros reinos exigem
+ * campanha militar com exércitos reais.
+ */
+export const CLAIM = {
+  coinBase: 150,
+  coinPerDefense: 14,
+  foodBase: 80,
+  foodPerPop: 0.09,
+} as const;
+
+export const SAVE = {
+  key: 'acord-kingdoms:save:v3',
+  autosaveEverySeconds: 20,
+} as const;
+
+/**
+ * Marcha e logística (§16). Guerra tem custo: mobilizar consome ouro e comida,
+ * a distância pesa e um exército sem suprimento perde moral.
+ */
+export const MARCH = {
+  /** Unidades de mundo por segundo, para velocidade de unidade 1. */
+  baseSpeed: 34,
+  /** Custo fixo de mobilização por soldado. */
+  mobilizeCoinPerUnit: 3,
+  mobilizeFoodPerUnit: 3,
+  /** Comida carregada por soldado ao partir. */
+  suppliesPerUnit: 7,
+  /** Consumo de comida por soldado por minuto em marcha. */
+  supplyBurnPerUnitPerMinute: 1.1,
+  /** Queda de moral por minuto quando o suprimento acaba. */
+  starvedMoraleLossPerMinute: 14,
+  /** Moral recuperada por minuto dentro do próprio território. */
+  moraleRecoveryPerMinute: 6,
+} as const;
+
+/**
+ * Batalha (§18). Não é um RTS: rodadas curtas, resultado por atributos.
+ * O objetivo é responder "vale a pena vencer?", não microgerenciar tropas.
+ */
+export const BATTLE = {
+  /** Segundos entre rodadas. */
+  roundSeconds: 1.4,
+  /** Fração da força que vira dano por rodada. */
+  damagePerRound: 0.16,
+  /** Multiplicador de defesa por nível de castelo. */
+  fortPerCastleLevel: 0.09,
+  /** Bônus de defesa por bioma difícil. */
+  terrainBonus: { mountains: 0.25, hills: 0.15, forest: 0.1, marsh: 0.1 } as Record<string, number>,
+  /** Muralha absorve dano até ser quebrada por cerco. */
+  wallHpPerCastleLevel: 260,
+  /** Moral perdida a cada 10% de baixas. */
+  moraleLossPerLossRatio: 55,
+  /** Abaixo disto o exército debanda. */
+  routMorale: 22,
+  /** Teto de rodadas — evita batalha eterna. */
+  maxRounds: 40,
+  /** Fração das tropas derrotadas que consegue recuar. */
+  retreatSurvival: 0.35,
+} as const;
+
+/**
+ * IA dos reinos (§30/§77). Pensa em intervalos, não a cada quadro.
+ */
+export const AI = {
+  thinkIntervalSeconds: 6,
+  /** Reserva mínima de moedas que a IA não gasta. */
+  coinReserve: 120,
+  /** Só ataca com esta vantagem de poder estimada. */
+  attackPowerRatio: 1.45,
+  /** Tamanho mínimo de exército para uma campanha. */
+  minCampaignUnits: 10,
+  /** Chance por decisão, por perfil. */
+  profiles: {
+    AGGRESSIVE: { build: 0.35, recruit: 0.5, attack: 0.9 },
+    ECONOMIC: { build: 0.9, recruit: 0.2, attack: 0.25 },
+    DEFENSIVE: { build: 0.6, recruit: 0.45, attack: 0.15 },
+    EXPANSIONIST: { build: 0.55, recruit: 0.4, attack: 0.6 },
+    NONE: { build: 0, recruit: 0, attack: 0 },
+  } as Record<string, { build: number; recruit: number; attack: number }>,
+} as const;

@@ -1,0 +1,90 @@
+[
+  {
+    "id": "lumberjack", "name": "Cabana do Lenhador", "short": "Lenhador",
+    "category": "extraction", "deposit": "forest",
+    "description": "Derruba a floresta do depósito e entrega madeira bruta.",
+    "maxLevel": 4, "jobsPerLevel": 3, "buildTime": 20,
+    "cost": { "wood": 40 }, "output": { "wood": 18 }
+  },
+  {
+    "id": "quarry", "name": "Pedreira", "short": "Pedreira",
+    "category": "extraction", "deposit": "stone",
+    "description": "Extrai blocos de pedra da encosta.",
+    "maxLevel": 4, "jobsPerLevel": 3, "buildTime": 26,
+    "cost": { "wood": 60 }, "output": { "stone": 14 }
+  },
+  {
+    "id": "iron_mine", "name": "Mina de Ferro", "short": "Mina",
+    "category": "extraction", "deposit": "ore",
+    "description": "Escava minério bruto — matéria-prima das armas.",
+    "maxLevel": 4, "jobsPerLevel": 4, "buildTime": 34,
+    "cost": { "wood": 80, "planks": 10 }, "output": { "ore": 12 }
+  },
+  {
+    "id": "gold_mine", "name": "Mina de Ouro", "short": "Mina de Ouro",
+    "category": "extraction", "deposit": "gold",
+    "description": "Extrai minério de ouro. Sozinho não vira moeda: precisa da Casa da Moeda.",
+    "maxLevel": 4, "jobsPerLevel": 4, "buildTime": 45,
+    "cost": { "wood": 100, "planks": 20 }, "output": { "goldOre": 8 }
+  },
+  {
+    "id": "farm", "name": "Fazenda", "short": "Fazenda",
+    "category": "extraction", "deposit": "farmland",
+    "description": "Cultiva grãos. Comida sustenta população e exército.",
+    "maxLevel": 4, "jobsPerLevel": 3, "buildTime": 18,
+    "cost": { "wood": 30 }, "output": { "food": 22 }
+  },
+  {
+    "id": "sawmill", "name": "Serraria", "short": "Serraria",
+    "category": "refining",
+    "description": "Converte madeira bruta em tábuas, usadas em quase toda construção.",
+    "maxLevel": 4, "jobsPerLevel": 3, "buildTime": 30,
+    "cost": { "wood": 80, "stone": 40 },
+    "input": { "wood": 20 }, "output": { "planks": 10 }
+  },
+  {
+    "id": "brickworks", "name": "Olaria", "short": "Olaria",
+    "category": "refining",
+    "description": "Queima pedra e argila em tijolos para muralhas e oficinas.",
+    "maxLevel": 4, "jobsPerLevel": 3, "buildTime": 32,
+    "cost": { "wood": 60, "stone": 60 },
+    "input": { "stone": 18 }, "output": { "bricks": 9 }
+  },
+  {
+    "id": "foundry", "name": "Fundição", "short": "Fundição",
+    "category": "refining",
+    "description": "Funde minério em ferro. Sem ferro não há armas nem soldados pesados.",
+    "maxLevel": 4, "jobsPerLevel": 4, "buildTime": 45,
+    "cost": { "planks": 30, "bricks": 20 },
+    "input": { "ore": 16 }, "output": { "iron": 8 }
+  },
+  {
+    "id": "mint", "name": "Casa da Moeda", "short": "Moeda",
+    "category": "refining",
+    "description": "Cunha minério de ouro em moedas — o sangue da administração.",
+    "maxLevel": 4, "jobsPerLevel": 3, "buildTime": 55,
+    "cost": { "planks": 40, "bricks": 30 },
+    "input": { "goldOre": 10 }, "output": { "coin": 60 }
+  },
+  {
+    "id": "house", "name": "Casario", "short": "Casario",
+    "category": "civic",
+    "description": "Abriga famílias. Sem moradia a população para de crescer.",
+    "maxLevel": 5, "jobsPerLevel": 0, "buildTime": 20,
+    "cost": { "wood": 40, "stone": 20 }, "housing": 70
+  },
+  {
+    "id": "warehouse", "name": "Armazém", "short": "Armazém",
+    "category": "civic",
+    "description": "Aumenta o limite de estoque do reino.",
+    "maxLevel": 4, "jobsPerLevel": 1, "buildTime": 30,
+    "cost": { "planks": 25, "bricks": 15 }, "storage": 1500
+  },
+  {
+    "id": "barracks", "name": "Quartel", "short": "Quartel",
+    "category": "military",
+    "description": "Treina e abriga tropas. O nível libera unidades melhores.",
+    "maxLevel": 3, "jobsPerLevel": 2, "buildTime": 60,
+    "cost": { "planks": 50, "bricks": 40, "iron": 10 }, "enablesRecruit": true
+  }
+]

@@ -1,0 +1,52 @@
+[
+  {
+    "id": "k_valdoria",
+    "name": "Valdória",
+    "ownerKind": "PLAYER",
+    "color": "#3f7ddc",
+    "colorDark": "#24499a",
+    "emblem": "fleur",
+    "capitalTerritoryId": "t01_valdoria",
+    "aiProfile": "NONE"
+  },
+  {
+    "id": "k_karneth",
+    "name": "Karneth",
+    "ownerKind": "AI",
+    "color": "#d8453f",
+    "colorDark": "#8e2420",
+    "emblem": "swords",
+    "capitalTerritoryId": "t07_karnholt",
+    "aiProfile": "AGGRESSIVE"
+  },
+  {
+    "id": "k_aurenna",
+    "name": "Aurenna",
+    "ownerKind": "AI",
+    "color": "#e6b32e",
+    "colorDark": "#a37714",
+    "emblem": "lion",
+    "capitalTerritoryId": "t09_aurenna",
+    "aiProfile": "ECONOMIC"
+  },
+  {
+    "id": "k_silvarden",
+    "name": "Silvarden",
+    "ownerKind": "AI",
+    "color": "#4bb35f",
+    "colorDark": "#2b7a3a",
+    "emblem": "tree",
+    "capitalTerritoryId": "t11_silvarden",
+    "aiProfile": "DEFENSIVE"
+  },
+  {
+    "id": "k_morvath",
+    "name": "Morvath",
+    "ownerKind": "AI",
+    "color": "#9558d4",
+    "colorDark": "#623093",
+    "emblem": "stag",
+    "capitalTerritoryId": "t12_morvath",
+    "aiProfile": "EXPANSIONIST"
+  }
+]

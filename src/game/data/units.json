@@ -1,0 +1,44 @@
+[
+  {
+    "id": "militia", "name": "Milícia",
+    "description": "Camponeses armados. Baratos, frágeis, disponíveis desde já.",
+    "hp": 40, "attack": 6, "defense": 4, "speed": 1, "siege": 0, "manpower": 1,
+    "cost": { "coin": 20, "food": 20 }, "upkeep": { "coin": 0.3, "food": 0.5 },
+    "trainTime": 10, "requiresBarracks": 1
+  },
+  {
+    "id": "spearman", "name": "Lanceiro",
+    "description": "Formação sólida. Segura cavalaria e defende passagens.",
+    "hp": 55, "attack": 9, "defense": 9, "speed": 1, "siege": 0, "manpower": 1,
+    "cost": { "coin": 40, "iron": 4, "planks": 4 }, "upkeep": { "coin": 0.5, "food": 0.6 },
+    "trainTime": 16, "requiresBarracks": 1
+  },
+  {
+    "id": "archer", "name": "Arqueiro",
+    "description": "Dano à distância. Excelente atrás de muralhas.",
+    "hp": 45, "attack": 13, "defense": 5, "speed": 1, "siege": 0, "manpower": 1,
+    "cost": { "coin": 50, "planks": 8, "iron": 2 }, "upkeep": { "coin": 0.6, "food": 0.6 },
+    "trainTime": 18, "requiresBarracks": 1
+  },
+  {
+    "id": "swordsman", "name": "Espadachim",
+    "description": "Infantaria pesada. Coluna vertebral de qualquer campanha.",
+    "hp": 75, "attack": 14, "defense": 12, "speed": 1, "siege": 2, "manpower": 1,
+    "cost": { "coin": 70, "iron": 10 }, "upkeep": { "coin": 0.9, "food": 0.8 },
+    "trainTime": 24, "requiresBarracks": 2
+  },
+  {
+    "id": "cavalry", "name": "Cavalaria",
+    "description": "Rápida e devastadora em campo aberto. Cara de manter.",
+    "hp": 110, "attack": 20, "defense": 12, "speed": 2, "siege": 0, "manpower": 1,
+    "cost": { "coin": 120, "iron": 14, "food": 40 }, "upkeep": { "coin": 1.8, "food": 1.6 },
+    "trainTime": 34, "requiresBarracks": 3
+  },
+  {
+    "id": "catapult", "name": "Catapulta",
+    "description": "Quebra muralhas. Inútil sem infantaria protegendo.",
+    "hp": 90, "attack": 8, "defense": 3, "speed": 0.6, "siege": 40, "manpower": 2,
+    "cost": { "coin": 180, "planks": 40, "iron": 20 }, "upkeep": { "coin": 2.2, "food": 1 },
+    "trainTime": 45, "requiresBarracks": 3
+  }
+]
