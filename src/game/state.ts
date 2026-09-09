@@ -116,6 +116,7 @@ export function createWorld(): WorldBundle {
       buildingIds: [],
       depositIds: depositsByTerritory[d.id] ?? [],
       citySlots: world.citySlots[d.id] ?? [],
+      tradeCooldown: 0,
       polygon: world.polygons[d.id] ?? [],
       center: world.centers[d.id] ?? d.seed,
       area: world.areas[d.id] ?? 0,

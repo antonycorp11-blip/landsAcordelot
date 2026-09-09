@@ -150,6 +150,32 @@ export const CLAIM = {
   foodPerPop: 0.09,
 } as const;
 
+/**
+ * Comércio (§12). Cada recurso tem um valor relativo; a caravana cobra uma
+ * margem que cai conforme o mercado evolui. Volume e intervalo evitam que o
+ * mercado vire um botão de converter recurso infinito.
+ */
+export const TRADE = {
+  /** Valor relativo por unidade. Ouro é a referência de troca. */
+  value: {
+    food: 1,
+    wood: 1,
+    stone: 1.3,
+    ore: 2.2,
+    goldOre: 4.5,
+    planks: 2.6,
+    bricks: 3.2,
+    iron: 6.5,
+    coin: 0.5,
+  } as Record<string, number>,
+  /** Margem da caravana por nível do mercado. */
+  spreadByLevel: [0.35, 0.28, 0.22, 0.16, 0.1],
+  /** Valor máximo movido por caravana, por nível. */
+  capacityByLevel: [0, 220, 420, 700, 1100],
+  /** Intervalo entre caravanas, em segundos. */
+  cooldownSeconds: 25,
+} as const;
+
 export const SAVE = {
   key: 'acord-kingdoms:save:v3',
   autosaveEverySeconds: 20,

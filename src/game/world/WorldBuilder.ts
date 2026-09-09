@@ -429,37 +429,74 @@ function buildDeposits(
       } else place('farmland', isOpen) || place('farmland', () => true);
     }
 
-    // Garantia mínima: todo território permite iniciar a cadeia produtiva.
-    const has = (kind: DepositSeed['kind']) =>
-      out.some((d) => d.territoryId === s.id && d.kind === kind);
-    if (!has('forest')) place('forest', isForest) || place('forest', () => true);
-    if (!has('farmland')) place('farmland', isOpen) || place('farmland', () => true);
-    if (!has('stone')) place('stone', isRocky) || place('stone', () => true);
-    // Uma floresta extra deixa a economia inicial respirável.
-    place('forest', isForest);
+    // Garantia mínima: todo território sustenta a cadeia produtiva inteira.
+    const countOf = (kind: DepositSeed['kind']) =>
+      out.filter((d) => d.territoryId === s.id && d.kind === kind).length;
+    const ensure = (
+      kind: DepositSeed['kind'],
+      quantity: number,
+      filter: (c: number, e: number) => boolean,
+    ) => {
+      while (countOf(kind) < quantity) {
+        if (!place(kind, filter) && !place(kind, () => true)) break;
+      }
+    };
+
+    ensure('forest', 2, isForest);
+    ensure('farmland', 2, isOpen);
+    ensure('stone', 1, isRocky);
+    ensure('ore', 1, isRocky);
+
+    // Ouro não é garantido: nasce no relevo e é o que faz certas regiões
+    // valerem uma guerra (§26).
+    const rocky = s.biome === 'hills' || s.biome === 'mountains';
+    if (countOf('gold') === 0 && rocky && rng() < 0.45) place('gold', isRocky);
   }
 
   return out;
 }
 
-/** Vagas urbanas: anel de posições válidas ao redor do castelo, para oficinas. */
+/**
+ * Vagas urbanas: anéis de posições válidas ao redor do castelo.
+ *
+ * O castelo é o maior sprite do mapa e se estende bastante para cima da própria
+ * âncora. Por isso reservamos uma caixa de exclusão à volta dele: sem isso as
+ * oficinas nascem por baixo do castelo e o jogador não consegue nem vê-las.
+ */
+const CASTLE_KEEPOUT = { halfWidth: 210, top: 330, bottom: 90 };
+
 function buildCitySlots(anchor: Vec2 | undefined, poly: Vec2[] | undefined, grid: WorldGrid): Vec2[] {
   if (!anchor || !poly || poly.length < 3) return [];
   const slots: Vec2[] = [];
   const rings = [
-    { r: 118, n: 6, phase: 0.2 },
-    { r: 188, n: 8, phase: 0.55 },
-    { r: 258, n: 10, phase: 0.9 },
+    { r: 250, n: 8, phase: 0.35 },
+    { r: 345, n: 10, phase: 0.75 },
+    { r: 445, n: 12, phase: 1.15 },
+    { r: 545, n: 14, phase: 1.55 },
   ];
+
+  const blocked = (p: Vec2) => {
+    const dx = p.x - anchor.x;
+    const dy = p.y - anchor.y;
+    return (
+      Math.abs(dx) < CASTLE_KEEPOUT.halfWidth &&
+      dy < CASTLE_KEEPOUT.bottom &&
+      dy > -CASTLE_KEEPOUT.top
+    );
+  };
+
   for (const ring of rings) {
     for (let i = 0; i < ring.n; i++) {
       const a = (i / ring.n) * Math.PI * 2 + ring.phase;
       // Elipse: o mundo tem leitura levemente isométrica.
-      const p = { x: anchor.x + Math.cos(a) * ring.r * 1.25, y: anchor.y + Math.sin(a) * ring.r * 0.78 };
+      const p = { x: anchor.x + Math.cos(a) * ring.r * 1.2, y: anchor.y + Math.sin(a) * ring.r * 0.72 };
+      if (blocked(p)) continue;
       const idx = sampleCell(grid, p.x, p.y);
       if (idx < 0 || !grid.land[idx]) continue;
       if (grid.biome[idx] === BIOME_CODE.mountains || grid.biome[idx] === BIOME_CODE.snow) continue;
       if (!pointInPolygon(p, poly)) continue;
+      // Oficinas não se empilham.
+      if (slots.some((q) => Math.hypot(q.x - p.x, q.y - p.y) < 130)) continue;
       slots.push(p);
     }
   }

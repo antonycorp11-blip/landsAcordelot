@@ -130,6 +130,8 @@ export interface BuildingDef {
   storage?: number;
   /** Habilita recrutamento no território. */
   enablesRecruit?: boolean;
+  /** Habilita o comércio de caravanas no território. */
+  enablesTrade?: boolean;
 }
 
 export interface Building {
@@ -294,6 +296,8 @@ export interface Territory {
   depositIds: string[];
   /** Vagas urbanas livres para oficinas (posições ao redor do castelo). */
   citySlots: Vec2[];
+  /** Segundos até a próxima caravana poder partir do mercado. */
+  tradeCooldown: number;
 
   polygon: Vec2[];
   center: Vec2;

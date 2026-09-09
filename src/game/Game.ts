@@ -7,6 +7,7 @@ import { BuildingManager } from './managers/BuildingManager';
 import { Camera } from './managers/Camera';
 import { EconomyManager } from './managers/EconomyManager';
 import { SaveManager } from './managers/SaveManager';
+import { TradeManager } from './managers/TradeManager';
 import { TerritoryManager } from './managers/TerritoryManager';
 import { Renderer } from './render/Renderer';
 import { createWorld } from './state';
@@ -16,6 +17,7 @@ import type {
   BuildingKind,
   ConquestReason,
   GameState,
+  ResourceKind,
   Territory,
   UnitKind,
   Vec2,
@@ -51,6 +53,7 @@ export class Game {
   readonly armies: ArmyManager;
   readonly battles: BattleManager;
   readonly ai: AIManager;
+  readonly trade: TradeManager;
   readonly saves: SaveManager;
 
   private renderer: Renderer | null = null;
@@ -93,6 +96,7 @@ export class Game {
     this.armies = new ArmyManager(this.state, this.economy, this.world);
     this.battles = new BattleManager(this.state);
     this.ai = new AIManager(this.state, this.economy, this.buildings, this.armies, this.battles);
+    this.trade = new TradeManager(this.state);
     this.saves = new SaveManager();
   }
 
@@ -238,6 +242,7 @@ export class Game {
     for (const army of this.armies.tickMovement(simDt)) this.onArrival(army);
     for (const battle of this.battles.tick(simDt)) this.settleBattle(battle);
 
+    this.trade.tick(simDt);
     this.ai.tick(simDt);
     this.saves.tick(simDt, this.state);
     this.advanceTutorial();
@@ -692,6 +697,22 @@ export class Game {
     if (!army) return;
     this.camera.focus(army.position, Math.max(this.camera.zoom, 0.9));
     this.touch();
+  }
+
+  // -- comércio -------------------------------------------------------------
+
+  executeTrade(territoryId: string, give: ResourceKind, amount: number, receive: ResourceKind): boolean {
+    const t = this.state.territories[territoryId];
+    if (!t) return false;
+    const q = this.trade.quote(t, give, amount, receive);
+    if (!q.ok) {
+      this.notify(q.reason);
+      return false;
+    }
+    if (!this.trade.execute(territoryId, give, amount, receive)) return false;
+    this.notify(`Caravana partiu: ${amount} → ${q.receiveAmount}.`, 3);
+    this.touch();
+    return true;
   }
 
   // -- conquista ------------------------------------------------------------
