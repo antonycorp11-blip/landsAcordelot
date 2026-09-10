@@ -1,24 +1,32 @@
 {
-  "name": "Acord Kingdoms",
-  "short_name": "Acord",
-  "description": "Jogo 2D medieval de conquista territorial e gerenciamento de reino.",
+  "name": "Lands of Acordelot",
+  "short_name": "Acordelot",
+  "description": "Conquista territorial, gerenciamento de reino e progressão de escala em um mundo medieval 2D.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "landscape",
-  "background_color": "#0b1220",
-  "theme_color": "#0b1220",
+  "background_color": "#0a1424",
+  "theme_color": "#0a1424",
+  "lang": "pt-BR",
   "icons": [
     {
       "src": "/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }

@@ -1,12 +1,24 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Game } from '../game/Game';
 
-const W = 156;
-const H = 92;
+const W = 176;
+const H = 108;
 
-/** Minimapa funcional: desenha os territórios reais e move a câmera ao clique. */
+const LAYERS: { id: 'provinces' | 'resources' | 'routes' | 'armies'; label: string; color: string }[] = [
+  { id: 'provinces', label: 'Províncias', color: '#4b8ef2' },
+  { id: 'resources', label: 'Recursos', color: '#5cd08a' },
+  { id: 'routes', label: 'Rotas', color: '#e8c35a' },
+  { id: 'armies', label: 'Exércitos', color: '#f0616a' },
+];
+
+/**
+ * Minimapa com as camadas do conceito. As caixas não são enfeite: cada uma
+ * liga e desliga de verdade uma camada do renderer.
+ */
 export function Minimap({ game, version }: { game: Game; version: number }) {
   const ref = useRef<HTMLCanvasElement>(null);
+  const [, force] = useState(0);
+  const layers = game.mapLayers();
 
   useEffect(() => {
     const canvas = ref.current;
@@ -22,7 +34,7 @@ export function Minimap({ game, version }: { game: Game; version: number }) {
       const sx = W / game.world.width;
       const sy = H / game.world.height;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.fillStyle = '#183a5c';
+      ctx.fillStyle = '#0d2237';
       ctx.fillRect(0, 0, W, H);
 
       for (const t of Object.values(game.state.territories)) {
@@ -34,18 +46,35 @@ export function Minimap({ game, version }: { game: Game; version: number }) {
           ctx.lineTo(t.polygon[i].x * sx, t.polygon[i].y * sy);
         }
         ctx.closePath();
-        ctx.fillStyle = k ? k.color : '#7c8a52';
-        ctx.globalAlpha = k ? 0.9 : 0.55;
+        ctx.fillStyle = k ? k.color : '#6f7f52';
+        ctx.globalAlpha = k ? 0.92 : 0.5;
         ctx.fill();
         ctx.globalAlpha = 1;
-        ctx.strokeStyle = 'rgba(255,255,255,.35)';
+        ctx.strokeStyle = 'rgba(232,195,90,.3)';
         ctx.lineWidth = 0.6;
         ctx.stroke();
       }
 
+      // Colunas em campo: onde a guerra está acontecendo agora.
+      for (const army of Object.values(game.state.armies)) {
+        if (army.state === 'garrison') continue;
+        const k = game.state.kingdoms[army.ownerId];
+        ctx.fillStyle = k?.color ?? '#fff';
+        ctx.beginPath();
+        ctx.arc(army.position.x * sx, army.position.y * sy, 2.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      for (const b of Object.values(game.state.battles)) {
+        ctx.strokeStyle = `rgba(240,97,106,${0.5 + Math.sin(Date.now() / 220) * 0.4})`;
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.arc(b.position.x * sx, b.position.y * sy, 4, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
       const b = game.camera.visibleBounds(0);
-      ctx.strokeStyle = 'rgba(255,255,255,.9)';
-      ctx.lineWidth = 1.4;
+      ctx.strokeStyle = 'rgba(255,255,255,.95)';
+      ctx.lineWidth = 1.3;
       ctx.strokeRect(b.minX * sx, b.minY * sy, (b.maxX - b.minX) * sx, (b.maxY - b.minY) * sy);
     };
     draw();
@@ -54,17 +83,38 @@ export function Minimap({ game, version }: { game: Game; version: number }) {
 
   return (
     <div className="minimap">
-      <canvas
-        ref={ref}
-        style={{ width: W, height: H }}
-        onPointerDown={(e) => {
-          const r = e.currentTarget.getBoundingClientRect();
-          game.camera.focus({
-            x: ((e.clientX - r.left) / r.width) * game.world.width,
-            y: ((e.clientY - r.top) / r.height) * game.world.height,
-          });
-        }}
-      />
+      <div className="minimap-row">
+        <div className="minimap-canvas">
+          <canvas
+            ref={ref}
+            style={{ width: W, height: H }}
+            onPointerDown={(e) => {
+              const r = e.currentTarget.getBoundingClientRect();
+              game.camera.focus({
+                x: ((e.clientX - r.left) / r.width) * game.world.width,
+                y: ((e.clientY - r.top) / r.height) * game.world.height,
+              });
+            }}
+          />
+        </div>
+        <div className="layers">
+          <div className="layers-cap">Camadas</div>
+          {LAYERS.map((l) => (
+            <button
+              key={l.id}
+              className={`layer ${layers[l.id] ? 'on' : ''}`}
+              onClick={() => {
+                game.toggleLayer(l.id);
+                force((v) => v + 1);
+              }}
+            >
+              <i style={{ background: l.color }} />
+              <span>{l.label}</span>
+              <em>{layers[l.id] ? '✓' : ''}</em>
+            </button>
+          ))}
+        </div>
+      </div>
       <div className="zoomrow">
         <button onClick={() => game.zoomBy(1 / 1.25)} title="Afastar">
           −

@@ -114,8 +114,11 @@ export class EconomyManager {
       employed += b.workers;
       if (b.construction > 0) continue;
       const scale = this.buildingScale(b, t);
-      if (def.output) addBag(gross, def.output, scale);
-      if (def.input) addBag(inputs, def.input, scale);
+      // Refinaria sem insumo não consome nem produz o cheio: o número mostrado
+      // tem que ser o que realmente acontece, não o teórico.
+      const rate = def.input ? scale * b.efficiency : scale;
+      if (def.output) addBag(gross, def.output, rate);
+      if (def.input) addBag(inputs, def.input, rate);
     }
 
     const taxes = t.population * ECONOMY.taxPerPopPerMinute * (0.5 + t.happiness / 150);

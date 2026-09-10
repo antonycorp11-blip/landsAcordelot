@@ -46,6 +46,9 @@ export const CAMERA = {
 export const TIME = {
   /** Segundos reais para 1 dia de jogo em velocidade 1x. */
   secondsPerDay: 12,
+  /** Calendário: 4 estações de 30 dias. Puro sabor, derivado do dia. */
+  daysPerSeason: 30,
+  startYear: 1124,
   /**
    * Passo fixo da simulação econômica. Não roda a cada frame: acumula e
    * processa em blocos, o que mantém o custo estável em mapas grandes (§77).

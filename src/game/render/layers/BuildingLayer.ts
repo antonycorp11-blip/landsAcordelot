@@ -16,6 +16,8 @@ import type { Bounds } from './TerrainLayer';
  * está em obra e o que está parado por falta de gente.
  */
 export class BuildingLayer {
+  /** Camada de recursos ligada no painel do minimapa. */
+  showDeposits = true;
   /** Depósito destacado pela UI (aba Construir). */
   focusedDepositId: string | null = null;
   /** Construção selecionada no mapa. */
@@ -34,7 +36,7 @@ export class BuildingLayer {
       x > bounds.minX && x < bounds.maxX && y > bounds.minY && y < bounds.maxY;
 
     // 1. Depósitos livres ficam no chão, sob tudo.
-    if (zoom >= CAMERA.lodBuildings) {
+    if (this.showDeposits && zoom >= CAMERA.lodBuildings) {
       for (const d of Object.values(state.deposits)) {
         if (d.buildingId || !inView(d.position.x, d.position.y)) continue;
         this.drawDeposit(ctx, d, zoom, time);

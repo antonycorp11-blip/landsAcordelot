@@ -1,4 +1,4 @@
-# Acord Kingdoms
+# Lands of Acordelot
 
 Jogo 2D medieval de **conquista territorial, gerenciamento de reino e progressão de escala**.
 Canvas 2D puro para o mundo, React apenas para HUD e painéis. Sem 3D em nenhuma camada.

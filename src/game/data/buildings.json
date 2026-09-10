@@ -13,7 +13,7 @@
       "wood": 40
     },
     "output": {
-      "wood": 18
+      "wood": 30
     }
   },
   {
@@ -30,7 +30,7 @@
       "wood": 60
     },
     "output": {
-      "stone": 14
+      "stone": 26
     }
   },
   {
@@ -48,7 +48,7 @@
       "planks": 10
     },
     "output": {
-      "ore": 12
+      "ore": 20
     }
   },
   {
@@ -66,7 +66,7 @@
       "planks": 20
     },
     "output": {
-      "goldOre": 8
+      "goldOre": 14
     }
   },
   {
@@ -83,7 +83,7 @@
       "wood": 30
     },
     "output": {
-      "food": 22
+      "food": 28
     }
   },
   {
@@ -100,10 +100,10 @@
       "stone": 40
     },
     "input": {
-      "wood": 20
+      "wood": 18
     },
     "output": {
-      "planks": 10
+      "planks": 9
     }
   },
   {
@@ -120,10 +120,10 @@
       "stone": 60
     },
     "input": {
-      "stone": 18
+      "stone": 16
     },
     "output": {
-      "bricks": 9
+      "bricks": 8
     }
   },
   {
@@ -140,10 +140,10 @@
       "bricks": 20
     },
     "input": {
-      "ore": 16
+      "ore": 12
     },
     "output": {
-      "iron": 8
+      "iron": 6
     }
   },
   {
@@ -160,10 +160,10 @@
       "bricks": 30
     },
     "input": {
-      "goldOre": 10
+      "goldOre": 8
     },
     "output": {
-      "coin": 60
+      "coin": 48
     }
   },
   {

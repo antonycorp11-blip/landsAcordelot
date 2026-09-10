@@ -68,13 +68,14 @@ export class AIManager {
 
   /** Contrata e aloca trabalhadores até encher as vagas que consegue pagar. */
   private staffTerritory(t: Territory, kingdom: Kingdom) {
-    const report = this.economy.report(t);
-    const openJobs = report.jobs - report.employed;
+    const openJobs = this.economy.report(t).jobs - this.economy.report(t).employed;
     if (openJobs <= 0) return;
 
-    let hires = Math.min(openJobs, 3);
-    while (hires-- > 0 && kingdom.resources.coin > AI.coinReserve) {
-      if (report.idleWorkers <= 0 && !this.buildings.hireWorker(t.id, kingdom.id)) break;
+    // Relê os ociosos a cada volta: o valor muda a cada contratação.
+    for (let i = 0; i < Math.min(openJobs, 3); i++) {
+      if (kingdom.resources.coin <= AI.coinReserve) break;
+      if (this.economy.report(t).idleWorkers > 0) continue;
+      if (!this.buildings.hireWorker(t.id, kingdom.id)) break;
     }
 
     for (const id of t.buildingIds) {

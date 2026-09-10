@@ -422,6 +422,19 @@ export class Game {
 
   // -- consultas ------------------------------------------------------------
 
+  /** Data do reino: dia, estação e ano, derivados do tempo decorrido. */
+  calendar(): { day: number; season: string; year: number } {
+    const total = this.state.time.day - 1;
+    const seasons = ['Primavera', 'Verão', 'Outono', 'Inverno'];
+    const seasonIndex = Math.floor(total / TIME.daysPerSeason) % 4;
+    const year = TIME.startYear + Math.floor(total / (TIME.daysPerSeason * 4));
+    return {
+      day: (total % TIME.daysPerSeason) + 1,
+      season: seasons[seasonIndex],
+      year,
+    };
+  }
+
   get playerKingdom() {
     return this.state.kingdoms[this.state.playerKingdomId];
   }
@@ -568,6 +581,17 @@ export class Game {
 
   zoomBy(factor: number) {
     this.camera.zoomAt(this.camera.viewW / 2, this.camera.viewH / 2, factor);
+  }
+
+  /** Liga/desliga uma camada do mapa. */
+  toggleLayer(layer: 'provinces' | 'resources' | 'routes' | 'armies') {
+    if (!this.renderer) return;
+    this.renderer.layers[layer] = !this.renderer.layers[layer];
+    this.touch();
+  }
+
+  mapLayers() {
+    return this.renderer?.layers ?? { provinces: true, resources: true, routes: true, armies: true };
   }
 
   setSpeed(speed: GameState['time']['speed']) {

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { CAMERA } from './game/config/balance';
-import { BUILD_ID } from './game/config/version';
+import { assetUrl, BUILD_ID } from './game/config/version';
 import { Game, type GameSnapshot } from './game/Game';
 import { assets } from './game/render/AssetManager';
 import { CampaignPanel } from './ui/CampaignPanel';
@@ -8,7 +8,7 @@ import { BuildingPanel } from './ui/BuildingPanel';
 import { CityPanel } from './ui/CityPanel';
 import { DebugPanel } from './ui/DebugPanel';
 import { EconomyPanel } from './ui/EconomyPanel';
-import { IconBug, IconCastle, IconHammer, IconHelp, IconMap, IconSave, IconSword } from './ui/icons';
+import { IconBug } from './ui/icons';
 import { KingdomPanel } from './ui/KingdomPanel';
 import { LoreIntro } from './ui/LoreIntro';
 import { Minimap } from './ui/Minimap';
@@ -17,6 +17,86 @@ import { TopBar } from './ui/TopBar';
 import { UpdateWatcher } from './ui/UpdateWatcher';
 
 type Rail = 'kingdom' | 'campaigns' | 'help' | 'debug' | null;
+
+/**
+ * Trilho lateral no formato do conceito: medalhão dourado + rótulo curto.
+ * Cada item ou abre um painel ou leva a câmera a algum lugar útil.
+ */
+const RAIL_ITEMS: {
+  id: string;
+  medal: string;
+  label: string;
+  title: string;
+  run: (
+    game: Game,
+    rail: Rail,
+    setRail: (r: Rail) => void,
+    openCapital: () => void,
+    snap: GameSnapshot,
+  ) => void;
+}[] = [
+  {
+    id: 'kingdom',
+    medal: 'reino',
+    label: 'Reino',
+    title: 'Visão do reino',
+    run: (_g, rail, setRail) => setRail(rail === 'kingdom' ? null : 'kingdom'),
+  },
+  {
+    id: 'mundo',
+    medal: 'mundo',
+    label: 'Mundo',
+    title: 'Voltar à capital',
+    run: (_g, _r, _s, openCapital) => openCapital(),
+  },
+  {
+    id: 'stalled',
+    medal: 'tecnologia',
+    label: 'Produção',
+    title: 'Ir para a produção parada',
+    run: (game, _r, _s, openCapital, snap) => {
+      const stalled = game
+        .ownedTerritories()
+        .find((t) =>
+          t.buildingIds.some((id) => {
+            const b = snap.state.buildings[id];
+            return b && b.construction === 0 && b.workers === 0;
+          }),
+        );
+      if (!stalled) {
+        game.notify('Nenhuma construção parada.', 2);
+        openCapital();
+        return;
+      }
+      const parada = stalled.buildingIds.find((id) => {
+        const b = snap.state.buildings[id];
+        return b && b.construction === 0 && b.workers === 0;
+      });
+      if (parada) game.selectBuilding(parada);
+    },
+  },
+  {
+    id: 'campaigns',
+    medal: 'exercitos',
+    label: 'Exércitos',
+    title: 'Campanhas e batalhas',
+    run: (_g, rail, setRail) => setRail(rail === 'campaigns' ? null : 'campaigns'),
+  },
+  {
+    id: 'save',
+    medal: 'diplomacia',
+    label: 'Salvar',
+    title: 'Salvar reino',
+    run: (game) => game.saveNow(),
+  },
+  {
+    id: 'help',
+    medal: 'relatorios',
+    label: 'Ajuda',
+    title: 'Como jogar',
+    run: (_g, rail, setRail) => setRail(rail === 'help' ? null : 'help'),
+  },
+];
 
 export function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -250,62 +330,30 @@ export function App() {
           )}
 
           <div className="rail">
-            <button
-              className={rail === 'kingdom' ? 'active' : ''}
-              title="Reino"
-              onClick={() => setRail(rail === 'kingdom' ? null : 'kingdom')}
-            >
-              <IconCastle />
-            </button>
-            <button title="Voltar à capital" onClick={openCapital}>
-              <IconMap />
-            </button>
-            <button
-              title="Ir para a produção parada"
-              onClick={() => {
-                const stalled = game
-                  .ownedTerritories()
-                  .find((t) =>
-                    t.buildingIds.some((id) => {
-                      const b = snap.state.buildings[id];
-                      return b && b.construction === 0 && b.workers === 0;
-                    }),
-                  );
-                const target = stalled ?? game.playerCapital();
-                if (!target) return;
-                game.select(target.id);
-                game.focusTerritory(target.id, Math.max(game.camera.zoom, 0.95));
-                if (!stalled) game.notify('Nenhuma construção parada.', 2);
-              }}
-            >
-              <IconHammer />
-              {idleWarnings > 0 && <span className="badge">{idleWarnings}</span>}
-            </button>
-            <button
-              className={rail === 'campaigns' ? 'active' : ''}
-              title="Campanhas e batalhas"
-              onClick={() => setRail(rail === 'campaigns' ? null : 'campaigns')}
-            >
-              <IconSword />
-              {inField > 0 && <span className="badge">{inField}</span>}
-            </button>
-            <button title="Salvar reino" onClick={() => game.saveNow()}>
-              <IconSave />
-            </button>
-            <button
-              className={rail === 'help' ? 'active' : ''}
-              title="Ajuda"
-              onClick={() => setRail(rail === 'help' ? null : 'help')}
-            >
-              <IconHelp />
-            </button>
+            {RAIL_ITEMS.map((item) => {
+              const badge =
+                item.id === 'campaigns' ? inField : item.id === 'stalled' ? idleWarnings : 0;
+              return (
+                <button
+                  key={item.id}
+                  className={rail === item.id ? 'active' : ''}
+                  title={item.title}
+                  onClick={() => item.run(game, rail, setRail, openCapital, snap)}
+                >
+                  <img className="medal" src={assetUrl(`/ui/rail_${item.medal}.webp`)} alt="" />
+                  <span className="tag">{item.label}</span>
+                  {badge > 0 && <span className="badge">{badge}</span>}
+                </button>
+              );
+            })}
             {isDev && (
               <button
                 className={rail === 'debug' ? 'active' : ''}
                 title="Debug"
                 onClick={() => setRail(rail === 'debug' ? null : 'debug')}
               >
-                <IconBug />
+                <IconBug size={26} />
+                <span className="tag">Debug</span>
               </button>
             )}
           </div>

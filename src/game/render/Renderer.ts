@@ -32,6 +32,8 @@ export class Renderer {
   claimableIds: Set<string> = new Set();
   focusedDepositId: string | null = null;
   selectedBuildingId: string | null = null;
+  /** Camadas ligáveis pelo painel do minimapa (§conceito). */
+  layers = { provinces: true, resources: true, routes: true, armies: true };
 
   constructor(world: BuiltWorld, private camera: Camera) {
     this.terrain = new TerrainLayer(world);
@@ -74,17 +76,18 @@ export class Renderer {
     this.terrain.draw(ctx, bounds, zoom);
     this.features.drawCoast(ctx, bounds, zoom, time);
     this.features.drawRivers(ctx, bounds, zoom);
-    this.borders.drawFills(ctx, state, bounds);
-    this.features.drawRoads(ctx, bounds, zoom);
+    if (this.layers.provinces) this.borders.drawFills(ctx, state, bounds);
+    if (this.layers.routes) this.features.drawRoads(ctx, bounds, zoom);
     this.props.draw(ctx, bounds, zoom, time);
-    this.borders.drawBorders(ctx, state, bounds, zoom);
+    if (this.layers.provinces) this.borders.drawBorders(ctx, state, bounds, zoom);
 
+    this.buildings.showDeposits = this.layers.resources;
     this.buildings.focusedDepositId = this.focusedDepositId;
     this.buildings.selectedBuildingId = this.selectedBuildingId;
     this.buildings.selectedTerritoryId = this.selectedId;
     this.buildings.draw(ctx, state, bounds, zoom, time);
 
-    this.armiesLayer.draw(ctx, state, bounds, zoom, time);
+    if (this.layers.armies) this.armiesLayer.draw(ctx, state, bounds, zoom, time);
 
     // Destaques de seleção/hover e alvos disputáveis.
     for (const id of this.claimableIds) {

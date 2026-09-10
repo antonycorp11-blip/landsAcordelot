@@ -220,3 +220,34 @@ export function IconChain({ size = 18 }: { size?: number }) {
     </svg>
   );
 }
+
+/** Sol do calendário, no canto do relógio. */
+export function IconSun({ size = 22 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="4.6" fill="#f0cf72" />
+      <circle cx="12" cy="12" r="4.6" fill="url(#sunG)" />
+      <defs>
+        <radialGradient id="sunG" cx="0.35" cy="0.3">
+          <stop offset="0" stopColor="#ffeeb0" />
+          <stop offset="1" stopColor="#d4a12e" />
+        </radialGradient>
+      </defs>
+      {Array.from({ length: 8 }).map((_, i) => {
+        const a = (i * Math.PI) / 4;
+        return (
+          <line
+            key={i}
+            x1={12 + Math.cos(a) * 6.6}
+            y1={12 + Math.sin(a) * 6.6}
+            x2={12 + Math.cos(a) * 9.4}
+            y2={12 + Math.sin(a) * 9.4}
+            stroke="#e8c35a"
+            strokeWidth="1.7"
+            strokeLinecap="round"
+          />
+        );
+      })}
+    </svg>
+  );
+}
