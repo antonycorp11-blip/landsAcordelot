@@ -28,6 +28,14 @@ export function DebugPanel({ game, fps }: { game: Game; fps: number }) {
       </button>
       <button
         onClick={() => {
+          const ok = game.revealNextWave();
+          game.notify(ok ? 'Próxima onda do País revelada' : 'Nenhuma onda nova disponível');
+        }}
+      >
+        Revelar onda do País
+      </button>
+      <button
+        onClick={() => {
           if (game.selectedId) game.claimTerritory(game.selectedId, 'SCENARIO');
         }}
       >

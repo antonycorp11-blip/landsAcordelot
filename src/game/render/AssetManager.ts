@@ -123,9 +123,10 @@ export class AssetManager {
 
   /** Sombra elíptica sob um sprite — dá peso e assenta o objeto no terreno. */
   drawShadow(ctx: CanvasRenderingContext2D, x: number, y: number, rx: number) {
+    const radius = Math.max(0.01, Math.abs(rx));
     ctx.fillStyle = 'rgba(18,30,46,0.22)';
     ctx.beginPath();
-    ctx.ellipse(x, y, rx, rx * 0.3, 0, 0, Math.PI * 2);
+    ctx.ellipse(x, y, radius, radius * 0.3, 0, 0, Math.PI * 2);
     ctx.fill();
   }
 

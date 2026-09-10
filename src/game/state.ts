@@ -209,6 +209,7 @@ export function createWorld(waves = 0): WorldBundle {
       emblem: k.emblem,
       capitalTerritoryId: k.capitalTerritoryId,
       aiProfile: k.aiProfile,
+      scale: k.scale ?? 'kingdom',
       resources: { ...(k.ownerKind === 'PLAYER' ? STARTING_RESOURCES : AI_STARTING_RESOURCES) },
     };
   }
@@ -316,6 +317,7 @@ export function createWorld(waves = 0): WorldBundle {
     stage: 'kingdom',
     waves: 0,
     relations: {},
+    pendingReveal: false,
     stateName: null,
     governorId: null,
     generalId: null,

@@ -100,7 +100,8 @@
           "colorDark": "#1d6b52",
           "emblem": "tree",
           "capitalTerritoryId": "c1w_marlen",
-          "aiProfile": "ECONOMIC"
+          "aiProfile": "ECONOMIC",
+          "scale": "state"
         },
         "territories": [
           {
@@ -247,7 +248,8 @@
           "colorDark": "#4d3c96",
           "emblem": "stag",
           "capitalTerritoryId": "c1n_skald",
-          "aiProfile": "AGGRESSIVE"
+          "aiProfile": "AGGRESSIVE",
+          "scale": "state"
         },
         "territories": [
           {

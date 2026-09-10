@@ -65,6 +65,20 @@ export class ArmyManager {
     private economy: EconomyManager,
     public world: BuiltWorld,
   ) {
+    this.indexRoutes(world);
+  }
+
+  /**
+   * O mapa cresceu: troca a geometria e refaz as rotas de marcha.
+   * Só substituir `world` deixava o País usando o cache de estradas do reino.
+   */
+  setWorld(world: BuiltWorld) {
+    this.world = world;
+    this.indexRoutes(world);
+  }
+
+  private indexRoutes(world: BuiltWorld) {
+    this.routes.clear();
     for (const road of world.roads) {
       this.routes.set(`${road.a}|${road.b}`, road.points);
       this.routes.set(`${road.b}|${road.a}`, [...road.points].reverse());

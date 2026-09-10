@@ -37,4 +37,6 @@ export interface KingdomDef {
   emblem: 'fleur' | 'swords' | 'lion' | 'tree' | 'stag' | 'crown';
   capitalTerritoryId: string;
   aiProfile: AiProfile;
+  /** Escala política. Ausente vale 'kingdom' — os rivais do mapa inicial. */
+  scale?: 'kingdom' | 'state';
 }

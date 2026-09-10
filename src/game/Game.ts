@@ -155,7 +155,14 @@ export class Game {
     this.resize();
 
     const capital = this.playerCapital();
-    if (capital) this.camera.jumpTo(capital.center, CAMERA.startZoom);
+    if (this.state.pendingReveal) {
+      // Há uma expansão que o jogador ainda não viu. Agora existe tela: mostra.
+      this.camera.jumpTo(this.worldCenter(), 0.01);
+      this.state.pendingReveal = false;
+      this.saves.save(this.state);
+    } else if (capital) {
+      this.camera.jumpTo(capital.center, CAMERA.startZoom);
+    }
 
     // Gancho de depuração: console do navegador enxerga o jogo (§78).
     if (import.meta.env.DEV) {
@@ -367,6 +374,29 @@ export class Game {
     );
     this.setSpeed(1);
     this.touch();
+  }
+
+  /**
+   * Mostra toda a escala já revelada. É um comando de câmera de verdade,
+   * usado pela mesa diplomática e pela primeira abertura do País.
+   */
+  focusWorld(announce = true) {
+    this.select(null);
+    this.camera.focus(this.worldCenter(), 0.01);
+    if (announce) {
+      const foreign = this.diplomacy.foreignKingdoms();
+      this.notify(
+        foreign.length > 0
+          ? `${foreign.map((k) => k.name).join(' e ')} estão além das fronteiras de Valdória.`
+          : 'Visão completa do domínio revelado.',
+        5,
+      );
+    }
+    this.touch();
+  }
+
+  private worldCenter(): Vec2 {
+    return { x: this.world.width / 2, y: this.world.height / 2 };
   }
 
   /** Leva uma proposta à mesa de um vizinho. */
@@ -1248,7 +1278,16 @@ export class Game {
     const waves = this.saves.peekWaves();
     if (waves > 0) this.rebuildWorld(waves);
     const ok = this.saves.load(this.state);
-    if (ok) this.select(null);
+    if (ok) {
+      // Migração para quem já havia fundado o Estado antes de a expansão do
+      // País existir. Esse save tem `stage=state`, mas não tem onda revelada;
+      // sem isto o jogador jamais volta a passar pela tela de fundação.
+      if (this.state.stage === 'state' && this.state.waves === 0 && MAX_WAVES > 0) {
+        this.revealNextWave();
+        this.notify('As fronteiras do Estado se abriram. Oeste e Skaldheim foram revelados.', 8);
+      }
+      this.select(null);
+    }
     return ok;
   }
 
@@ -1263,7 +1302,8 @@ export class Game {
   private rebuildWorld(waves: number) {
     const { world, dx, dy } = expandWorld(this.state, waves);
     this.world = world;
-    this.armies.world = world;
+    this.armies.setWorld(world);
+    this.diplomacy.sync();
     this.camera.setBounds(world.width, world.height);
     this.camera.nudge(dx, dy);
     if (this.canvas) this.renderer = new Renderer(this.world, this.camera);
@@ -1284,6 +1324,10 @@ export class Game {
     const next = this.state.waves + 1;
     if (next > MAX_WAVES) return false;
     this.rebuildWorld(next);
+    // A expansão precisa ser vista, não apenas existir nos dados. Se já há
+    // tela, enquadra agora; se não, o pedido fica no save até haver uma.
+    if (this.canvas) this.focusWorld(false);
+    else this.state.pendingReveal = true;
     this.saves.save(this.state);
     return true;
   }

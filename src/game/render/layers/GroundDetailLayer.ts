@@ -52,12 +52,12 @@ export class GroundDetailLayer {
   private seedMeadows() {
     const rng = makeRng(0x51a7d0);
     const g = this.world.grid;
-    const step = 138;
+    const step = 94;
 
     for (let y = 54; y < this.world.height - 54; y += step) {
       for (let x = 54; x < this.world.width - 54; x += step) {
-        const px = x + range(rng, -48, 48);
-        const py = y + range(rng, -44, 44);
+        const px = x + range(rng, -34, 34);
+        const py = y + range(rng, -30, 30);
         const idx = sampleCell(g, px, py);
         if (idx < 0 || !g.land[idx]) continue;
         const territoryIndex = g.terr[idx];
@@ -67,58 +67,58 @@ export class GroundDetailLayer {
         const biome = g.biome[idx];
         const roll = rng();
         if (biome === BIOME_CODE.plains || biome === BIOME_CODE.fertile) {
-          if (roll < 0.58) {
+          if (roll < 0.78) {
             this.add({
               kind: 'meadow',
               x: px,
               y: py,
-              scale: range(rng, 0.18, 0.28),
-              alpha: range(rng, 0.46, 0.72),
+              scale: range(rng, 0.25, 0.38),
+              alpha: range(rng, 0.7, 0.94),
               flip: rng() > 0.5,
             });
           }
         } else if (biome === BIOME_CODE.forest) {
-          if (roll < 0.64) {
+          if (roll < 0.8) {
             this.add({
               kind: 'undergrowth',
               x: px,
               y: py,
-              scale: range(rng, 0.15, 0.23),
-              alpha: range(rng, 0.58, 0.82),
+              scale: range(rng, 0.21, 0.31),
+              alpha: range(rng, 0.76, 0.96),
               flip: rng() > 0.5,
             });
           }
-        } else if (biome === BIOME_CODE.hills && roll < 0.28) {
+        } else if (biome === BIOME_CODE.hills && roll < 0.46) {
           this.add({
             kind: 'hill',
             x: px,
             y: py,
-            scale: range(rng, 0.22, 0.3),
-            alpha: range(rng, 0.4, 0.62),
+            scale: range(rng, 0.28, 0.4),
+            alpha: range(rng, 0.58, 0.82),
             flip: rng() > 0.5,
           });
-        } else if (biome === BIOME_CODE.marsh && roll < 0.42) {
+        } else if (biome === BIOME_CODE.marsh && roll < 0.64) {
           this.add({
             kind: 'undergrowth',
             x: px,
             y: py,
-            scale: range(rng, 0.13, 0.19),
-            alpha: range(rng, 0.36, 0.58),
+            scale: range(rng, 0.18, 0.27),
+            alpha: range(rng, 0.56, 0.78),
             flip: rng() > 0.5,
           });
         } else if (
           (biome === BIOME_CODE.mountains || biome === BIOME_CODE.snow) &&
-          roll < (biome === BIOME_CODE.snow ? 0.1 : 0.22)
+          roll < (biome === BIOME_CODE.snow ? 0.18 : 0.38)
         ) {
           this.add({
             kind: 'scree',
             x: px,
             y: py,
-            scale: range(rng, 0.16, 0.23),
-            alpha: range(rng, 0.46, 0.7),
+            scale: range(rng, 0.22, 0.32),
+            alpha: range(rng, 0.58, 0.82),
             flip: rng() > 0.5,
           });
-        } else if (biome === BIOME_CODE.sand && roll < 0.16) {
+        } else if (biome === BIOME_CODE.sand && roll < 0.3) {
           this.add({
             kind: 'coast',
             x: px,

@@ -52,6 +52,8 @@ export class TerrainLayer {
   private grid: WorldGrid;
   /** Distância (em células) até a água — usada para profundidade e praia. */
   private coastDist: Float32Array;
+  /** Cor-base por célula; interpolada na pintura para nunca revelar o grid. */
+  private cellColors: Uint8Array;
   private chunks = new Map<string, HTMLCanvasElement>();
   private chunkOrder: string[] = [];
   private overview: HTMLCanvasElement | null = null;
@@ -59,6 +61,7 @@ export class TerrainLayer {
   constructor(private world: BuiltWorld) {
     this.grid = world.grid;
     this.coastDist = computeCoastDistance(this.grid);
+    this.cellColors = this.bakeCellColors();
     this.overview = this.bakeOverview();
   }
 
@@ -133,15 +136,11 @@ export class TerrainLayer {
     originY: number,
     step: number,
   ) {
-    const g = this.grid;
     for (let py = 0; py < h; py++) {
       const wy = originY + (py + 0.5) * step;
-      const j = Math.min(g.h - 1, Math.max(0, Math.floor(wy / g.cell)));
       for (let px = 0; px < w; px++) {
         const wx = originX + (px + 0.5) * step;
-        const i = Math.min(g.w - 1, Math.max(0, Math.floor(wx / g.cell)));
-        const idx = j * g.w + i;
-        const rgb = this.colorAt(idx, wx, wy);
+        const rgb = this.colorAt(wx, wy);
         const o = (py * w + px) * 4;
         data[o] = rgb[0];
         data[o + 1] = rgb[1];
@@ -151,7 +150,57 @@ export class TerrainLayer {
     }
   }
 
-  private colorAt(idx: number, wx: number, wy: number): RGB {
+  /**
+   * Interpola as quatro células próximas. O mundo é gerado em uma grade de
+   * 16 px, mas ela é apenas uma estrutura de dados: sem esta passagem cada
+   * célula aparecia no chão como um quadrado verde claramente visível.
+   */
+  private colorAt(wx: number, wy: number): RGB {
+    const g = this.grid;
+    const gx = wx / g.cell - 0.5;
+    const gy = wy / g.cell - 0.5;
+    const x0 = Math.floor(gx);
+    const y0 = Math.floor(gy);
+    const tx = smooth(gx - x0);
+    const ty = smooth(gy - y0);
+    const c00 = this.cachedColor(x0, y0);
+    const c10 = this.cachedColor(x0 + 1, y0);
+    const c01 = this.cachedColor(x0, y0 + 1);
+    const c11 = this.cachedColor(x0 + 1, y0 + 1);
+    const top = mix(c00, c10, tx);
+    const bottom = mix(c01, c11, tx);
+    const base = mix(top, bottom, ty);
+
+    // Grão em duas escalas, aplicado depois da mistura para parecer pintura e
+    // não repetir exatamente o desenho da malha de simulação.
+    const grain = microNoise(wx, wy);
+    const broad = microNoise(wx * 0.19 + 137, wy * 0.19 - 71);
+    return shade(base, 0.985 + grain * 0.04 + broad * 0.03);
+  }
+
+  private cachedColor(x: number, y: number): RGB {
+    const g = this.grid;
+    const cx = Math.min(g.w - 1, Math.max(0, x));
+    const cy = Math.min(g.h - 1, Math.max(0, y));
+    const o = (cy * g.w + cx) * 3;
+    return [this.cellColors[o], this.cellColors[o + 1], this.cellColors[o + 2]];
+  }
+
+  /** Calculado uma vez; torna a interpolação barata mesmo no mapa do País. */
+  private bakeCellColors(): Uint8Array {
+    const g = this.grid;
+    const out = new Uint8Array(g.w * g.h * 3);
+    for (let idx = 0; idx < g.w * g.h; idx++) {
+      const rgb = this.cellBaseColor(idx);
+      const o = idx * 3;
+      out[o] = rgb[0];
+      out[o + 1] = rgb[1];
+      out[o + 2] = rgb[2];
+    }
+    return out;
+  }
+
+  private cellBaseColor(idx: number): RGB {
     const g = this.grid;
     const code = g.biome[idx];
     const n = g.shade[idx];
@@ -161,7 +210,7 @@ export class TerrainLayer {
       const depth = Math.min(1, Math.max(0, (-dist - 0.5) / 7));
       let c = mix(C.oceanShallow, C.ocean, Math.min(1, depth * 2));
       c = mix(c, C.oceanDeep, Math.max(0, depth - 0.5) * 2);
-      return shade(c, (0.94 + n * 0.12) * (0.975 + microNoise(wx, wy) * 0.045));
+      return shade(c, 0.94 + n * 0.12);
     }
 
     let base: RGB;
@@ -198,11 +247,7 @@ export class TerrainLayer {
     const here = g.elev[idx];
     const slope = (here - left) * 1.2 + (here - up) * 1.2;
     const light = 1 + Math.max(-0.22, Math.min(0.22, slope * 2.6));
-    // Grão em duas escalas. A primeira quebra a aparência de gradiente liso;
-    // a segunda cria manchas largas como pinceladas, sem formar um tile/grid.
-    const grain = microNoise(wx, wy);
-    const broad = microNoise(wx * 0.19 + 137, wy * 0.19 - 71);
-    return shade(base, light * (0.965 + n * 0.055 + grain * 0.035 + broad * 0.025));
+    return shade(base, light * (0.965 + n * 0.055));
   }
 
   /** Invalida chunks (usado quando o mundo mudar visualmente no futuro). */
@@ -219,6 +264,10 @@ function microNoise(x: number, y: number): number {
   let h = Math.imul(ix, 374761393) ^ Math.imul(iy, 668265263);
   h = Math.imul(h ^ (h >>> 13), 1274126177);
   return ((h ^ (h >>> 16)) >>> 24) / 255 - 0.5;
+}
+
+function smooth(t: number): number {
+  return t * t * (3 - 2 * t);
 }
 
 export interface Bounds {

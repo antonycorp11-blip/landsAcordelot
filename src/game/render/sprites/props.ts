@@ -3,6 +3,8 @@ import { PALETTE } from '../../config/palette';
 type Ctx = CanvasRenderingContext2D;
 
 function shadow(ctx: Ctx, x: number, y: number, rx: number, ry: number) {
+  rx = Math.max(0.01, Math.abs(rx));
+  ry = Math.max(0.01, Math.abs(ry));
   ctx.fillStyle = PALETTE.shadow;
   ctx.beginPath();
   ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2);

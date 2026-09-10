@@ -50,6 +50,21 @@ export function DiplomacyPanel({
       </div>
 
       <div className="panel-body">
+        <div className="dip-country">
+          <div className="dip-country-copy">
+            <span className="eyebrow">FRONTEIRAS DO PAÍS</span>
+            <strong>{Object.keys(state.territories).length} províncias reveladas</strong>
+            <small>
+              {foreign.length > 0
+                ? `${foreign.map((k) => k.name).join(' · ')} aguardam além de Valdória.`
+                : 'Todo o território conhecido está sob sua bandeira.'}
+            </small>
+          </div>
+          <button className="btn country-map" onClick={() => game.focusWorld()}>
+            Ver mapa completo
+          </button>
+        </div>
+
         {foreign.length === 0 && (
           <p className="empty">
             Não sobrou bandeira estrangeira no mapa. A mesa volta a encher quando o País crescer.

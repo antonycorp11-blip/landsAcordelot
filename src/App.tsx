@@ -60,6 +60,14 @@ const RAIL_ITEMS: {
     run: (_g, _r, _s, openCapital) => openCapital(),
   },
   {
+    id: 'country',
+    medal: 'mundo',
+    label: 'País',
+    title: 'Ver todos os Estados revelados',
+    when: (snap) => snap.state.stage === 'state',
+    run: (game) => game.focusWorld(),
+  },
+  {
     id: 'resources',
     medal: 'tecnologia',
     label: 'Recursos',
@@ -518,6 +526,16 @@ export function App() {
                   <strong>Fronteiras:</strong> só se disputa território vizinho ao seu domínio.
                   Neutros aceitam negociação; reinos rivais exigem campanha militar.
                 </div>
+                {snap.state.stage === 'state' && (
+                  <div className="hint country-help">
+                    <strong>Seu Estado abriu o mapa do País.</strong> Use <em>Diplomacia</em> no
+                    trilho lateral e toque em <em>Ver mapa completo</em> para enxergar a
+                    Confederação do Oeste e Skaldheim.
+                    <button className="btn sm" onClick={() => game.focusWorld()}>
+                      Ver novos Estados
+                    </button>
+                  </div>
+                )}
                 <div className="hint">
                   <strong>Guerra:</strong> monte a expedição na aba Militar, veja a prévia de
                   perdas e marche. A coluna leva comida para a viagem — sem suprimento, a moral cai

@@ -329,6 +329,8 @@ export type AiProfile = 'AGGRESSIVE' | 'ECONOMIC' | 'DEFENSIVE' | 'EXPANSIONIST'
 
 export interface Kingdom {
   id: KingdomId;
+  /** Reino ou Estado. Quem chega com o País já nasce Estado. */
+  scale: RealmStage;
   name: string;
   ownerKind: OwnerKind;
   color: string;
@@ -385,6 +387,16 @@ export interface GameState {
   waves: number;
   /** Relação com cada reino estrangeiro, por id. */
   relations: Record<string, Relation>;
+  /**
+   * Uma revelação do País ainda não foi mostrada ao jogador.
+   *
+   * Vive no save, e não em memória, porque o momento em que o mapa cresce e o
+   * momento em que existe uma tela para enquadrá-lo são diferentes — e entre
+   * os dois cabe um recarregamento, uma remontagem do React ou um encerramento
+   * do app. Perder este sinalizador é perder a única vez que o jogador seria
+   * levado a ver os vizinhos novos.
+   */
+  pendingReveal: boolean;
   /** Nome dado pelo jogador ao Estado, quando promovido. */
   stateName: string | null;
   /** Governador e general escolhidos, com a ordem que cada um segue. */

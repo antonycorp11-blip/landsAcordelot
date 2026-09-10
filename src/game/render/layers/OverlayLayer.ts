@@ -48,9 +48,11 @@ export class OverlayLayer {
   }
 
   /** Névoa/nuvens fechando as bordas: sugere um mundo maior além do mapa (§4). */
-  drawClouds(ctx: CanvasRenderingContext2D, bounds: Bounds, time: number) {
+  drawClouds(ctx: CanvasRenderingContext2D, bounds: Bounds, time: number, zoom: number) {
     ctx.save();
-    for (const c of this.clouds) {
+    const stride = zoom < 0.18 ? 3 : 1;
+    for (let i = 0; i < this.clouds.length; i += stride) {
+      const c = this.clouds[i];
       const x = c.x + Math.sin(time * 0.06 + c.drift * 4) * 18 * c.drift;
       if (x + c.r < bounds.minX || x - c.r > bounds.maxX) continue;
       if (c.y + c.r < bounds.minY || c.y - c.r > bounds.maxY) continue;
@@ -100,10 +102,16 @@ export class OverlayLayer {
     hovered: string | null,
     selected: string | null,
   ) {
-    if (camera.zoom < CAMERA.lodLabels) return;
     const bounds = camera.visibleBounds(220);
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
+
+    // Na escala do País os nomes das províncias virariam ruído. Em vez de
+    // apagar toda a informação, agrupamos por dono e nomeamos cada Estado.
+    if (camera.zoom < CAMERA.lodLabels) {
+      this.drawRealmLabels(ctx, state, camera, bounds);
+      return;
+    }
 
     for (const t of Object.values(state.territories)) {
       const anchor = this.world.anchors[t.id] ?? t.center;
@@ -126,6 +134,106 @@ export class OverlayLayer {
       ctx.fillText(f.name.toUpperCase(), p.x, p.y);
     }
   }
+
+  private drawRealmLabels(
+    ctx: CanvasRenderingContext2D,
+    state: GameState,
+    camera: Camera,
+    bounds: Bounds,
+  ) {
+    const placed: {
+      p: Vec2;
+      kingdom: GameState['kingdoms'][string];
+      holdings: number;
+      player: boolean;
+    }[] = [];
+    const byKingdom = new Map<string, Territory[]>();
+    for (const t of Object.values(state.territories)) {
+      if (!t.ownerId) continue;
+      const list = byKingdom.get(t.ownerId);
+      if (list) list.push(t);
+      else byKingdom.set(t.ownerId, [t]);
+    }
+    for (const kingdom of Object.values(state.kingdoms)) {
+      const holdings = byKingdom.get(kingdom.id) ?? [];
+      if (holdings.length === 0) continue;
+
+      let x = 0;
+      let y = 0;
+      let total = 0;
+      for (const t of holdings) {
+        const weight = Math.max(1, t.area);
+        x += t.center.x * weight;
+        y += t.center.y * weight;
+        total += weight;
+      }
+      x /= total;
+      y /= total;
+      if (x < bounds.minX || x > bounds.maxX || y < bounds.minY || y > bounds.maxY) continue;
+      const screen = camera.worldToScreen(x, y);
+      placed.push({
+        p: screen,
+        kingdom,
+        holdings: holdings.length,
+        player: kingdom.id === state.playerKingdomId,
+      });
+    }
+
+    // O seu Estado se desenha por último: fica por cima em caso de disputa.
+    placed.sort((a, b) => Number(a.player) - Number(b.player));
+
+    const taken: Rect[] = [];
+    for (const chip of placed) {
+      const w = realmChipWidth(ctx, chip.kingdom.name, chip.player);
+      // O trilho lateral come a borda esquerda da tela; um rótulo por baixo
+      // dele é informação perdida, então empurramos para dentro do mapa.
+      const left = RAIL_INSET + w / 2;
+      const right = camera.viewW - 16 - w / 2;
+      chip.p.x = left > right ? (left + right) / 2 : Math.max(left, Math.min(right, chip.p.x));
+      chip.p.y = Math.max(TOP_INSET + CHIP_H / 2, Math.min(camera.viewH - 24, chip.p.y));
+      // Dois Estados vizinhos podem cair no mesmo ponto da tela; nesse caso
+      // o de baixo desce até caber, em vez de virar um borrão ilegível.
+      let guard = 0;
+      while (guard++ < 12 && taken.some((r) => overlaps(r, chip.p, w))) {
+        chip.p.y += CHIP_H + 6;
+        if (chip.p.y > camera.viewH - 24) {
+          chip.p.y = TOP_INSET + CHIP_H / 2;
+          chip.p.x += w * 0.55;
+        }
+      }
+      taken.push({ x: chip.p.x - w / 2, y: chip.p.y - CHIP_H / 2, w, h: CHIP_H });
+      const scale = chip.player ? state.stage : chip.kingdom.scale;
+      drawRealmChip(ctx, chip.p, chip.kingdom, chip.holdings, chip.player, scale === 'state');
+    }
+  }
+}
+
+/** Largura do trilho lateral mais uma folga; nada legível vive à esquerda disto. */
+const RAIL_INSET = 84;
+const TOP_INSET = 62;
+const CHIP_H = 42;
+
+interface Rect {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+function overlaps(r: Rect, p: Vec2, w: number): boolean {
+  return (
+    Math.abs(r.x + r.w / 2 - p.x) < (r.w + w) / 2 + 8 &&
+    Math.abs(r.y + r.h / 2 - p.y) < CHIP_H + 6
+  );
+}
+
+function realmChipFont(player: boolean): string {
+  return `${player ? 760 : 680} ${player ? 13 : 12}px "Inter", "Segoe UI", system-ui, sans-serif`;
+}
+
+function realmChipWidth(ctx: CanvasRenderingContext2D, name: string, player: boolean): number {
+  ctx.font = realmChipFont(player);
+  return Math.max(150, ctx.measureText(name.toUpperCase()).width + 48);
 }
 
 const FARLANDS = farlandsRaw as { name: string; x: number; y: number }[];
@@ -167,6 +275,45 @@ function drawLabelChip(
     ctx.font = '10px system-ui, sans-serif';
     ctx.fillText('🔒 BLOQUEADO', p.x, p.y + 18);
   }
+}
+
+function drawRealmChip(
+  ctx: CanvasRenderingContext2D,
+  p: Vec2,
+  kingdom: GameState['kingdoms'][string],
+  holdings: number,
+  player: boolean,
+  stateScale: boolean,
+) {
+  const name = kingdom.name.toUpperCase();
+  ctx.font = realmChipFont(player);
+  const w = realmChipWidth(ctx, kingdom.name, player);
+  const h = CHIP_H;
+  const x = p.x - w / 2;
+  const y = p.y - h / 2;
+
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,.55)';
+  ctx.shadowBlur = 12;
+  ctx.shadowOffsetY = 4;
+  ctx.fillStyle = player ? 'rgba(9,27,48,.94)' : 'rgba(9,18,30,.88)';
+  roundRect(ctx, x, y, w, h, 11);
+  ctx.fill();
+  ctx.shadowColor = 'transparent';
+  ctx.strokeStyle = hexA(player ? '#f2c33d' : kingdom.color, 0.95);
+  ctx.lineWidth = player ? 2 : 1.5;
+  roundRect(ctx, x, y, w, h, 11);
+  ctx.stroke();
+
+  drawEmblem(ctx, x + 20, p.y, 9, kingdom.emblem, kingdom.color);
+  ctx.textAlign = 'left';
+  ctx.fillStyle = '#f4f7fb';
+  ctx.fillText(name, x + 37, y + 15);
+  ctx.font = '700 8px "Inter", "Segoe UI", system-ui, sans-serif';
+  ctx.fillStyle = player ? '#f4d77d' : 'rgba(210,222,237,.76)';
+  const scale = stateScale ? 'ESTADO' : 'REINO';
+  ctx.fillText(`${scale} · ${holdings} ${holdings === 1 ? 'PROVÍNCIA' : 'PROVÍNCIAS'}`, x + 37, y + 29);
+  ctx.restore();
 }
 
 export function roundRect(

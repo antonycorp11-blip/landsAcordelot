@@ -92,6 +92,10 @@ export class PropLayer {
         for (const p of arr) {
           if (p.x < bounds.minX || p.x > bounds.maxX || p.y < bounds.minY || p.y > bounds.maxY) continue;
           if (!showSmall && p.kind !== 'peak') continue;
+          // No enquadramento de País centenas de picos de 10 px ficam um em
+          // cima do outro e custam quadro sem acrescentar leitura. Mantemos
+          // uma amostra estável; ao aproximar, todos voltam a aparecer.
+          if (zoom < 0.18 && p.kind === 'peak' && p.phase < 0.9) continue;
           visible.push(p);
         }
       }
@@ -112,7 +116,7 @@ export class PropLayer {
               : p.phase < 0.22
                 ? 'nature/tree_big'
                 : 'nature/tree_oak';
-          const sc = (dense ? 0.18 : grove ? 0.18 : 0.19) * p.s;
+          const sc = (dense ? 0.23 : grove ? 0.22 : 0.22) * p.s;
           assets.drawShadow(ctx, p.x, p.y + 2, (dense || grove ? 24 : 11) * p.s);
           if (!assets.draw(ctx, key, p.x, p.y, sc, { flip: p.phase > 0.5 })) {
             drawTreeRound(ctx, p.x, p.y, p.s);
@@ -127,7 +131,7 @@ export class PropLayer {
             : grove
               ? 'nature/grove_mixed'
               : 'terrain/tree_lone';
-          const sc = (dense ? 0.18 : grove ? 0.18 : 0.155) * p.s;
+          const sc = (dense ? 0.23 : grove ? 0.22 : 0.18) * p.s;
           assets.drawShadow(ctx, p.x, p.y + 2, (dense || grove ? 25 : 10) * p.s);
           if (!assets.draw(ctx, key, p.x, p.y, sc, { flip: p.phase < 0.34 })) {
             drawTreePine(ctx, p.x, p.y, p.s);
@@ -204,12 +208,19 @@ export class PropLayer {
 /** Fumaça saindo das chaminés — mundo vivo mesmo parado (§8). */
 export function drawSmoke(ctx: CanvasRenderingContext2D, x: number, y: number, time: number, s = 1) {
   for (let i = 0; i < 3; i++) {
-    const t = (time * 0.35 + i * 0.33) % 1;
+    const raw = (time * 0.35 + i * 0.33) % 1;
+    const t = raw < 0 ? raw + 1 : raw;
     const alpha = (1 - t) * 0.32;
     if (alpha <= 0.01) continue;
     ctx.fillStyle = `rgba(255,255,255,${alpha})`;
     ctx.beginPath();
-    ctx.arc(x + Math.sin(t * 5 + i) * 5 * s, y - t * 34 * s, (3 + t * 7) * s, 0, Math.PI * 2);
+    ctx.arc(
+      x + Math.sin(t * 5 + i) * 5 * s,
+      y - t * 34 * s,
+      Math.max(0.01, (3 + t * 7) * Math.abs(s)),
+      0,
+      Math.PI * 2,
+    );
     ctx.fill();
   }
 }

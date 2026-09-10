@@ -83,9 +83,11 @@ export class Renderer {
 
     this.terrain.draw(ctx, bounds, zoom);
     this.features.drawCoast(ctx, bounds, zoom, time);
+    if (this.layers.provinces) this.borders.drawFills(ctx, state, bounds);
+    // A decoração vem depois da tonalidade de domínio para continuar viva;
+    // rios passam por cima e recortam naturalmente a vegetação de margem.
     this.groundDetails.draw(ctx, bounds, zoom);
     this.features.drawRivers(ctx, bounds, zoom);
-    if (this.layers.provinces) this.borders.drawFills(ctx, state, bounds);
     if (this.layers.routes) this.features.drawRoads(ctx, bounds, zoom);
     this.props.draw(ctx, bounds, zoom, time);
     if (this.layers.provinces) this.borders.drawBorders(ctx, state, bounds, zoom);
@@ -160,7 +162,7 @@ export class Renderer {
     }
 
     this.overlay.drawEffects(ctx);
-    this.overlay.drawClouds(ctx, bounds, time);
+    this.overlay.drawClouds(ctx, bounds, time, zoom);
     ctx.restore();
 
     this.overlay.drawLabels(ctx, state, cam, this.hoveredId, this.selectedId);

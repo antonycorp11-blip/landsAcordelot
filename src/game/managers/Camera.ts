@@ -27,6 +27,7 @@ export class Camera {
   setViewport(w: number, h: number) {
     this.viewW = w;
     this.viewH = h;
+    this.clampZoom();
     this.clamp();
   }
 
@@ -51,6 +52,7 @@ export class Camera {
   setBounds(width: number, height: number) {
     this.worldW = width;
     this.worldH = height;
+    this.clampZoom();
   }
 
   worldToScreen(wx: number, wy: number): Vec2 {
@@ -134,7 +136,24 @@ export class Camera {
         this.targetZoom = null;
       }
     }
+    // A tela pode ter medido zero no attach; aqui o piso já é real.
+    this.clampZoom();
     this.clamp();
+  }
+
+  /**
+   * Reavalia o zoom contra o piso atual.
+   *
+   * O piso depende da viewport, e no `attach` a tela ainda pode medir zero —
+   * ali o piso desaba para o mínimo absoluto e um enquadramento de mundo
+   * congelava num mapa minúsculo cercado de vazio. Toda vez que a viewport ou
+   * o tamanho do mundo mudam, o zoom volta para dentro dos limites.
+   */
+  private clampZoom() {
+    if (this.viewW <= 1 || this.viewH <= 1) return;
+    const floor = this.floorZoom();
+    if (this.zoom < floor) this.zoom = floor;
+    if (this.targetZoom !== null && this.targetZoom < floor) this.targetZoom = floor;
   }
 
   private clamp() {
