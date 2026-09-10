@@ -111,9 +111,7 @@ const RAIL_ITEMS: {
     id: 'diplomacy',
     medal: 'diplomacia',
     label: 'Diplomacia',
-    title: 'A mesa: pactos, casamentos e tributos',
-    // Só faz sentido depois que existe vizinho de fato, e isso é o Estado.
-    when: (snap) => snap.state.stage === 'state',
+    title: 'A corte: quem governa os vizinhos, e o que pensam de você',
     run: (_g, rail, setRail) => setRail(rail === 'diplomacy' ? null : 'diplomacy'),
   },
   {

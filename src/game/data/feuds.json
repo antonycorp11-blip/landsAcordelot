@@ -1,0 +1,50 @@
+[
+  {
+    "id": "divida_de_ferro",
+    "kind": "feud",
+    "a": "k_karneth",
+    "b": "k_aurenna",
+    "title": "A Dívida de Ferro",
+    "text": "Karneth tomou emprestado de Aurenna para armar três campanhas e não pagou nenhuma. Isaure nunca cobrou em voz alta — apenas manteve o livro aberto, onde todos podem ler."
+  },
+  {
+    "id": "tres_invernos",
+    "kind": "feud",
+    "a": "k_karneth",
+    "b": "k_morvath",
+    "title": "Os Três Invernos",
+    "text": "Karneth entrou nos pântanos três vezes em cem anos. Nas três, Morvath não deu batalha: deu tempo. Voltaram menos homens do que entraram, e em nenhuma das vezes se soube por quê."
+  },
+  {
+    "id": "corte_do_bosque",
+    "kind": "feud",
+    "a": "k_karneth",
+    "b": "k_silvarden",
+    "title": "O Corte do Bosque Velho",
+    "text": "Para escorar as minas, Karneth derrubou mata que os Silvarden guardavam havia onze gerações. Aldan tinha nove anos e viu as carroças passarem. Nunca mais recebeu um enviado de Karneth."
+  },
+  {
+    "id": "mar_salgado",
+    "kind": "feud",
+    "a": "k_norte",
+    "b": "k_oeste",
+    "title": "As Incursões do Mar Salgado",
+    "text": "Antes de descer pelo Portão, Skaldheim descia pelo mar. Ainda há portos no oeste que tocam o sino ao ver vela quadrada, e armadores que não votam em nada que cheire a trégua com o norte."
+  },
+  {
+    "id": "tratado_das_cordas",
+    "kind": "bond",
+    "a": "k_aurenna",
+    "b": "k_oeste",
+    "title": "O Tratado das Cordas",
+    "text": "Grão de Aurenna, casco da Confederação. O acordo tem quarenta anos, sobreviveu a duas guerras e nunca precisou de exército para ser cumprido — só de dois contadores que se respeitam."
+  },
+  {
+    "id": "pacto_do_santuario",
+    "kind": "bond",
+    "a": "k_morvath",
+    "b": "k_silvarden",
+    "title": "O Pacto do Santuário",
+    "text": "O pântano e o bosque rezam para a mesma coisa antiga, com nomes diferentes. Vespera manda velas ao santuário todo solstício; Aldan nunca perguntou de onde vêm."
+  }
+]

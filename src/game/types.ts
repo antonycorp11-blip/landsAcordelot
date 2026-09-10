@@ -419,10 +419,28 @@ export type RealmStage = 'kingdom' | 'state';
  */
 export type PactKind = 'neutral' | 'truce' | 'alliance' | 'vassal' | 'war';
 
+/**
+ * Uma razão pela qual um soberano pensa o que pensa de você.
+ *
+ * Opinião era um número só, que derivava sozinho para uma linha de base. Um
+ * número não se discute nem se conserta: o jogador via "-40" e não sabia se
+ * era a província tomada, o pacto rompido ou o exército parado na fronteira
+ * dele. Agora cada motivo tem nome, valor e prazo — e por isso tem resposta.
+ */
+export interface OpinionEntry {
+  id: string;
+  label: string;
+  value: number;
+  /** Dias restantes; `null` enquanto a causa continuar de pé. */
+  days: number | null;
+}
+
 export interface Relation {
   kingdomId: KingdomId;
-  /** -100 (ódio) a 100 (devoção). */
+  /** Soma das razões, de -100 (ódio) a 100 (devoção). Derivada, nunca escrita. */
   attitude: number;
+  /** Por que ele pensa isso. É esta lista que manda. */
+  opinions: OpinionEntry[];
   pact: PactKind;
   /** Dias que faltam para a trégua vencer; 0 quando não tem prazo. */
   pactDays: number;

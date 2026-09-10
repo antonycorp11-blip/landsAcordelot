@@ -1573,3 +1573,99 @@ canvas.map {
   .tutorial .tip { display: none; }
   .tutorial .dots { margin-top: 6px; }
 }
+
+/* ------------------------------------------------------------- a corte -- */
+
+.dip-row {
+  display: flex; align-items: center; gap: 10px; width: 100%; cursor: pointer;
+  padding: 8px 10px; border-radius: 11px; color: var(--text); text-align: left;
+  background: rgba(255,255,255,.035); border: 1px solid rgba(232,195,90,.18);
+}
+.dip-row:hover { background: rgba(232,195,90,.12); border-color: rgba(232,195,90,.5); }
+.dip-face {
+  width: 40px; height: 40px; flex: 0 0 auto; border-radius: 9px; object-fit: cover;
+  object-position: top center;
+  border: 1px solid rgba(232,195,90,.35); background: rgba(6,13,26,.6);
+}
+.dip-right { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+.dip-num { font-size: 11.5px; font-weight: 750; color: var(--muted); }
+.dip-num.good { color: #6fd39a; }
+.dip-num.bad { color: #e08a8a; }
+
+.dip-back {
+  align-self: start; padding: 4px 2px; font-size: 11px; font-weight: 650;
+  color: var(--gold-300); background: none; border: none; cursor: pointer;
+}
+.dip-back:hover { color: var(--gold-100); }
+
+.court { display: flex; gap: 11px; align-items: flex-start; }
+.court-face {
+  width: 92px; flex: 0 0 auto; border-radius: 11px; object-fit: cover;
+  border: 1px solid rgba(232,195,90,.4); box-shadow: 0 10px 24px rgba(0,0,0,.55);
+}
+.court-id { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding-top: 2px; }
+.court-name { font-size: 15px; font-weight: 760; color: var(--gold-100); line-height: 1.15; }
+.court-epithet { font-size: 11px; font-style: italic; color: #cfdaea; }
+.court-title { font-size: 10.5px; color: var(--muted); line-height: 1.3; }
+.court-id .dip-pact { align-self: flex-start; margin-top: 4px; }
+
+.court-say {
+  margin: 11px 0 0; padding: 10px 12px; border-radius: 10px;
+  border-left: 3px solid rgba(232,195,90,.6);
+  background: rgba(6,13,26,.5);
+  font-size: 12.5px; line-height: 1.6; color: #e6edf7; font-style: italic;
+}
+.court-say.answer { border-left-color: rgba(63,185,143,.7); }
+
+.court-topics { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+.court-topics button {
+  padding: 6px 9px; border-radius: 999px; cursor: pointer; font-size: 10.5px; font-weight: 650;
+  color: #cfdaea; background: rgba(255,255,255,.05); border: 1px solid rgba(232,195,90,.24);
+}
+.court-topics button:hover, .court-topics button.active {
+  background: rgba(232,195,90,.16); border-color: rgba(232,195,90,.6); color: var(--gold-100);
+}
+
+.court-block {
+  margin-top: 11px; padding: 10px 12px; border-radius: 10px;
+  background: rgba(255,255,255,.035); border: 1px solid rgba(232,195,90,.15);
+}
+.court-h {
+  display: block; font-size: 9px; font-weight: 800; letter-spacing: 1.3px;
+  text-transform: uppercase; color: var(--gold-300); margin-bottom: 7px;
+}
+.court-none { margin: 0; font-size: 11.5px; color: var(--muted); }
+.court-history { margin: 0; font-size: 11.5px; line-height: 1.6; color: #c3d0e2; }
+.court-creed { margin: 7px 0 0; font-size: 11.5px; font-style: italic; color: var(--gold-100); }
+.court-traits { display: flex; flex-direction: column; gap: 3px; margin-top: 8px; }
+.court-traits span { font-size: 11px; color: #cfdaea; }
+.court-traits span::before { content: '▸ '; color: var(--gold-300); }
+
+.op-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,.05);
+}
+.op-row:last-child { border-bottom: none; }
+.op-label { flex: 1; font-size: 11.5px; color: #cfdaea; line-height: 1.3; }
+.op-days {
+  font-size: 9.5px; font-weight: 700; color: var(--muted);
+  padding: 1px 5px; border-radius: 999px; background: rgba(255,255,255,.06);
+}
+.op-val { font-size: 11.5px; font-weight: 780; min-width: 30px; text-align: right; }
+.op-val.up { color: #6fd39a; }
+.op-val.down { color: #e08a8a; }
+
+.feud { margin-bottom: 9px; }
+.feud:last-child { margin-bottom: 0; }
+.feud-title { display: block; font-size: 11.5px; font-weight: 720; margin-bottom: 2px; }
+.feud.feud .feud-title { color: #e0a0a0; }
+.feud.bond .feud-title { color: #8fd8b4; }
+.feud p { margin: 0; font-size: 11px; line-height: 1.55; color: #b9c6d8; }
+
+@media (max-height: 560px) {
+  .court-face { width: 66px; }
+  .court-name { font-size: 13px; }
+  .court-say { font-size: 11.5px; line-height: 1.45; padding: 8px 10px; }
+  .court-history, .feud p { font-size: 10.5px; line-height: 1.45; }
+  .dip-face { width: 32px; height: 32px; }
+}

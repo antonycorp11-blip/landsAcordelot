@@ -1,0 +1,158 @@
+[
+  {
+    "kingdomId": "k_karneth",
+    "name": "Torvald Karn",
+    "epithet": "o Punho de Ferro",
+    "house": "Casa Karn",
+    "title": "Rei-Marechal de Karneth",
+    "portrait": "portraits/king",
+    "temperament": "belicoso",
+    "creed": "Ferro não pede licença.",
+    "history": "Herdou um reino de minas e o transformou num quartel. Diz que o Alto Rei morreu de moleza, não de doença, e que o Acordo foi um pacto de covardes assinado para adiar o inevitável. Nunca perdeu uma batalha campal; nunca venceu um cerco longo.",
+    "traits": [
+      "Respeita força, despreza presente",
+      "Só dobra o joelho diante de exército maior"
+    ],
+    "voice": {
+      "hostil": "Você veio falar ou veio morrer? Fale rápido, tenho ferro esfriando.",
+      "frio": "Valdória. Sei quem você é. Ainda não decidi se isso é bom.",
+      "cordial": "Você luta melhor do que fala. Sente-se.",
+      "leal": "Enquanto meu ferro durar, ele é seu também."
+    },
+    "topics": {
+      "casa": "Karn não é sobrenome, é o nome do primeiro que segurou uma espada nestes morros. Tudo o que você vê aqui foi tomado. Nada foi herdado.",
+      "querer": "Quero o Passo de Pedra Cinza. Sempre quis. Um dia venho buscar, com sua licença ou sem ela.",
+      "guerra": "Guerra é a única conversa em que ninguém mente."
+    }
+  },
+  {
+    "kingdomId": "k_aurenna",
+    "name": "Isaure de Aurenna",
+    "epithet": "a Contadora de Dias",
+    "house": "Casa Vaine",
+    "title": "Rainha de Aurenna",
+    "portrait": "portraits/queen",
+    "temperament": "calculista",
+    "creed": "Toda guerra é uma conta que alguém pagou mal.",
+    "history": "Assumiu o trono aos dezenove anos, com o tesouro vazio e três credores à porta. Pagou todos em sete anos e comprou dois dos três. Não levanta a voz e não esquece um número. Karneth a chama de aranha; ela manda cartas de agradecimento.",
+    "traits": [
+      "Um presente bem-feito vale o dobro",
+      "Trégua sai barato; casamento sai caro"
+    ],
+    "voice": {
+      "hostil": "Você me custou dinheiro. Isso eu anoto, e eu cobro.",
+      "frio": "Diga o que quer e o que oferece. Nessa ordem, por favor.",
+      "cordial": "Você é previsível. No meu ofício isso é um elogio raro.",
+      "leal": "Meus livros e os seus já são o mesmo livro."
+    },
+    "topics": {
+      "casa": "Os Vaine eram cobradores dos reis antigos. Quando as casas quebraram, sobramos nós, porque só nós sabíamos quanto cada uma devia.",
+      "querer": "Quero os Trigais em paz e a estrada do sul aberta. Grãos que apodrecem esperando escolta são grãos que eu paguei duas vezes.",
+      "guerra": "Guerra eu financio. Não participo."
+    }
+  },
+  {
+    "kingdomId": "k_silvarden",
+    "name": "Aldan Silvarden",
+    "epithet": "o Último da Linha",
+    "house": "Casa Silvarden",
+    "title": "Príncipe-Guardião do Bosque",
+    "portrait": "portraits/prince",
+    "temperament": "orgulhoso",
+    "creed": "Meu nome é mais velho que o seu reino.",
+    "history": "Tem vinte e dois anos e o sangue mais antigo do mapa. Os Silvarden guardavam o santuário do bosque quando Valdória ainda era um acampamento de lenhadores. Restou-lhe uma província, uma árvore sagrada e um orgulho que não cabe em nenhuma das duas.",
+    "traits": [
+      "Exigir vassalagem dele é uma ofensa cara",
+      "Casamento vale mais que ouro"
+    ],
+    "voice": {
+      "hostil": "Meus antepassados receberam reis melhores que você. De pé.",
+      "frio": "Fale. Mas escolha as palavras: aqui elas ficam registradas.",
+      "cordial": "Você tem modos. Isso é mais raro que ouro hoje em dia.",
+      "leal": "O bosque conhece seu nome agora. Ele não esquece amigos."
+    },
+    "topics": {
+      "casa": "Silvarden não conquistou nada. Foi posto aqui para guardar, e guardou por onze gerações. Sobrou pouco chão, mas nenhum dele foi vendido.",
+      "querer": "Quero que o santuário continue de pé e que ninguém corte a mata velha. É pouco. É tudo.",
+      "guerra": "Já perdi províncias demais para achar guerra interessante."
+    }
+  },
+  {
+    "kingdomId": "k_morvath",
+    "name": "Vespera de Morvath",
+    "epithet": "a que Espera",
+    "house": "Casa Morvath",
+    "title": "Senhora dos Pântanos",
+    "portrait": "portraits/princess",
+    "temperament": "reservado",
+    "creed": "Quem tem pressa atravessa o pântano uma vez só.",
+    "history": "Ninguém sabe ao certo há quanto tempo governa. Morvath não manda exércitos: manda esperar. Sobreviveu a três reis de Karneth deixando que os pântanos fizessem o trabalho. Fala pouco e escuta demais; dizem que sabe o que se conversa nas outras cortes antes dos próprios conselheiros.",
+    "traits": [
+      "Muda de opinião devagar, para os dois lados",
+      "Guerra não a assusta, mas também não a atrai"
+    ],
+    "voice": {
+      "hostil": "Você vai afundar sozinho. Não preciso empurrar.",
+      "frio": "Eu ouvi você chegar há três dias. Diga.",
+      "cordial": "Você aprende. Poucos aprendem.",
+      "leal": "O pântano se abre para você. Não conte a ninguém."
+    },
+    "topics": {
+      "casa": "Morvath não tem árvore genealógica. Tem um registro de quem entrou no pântano e de quem saiu. A segunda lista é bem menor.",
+      "querer": "Quero o que sempre quis: que me deixem em paz. Você vai descobrir que é o pedido mais caro de todos.",
+      "guerra": "Karneth já tentou. Três vezes. Pergunte a eles como foi."
+    }
+  },
+  {
+    "kingdomId": "k_oeste",
+    "name": "Ravel Corrin",
+    "epithet": "o Primeiro-Falante",
+    "house": "Sindicato das Cordas",
+    "title": "Primeiro-Falante da Confederação",
+    "portrait": "portraits/lord",
+    "temperament": "mercador",
+    "creed": "Não represento um trono. Represento setenta armadores.",
+    "history": "A Confederação não tem rei: tem uma assembleia de portos que elege um Falante a cada seis anos. Ravel foi eleito três vezes, o que ninguém tinha conseguido antes, e explica isso dizendo que é o único que sabe fazer sete cidades brigarem em voz baixa. Não pode declarar guerra sozinho. Pode, sozinho, fechar todos os portos do oeste.",
+    "traits": [
+      "Presente vale muito; ouro abre quase tudo",
+      "Não pode ser vassalo — a assembleia não permite"
+    ],
+    "voice": {
+      "hostil": "Os portos estão fechados para você. Boa sorte com o inverno.",
+      "frio": "Bem-vindo. Isto é uma negociação, não uma audiência. Sente-se como igual.",
+      "cordial": "Você paga em dia. Na Confederação isso é quase nobreza.",
+      "leal": "Setenta armadores brindam ao seu nome. Não pergunte quanto isso custou."
+    },
+    "topics": {
+      "casa": "Casa? Não temos casa. Temos livro-caixa. Meu avô descarregava peixe no cais que hoje leva o nome dele, e isso aqui é o mais perto de nobreza que a gente chega.",
+      "querer": "Queremos rota livre até o seu Vau do Sul e imposto fixo. Fixo, entende? Não é o valor que nos mata, é a surpresa.",
+      "guerra": "A assembleia leva quatro meses para votar uma guerra. Até lá ela já acabou."
+    }
+  },
+  {
+    "kingdomId": "k_norte",
+    "name": "Hjalmar Vend",
+    "epithet": "o Rei de Inverno",
+    "house": "Casa Vend",
+    "title": "Rei de Skaldheim",
+    "portrait": "portraits/king",
+    "temperament": "belicoso",
+    "creed": "A montanha não nos protege. Ela nos prende.",
+    "history": "Governa um salão atrás das Montanhas Cinzas, onde o inverno dura oito meses e a terra dá menos do que come. Skaldheim desce ao sul há seis gerações — não por ambição, dizem eles, mas por aritmética. Hjalmar é o primeiro rei de sua linha a mandar um enviado antes de mandar uma coluna.",
+    "traits": [
+      "A fome do norte pesa mais que qualquer promessa",
+      "Uma trégua com ele tem prazo curto e é honrada até o fim"
+    ],
+    "voice": {
+      "hostil": "O Portão está aberto. Sempre esteve. Foi por ele que descemos das outras vezes.",
+      "frio": "Sul. Vocês têm grão demais e homens de menos. Reparei.",
+      "cordial": "Você mandou palavras antes de mandar lanças. Meu pai não teria feito isso.",
+      "leal": "Enquanto houver comida no seu celeiro, não há fome no meu salão. Isso vale mais que juramento."
+    },
+    "topics": {
+      "casa": "Vend quer dizer 'aquele que virou'. O primeiro de nós virou as costas para o mar quando o mar congelou. Viemos para a montanha achando que era abrigo. Era jaula.",
+      "querer": "Quero grão. Não terra, não ouro, não título. Grão, todo outono, sem falhar. Faça isso e o Portão fica fechado.",
+      "guerra": "Nós não gostamos de guerra. Nós ficamos bons nela porque a alternativa era morrer de fome."
+    }
+  }
+]

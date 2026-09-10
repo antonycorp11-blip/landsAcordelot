@@ -399,6 +399,17 @@ export const BATTLE = {
  * IA dos reinos (§30/§77). Pensa em intervalos, não a cada quadro.
  */
 export const AI = {
+  /**
+   * Quanto a liderança de um domínio inflama os outros. Multiplica a fatia do
+   * mapa acima de um terço: passar de metade do continente deixa todo mundo
+   * mais disposto a marchar sobre você.
+   */
+  coalitionPressure: 0.55,
+  /** Reino que já foi maior ataca mais: perder província não acalma ninguém. */
+  woundedBonus: 0.12,
+  /** Multiplica a nota do alvo quando há rancor antigo entre os dois. */
+  feudPreference: 1.45,
+
   thinkIntervalSeconds: 6,
   /** Reserva mínima de moedas que a IA não gasta. */
   coinReserve: 120,
@@ -441,4 +452,81 @@ export const DIPLOMACY = {
 
   /** A IA em guerra ataca com mais frequência. */
   aiWarAttackBonus: 0.35,
+
+  /** Quanto tempo cada razão de opinião leva para se apagar, em dias. */
+  memory: {
+    presente: 70,
+    conquista: 150,
+    recusa: 25,
+  },
+  /** Peso do "inimigo do meu inimigo" e da fronteira militarizada. */
+  inimigoComum: 16,
+  fronteiraArmada: -14,
+  /** Tropas suas na fronteira dele a partir das quais ele se incomoda. */
+  fronteiraArmadaMin: 40,
 } as const;
+
+/**
+ * Temperamento do soberano.
+ *
+ * É o que separa um trono de outro. Torvald despreza presente e só respeita
+ * exército; Ravel abre quase tudo por ouro mas não pode ser vassalo porque a
+ * assembleia dele não permite. Sem estes números, "belicoso" e "mercador"
+ * seriam apenas duas palavras no mesmo botão.
+ */
+export const TEMPERAMENTS = {
+  belicoso: {
+    label: 'Belicoso',
+    /** Multiplica o valor de um presente. */
+    giftValue: 0.55,
+    /** Soma fixa à disposição: como ele te vê antes de qualquer história. */
+    disposition: -18,
+    /** Multiplica o quanto ele exige de simpatia em cada proposta. */
+    demand: 1.35,
+    /** Força relativa exigida para aceitar vassalagem. */
+    vassalRatio: 3.0,
+    /** Multiplica a raiva por terra tomada. */
+    grudge: 1.35,
+    /** Velocidade com que razões antigas se apagam. */
+    forget: 1.2,
+  },
+  calculista: {
+    label: 'Calculista',
+    giftValue: 1.35,
+    disposition: 4,
+    demand: 0.9,
+    vassalRatio: 2.0,
+    grudge: 1.0,
+    forget: 0.85,
+  },
+  mercador: {
+    label: 'Mercador',
+    giftValue: 1.9,
+    disposition: 10,
+    demand: 0.75,
+    /** A assembleia não dobra o joelho por decisão de um Falante só. */
+    vassalRatio: Infinity,
+    grudge: 0.9,
+    forget: 1.4,
+  },
+  orgulhoso: {
+    label: 'Orgulhoso',
+    giftValue: 0.85,
+    disposition: -8,
+    demand: 1.15,
+    vassalRatio: 2.6,
+    grudge: 1.5,
+    forget: 0.6,
+  },
+  reservado: {
+    label: 'Reservado',
+    giftValue: 1.0,
+    disposition: -4,
+    demand: 1.0,
+    vassalRatio: 2.4,
+    grudge: 0.8,
+    forget: 0.45,
+  },
+} as const;
+
+export type Temperament = keyof typeof TEMPERAMENTS;

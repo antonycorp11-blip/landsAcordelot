@@ -1,4 +1,5 @@
 import { AI, DIPLOMACY } from '../config/balance';
+import { FEUDS } from '../data/rulers';
 import { BUILDING_LIST, UNIT_LIST } from '../data/defs';
 import type { Building, Deposit, GameState, Kingdom, Territory, UnitKind } from '../types';
 import type { ArmyManager, UnitStack } from './ArmyManager';
@@ -18,6 +19,9 @@ import type { EconomyManager } from './EconomyManager';
  * Pensa em intervalos e um reino por vez, para não pesar no quadro (§77).
  */
 export class AIManager {
+  /** Maior número de províncias que cada reino já teve, para saber quem encolheu. */
+  private peak = new Map<string, number>();
+
   private timer = 0;
   private cursor = 0;
   /** Mensagens do que a IA fez, para o diário de eventos da UI. */
@@ -65,11 +69,55 @@ export class AIManager {
     if (Math.random() < profile.recruit) this.tryRecruit(kingdom, owned);
 
     // 4. Campanha.
-    // Em guerra declarada a IA vai para cima com mais frequência: um pacto
-    // rompido tem de doer, senão declarar guerra é só um rótulo.
+    if (Math.random() < this.aggression(kingdom, profile.attack)) this.tryAttack(kingdom, owned);
+  }
+
+  /**
+   * Com que vontade este reino marcha hoje.
+   *
+   * Três coisas somam. Guerra declarada com você — senão declarar guerra seria
+   * só um rótulo. O tamanho do líder do mapa: ninguém assiste calado alguém
+   * juntar metade do continente, e é isso que faz a partida endurecer em vez
+   * de amolecer conforme você cresce. E o próprio encolhimento: reino que
+   * perdeu província fica mais perigoso, não menos.
+   */
+  private aggression(kingdom: Kingdom, base: number): number {
+    let chance = base;
+
     const rel = this.diplomacy.relation(kingdom.id);
-    const chance = profile.attack + (rel?.pact === 'war' ? DIPLOMACY.aiWarAttackBonus : 0);
-    if (Math.random() < chance) this.tryAttack(kingdom, owned);
+    if (rel?.pact === 'war') chance += DIPLOMACY.aiWarAttackBonus;
+
+    const all = Object.values(this.state.territories);
+    const mine = all.filter((t) => t.ownerId === kingdom.id).length;
+    const leader = this.leaderShare();
+    // Só pesa depois que alguém passa de um terço do mapa.
+    if (leader.share > 0.34 && leader.id !== kingdom.id) {
+      chance += (leader.share - 0.34) * AI.coalitionPressure;
+    }
+    if (mine > 0 && mine < (this.peak.get(kingdom.id) ?? mine)) chance += AI.woundedBonus;
+    this.peak.set(kingdom.id, Math.max(mine, this.peak.get(kingdom.id) ?? 0));
+
+    return chance;
+  }
+
+  /** Maior domínio do mapa e que fatia ele ocupa. */
+  private leaderShare(): { id: string | null; share: number } {
+    const count = new Map<string, number>();
+    let total = 0;
+    for (const t of Object.values(this.state.territories)) {
+      if (!t.ownerId) continue;
+      count.set(t.ownerId, (count.get(t.ownerId) ?? 0) + 1);
+      total++;
+    }
+    let id: string | null = null;
+    let best = 0;
+    for (const [k, n] of count) {
+      if (n > best) {
+        best = n;
+        id = k;
+      }
+    }
+    return { id, share: total > 0 ? best / total : 0 };
   }
 
   /** Contrata e aloca trabalhadores até encher as vagas que consegue pagar. */
@@ -204,7 +252,10 @@ export class AIManager {
           ? preview.attackerPower / preview.defenderPower
           : 99;
         if (ratio < AI.attackPowerRatio) continue;
-        if (!best || ratio > best.ratio) best = { from, to, units: send, ratio };
+        // Rancor antigo escolhe o alvo. Karneth deve a Aurenna e cortou a mata
+        // dos Silvarden; quando puder atacar os dois, vai atrás de quem odeia.
+        const score = ratio * (this.hasFeudWith(kingdom.id, to.ownerId) ? AI.feudPreference : 1);
+        if (!best || score > best.ratio) best = { from, to, units: send, ratio: score };
       }
     }
 
@@ -212,6 +263,14 @@ export class AIManager {
     if (this.armies.dispatch(best.from.id, best.to.id, best.units, kingdom.id)) {
       this.note(`${kingdom.name} marcha sobre ${best.to.name}.`);
     }
+  }
+
+  /** Existe história ruim entre estes dois domínios? */
+  private hasFeudWith(a: string, b: string | null): boolean {
+    if (!b) return false;
+    return FEUDS.some(
+      (f) => f.kind === 'feud' && ((f.a === a && f.b === b) || (f.b === a && f.a === b)),
+    );
   }
 
   private note(message: string) {

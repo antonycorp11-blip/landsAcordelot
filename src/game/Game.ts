@@ -512,7 +512,7 @@ export class Game {
       this.territories.transferOwnership(battle.territoryId, attackerArmy.ownerId, 'MILITARY');
       // Só a sua conquista mexe na sua mesa; briga entre vizinhos não.
       if (attackerArmy.ownerId === this.state.playerKingdomId && previousOwner) {
-        this.diplomacy.onTerritoryTaken(previousOwner);
+        this.diplomacy.onTerritoryTaken(previousOwner, territory.name);
       }
 
       attackerArmy.state = 'garrison';
@@ -1159,7 +1159,7 @@ export class Game {
     if (!this.territories.transferOwnership(id, kingdomId, reason)) return false;
     // Tomar terra de alguém rompe o que estava assinado com ele.
     if (previousOwner && previousOwner !== kingdomId) {
-      this.diplomacy.onTerritoryTaken(previousOwner);
+      this.diplomacy.onTerritoryTaken(previousOwner, t.name);
     }
 
     const castle = t.castleId ? this.state.castles[t.castleId] : null;
