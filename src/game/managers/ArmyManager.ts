@@ -54,6 +54,11 @@ export function stackSize(units: UnitStack): number {
 export class ArmyManager {
   /** Rotas prontas entre pares de territórios vizinhos. */
   private routes = new Map<string, Vec2[]>();
+  /** Ajustes vindos da ordem dada ao governador do Estado. */
+  policyTrainSpeed = 1;
+  policyMorale = 0;
+  /** Velocidade de marcha concedida pelo general. */
+  policyMarchSpeed = 1;
 
   constructor(
     private state: GameState,
@@ -192,7 +197,7 @@ export class ArmyManager {
       if (check.cost[k]) kingdom.resources[k] = Math.max(0, kingdom.resources[k] - check.cost[k]!);
     }
     // Praça de armas treina mais rápido.
-    const speed = (VOCATIONS[t.vocation] ?? VOCATIONS.balanced).trainSpeed;
+    const speed = (VOCATIONS[t.vocation] ?? VOCATIONS.balanced).trainSpeed * this.policyTrainSpeed;
     const each = Math.max(3, Math.round(UNIT_DEFS[unit].trainTime * speed));
     this.state.training.push({
       id: nextId('trn'),
@@ -237,7 +242,10 @@ export class ArmyManager {
       ownerId: t.ownerId,
       territoryId,
       units: {},
-      morale: MILITARY.startingMorale + (VOCATIONS[t.vocation] ?? VOCATIONS.balanced).morale,
+      morale: Math.min(
+        100,
+        MILITARY.startingMorale + (VOCATIONS[t.vocation] ?? VOCATIONS.balanced).morale + this.policyMorale,
+      ),
       state: 'garrison',
       position: this.garrisonPosition(territoryId),
       path: null,
@@ -289,7 +297,7 @@ export class ArmyManager {
       slowest = Math.min(slowest, UNIT_DEFS[kind].speed);
     }
     if (!Number.isFinite(slowest)) slowest = 1;
-    return MARCH.baseSpeed * slowest;
+    return MARCH.baseSpeed * slowest * this.policyMarchSpeed;
   }
 
   checkMarch(fromId: string, toId: string, units: UnitStack, actor?: string): MarchCheck {

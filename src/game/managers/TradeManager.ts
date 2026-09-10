@@ -25,6 +25,9 @@ export interface TradeQuote {
  * tempo para voltar — comércio é logística, não um botão de converter recurso.
  */
 export class TradeManager {
+  /** Ajuste de margem vindo do governador do Estado. */
+  policySpread = 0;
+
   constructor(private state: GameState) {}
 
   /** Nível do melhor mercado pronto no território (0 = sem mercado). */
@@ -54,7 +57,7 @@ export class TradeManager {
   quote(t: Territory, give: ResourceKind, amount: number, receive: ResourceKind): TradeQuote {
     const level = this.marketLevel(t);
     const voc = VOCATIONS[t.vocation] ?? VOCATIONS.balanced;
-    const spread = Math.max(0.04, this.spreadFor(level) + voc.tradeSpread);
+    const spread = Math.max(0.03, this.spreadFor(level) + voc.tradeSpread + this.policySpread);
     const capacity = this.capacityFor(level);
     const offerValue = amount * this.valueOf(give);
     const base = {

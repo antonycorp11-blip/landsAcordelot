@@ -78,17 +78,50 @@ export class ArmyLayer {
     const bob = marching ? Math.sin(time * 6 + p.x * 0.02) * 1.6 : 0;
 
     if (army.id === this.selectedArmyId) {
+      // Selecionado precisa gritar: é a peça que o jogador está manobrando.
+      const pulse = 0.5 + Math.sin(time * 4.5) * 0.5;
       ctx.save();
-      ctx.strokeStyle = `rgba(232,195,90,${0.55 + Math.sin(time * 4) * 0.35})`;
-      ctx.lineWidth = 3 / zoom + 1.5;
+
+      // Halo dourado no chão
+      const glow = ctx.createRadialGradient(p.x, p.y + 4, 6, p.x, p.y + 4, 96);
+      glow.addColorStop(0, `rgba(255,226,140,${0.34 + pulse * 0.22})`);
+      glow.addColorStop(0.55, `rgba(232,195,90,${0.16 + pulse * 0.12})`);
+      glow.addColorStop(1, 'rgba(232,195,90,0)');
+      ctx.fillStyle = glow;
       ctx.beginPath();
-      ctx.ellipse(p.x, p.y + 3, 54, 24, 0, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.strokeStyle = 'rgba(255,255,255,0.55)';
-      ctx.lineWidth = 1.6 / zoom + 0.8;
+      ctx.ellipse(p.x, p.y + 4, 96, 44, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Anel duplo pulsando
+      ctx.shadowColor = 'rgba(255,226,140,0.9)';
+      ctx.shadowBlur = 18;
+      ctx.strokeStyle = `rgba(255,238,176,${0.75 + pulse * 0.25})`;
+      ctx.lineWidth = 4 / zoom + 2;
       ctx.beginPath();
-      ctx.ellipse(p.x, p.y + 3, 62, 28, 0, 0, Math.PI * 2);
+      ctx.ellipse(p.x, p.y + 4, 56, 25, 0, 0, Math.PI * 2);
       ctx.stroke();
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = `rgba(255,255,255,${0.4 + pulse * 0.35})`;
+      ctx.lineWidth = 2 / zoom + 1;
+      ctx.beginPath();
+      ctx.ellipse(p.x, p.y + 4, 68 + pulse * 8, 31 + pulse * 4, 0, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Setas apontando para dentro, marcando a peça viva
+      ctx.fillStyle = `rgba(255,226,140,${0.6 + pulse * 0.4})`;
+      for (let i = 0; i < 4; i++) {
+        const a = (i * Math.PI) / 2 + Math.PI / 4;
+        const rx = 74 + pulse * 10;
+        const ry = 34 + pulse * 5;
+        const x = p.x + Math.cos(a) * rx;
+        const y = p.y + 4 + Math.sin(a) * ry;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x - Math.cos(a) * 11 - Math.sin(a) * 5, y - Math.sin(a) * 11 + Math.cos(a) * 5);
+        ctx.lineTo(x - Math.cos(a) * 11 + Math.sin(a) * 5, y - Math.sin(a) * 11 - Math.cos(a) * 5);
+        ctx.closePath();
+        ctx.fill();
+      }
       ctx.restore();
     }
 

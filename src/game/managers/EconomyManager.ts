@@ -58,6 +58,8 @@ export class EconomyManager {
   private accumulator = 0;
   /** Desconto de salário concedido pelo título do reino. */
   wageFactor = 1;
+  /** Multiplicador de produção vindo da ordem dada ao governador. */
+  policyProduction = 1;
 
   constructor(private state: GameState) {}
 
@@ -82,7 +84,9 @@ export class EconomyManager {
     const voc = VOCATIONS[t.vocation] ?? VOCATIONS.balanced;
     const category = def.category === 'refining' ? voc.refining : def.category === 'extraction' ? voc.extraction : 1;
 
-    return b.level * BUILD.levelOutputMult * staff * richness * castleMult * mood * category;
+    return (
+      b.level * BUILD.levelOutputMult * staff * richness * castleMult * mood * category * this.policyProduction
+    );
   }
 
   laborPool(t: Territory): number {

@@ -15,7 +15,17 @@ const LAYERS: { id: 'provinces' | 'resources' | 'routes' | 'armies'; label: stri
  * Minimapa com as camadas do conceito. As caixas não são enfeite: cada uma
  * liga e desliga de verdade uma camada do renderer.
  */
-export function Minimap({ game, version }: { game: Game; version: number }) {
+export function Minimap({
+  game,
+  version,
+  open,
+  onToggle,
+}: {
+  game: Game;
+  version: number;
+  open: boolean;
+  onToggle: () => void;
+}) {
   const ref = useRef<HTMLCanvasElement>(null);
   const [, force] = useState(0);
   const layers = game.mapLayers();
@@ -81,8 +91,19 @@ export function Minimap({ game, version }: { game: Game; version: number }) {
     return () => cancelAnimationFrame(raf);
   }, [game, version]);
 
+  if (!open) {
+    return (
+      <button className="minimap-handle" onClick={onToggle} title="Mostrar o mapa do reino">
+        🗺
+      </button>
+    );
+  }
+
   return (
     <div className="minimap">
+      <button className="minimap-close" onClick={onToggle} title="Recolher o mapa">
+        ×
+      </button>
       <div className="minimap-row">
         <div className="minimap-canvas">
           <canvas

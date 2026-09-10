@@ -14,6 +14,7 @@ import { LoreIntro } from './ui/LoreIntro';
 import { Minimap } from './ui/Minimap';
 import { SaveTools } from './ui/SavePanel';
 import { SendTroops } from './ui/SendTroops';
+import { StatePromotion } from './ui/StatePromotion';
 import { Tutorial } from './ui/Tutorial';
 import { TopBar } from './ui/TopBar';
 import { safeAreaReport, watchSafeArea } from './ui/safeArea';
@@ -110,6 +111,24 @@ export function App() {
   const [economyOpen, setEconomyOpen] = useState(false);
   // Destino escolhido para a coluna: abre a tela de "quantos enviar".
   const [sendTarget, setSendTarget] = useState<string | null>(null);
+  // O minimapa é consulta, não painel: fica recolhido por padrão no celular.
+  const [mapOpen, setMapOpen] = useState(() => {
+    try {
+      return localStorage.getItem('acordelot:minimap') !== 'min';
+    } catch {
+      return true;
+    }
+  });
+  const toggleMap = () => {
+    setMapOpen((v) => {
+      try {
+        localStorage.setItem('acordelot:minimap', v ? 'min' : 'open');
+      } catch {
+        /* preferência só desta sessão */
+      }
+      return !v;
+    });
+  };
   // O trilho é só atalho: quem já sabe onde tudo fica prefere a tela limpa.
   const [railOpen, setRailOpen] = useState(() => {
     try {
@@ -546,13 +565,15 @@ export function App() {
             )
           )}
 
-          <Minimap game={game} version={snap.revision} />
+          <Minimap game={game} version={snap.revision} open={mapOpen} onToggle={toggleMap} />
 
           {isDev && rail === 'debug' && <DebugPanel game={game} fps={snap.fps} />}
 
           {snap.message && <div className="toast">{snap.message}</div>}
         </div>
       )}
+
+      {started && game && snap?.state.promotionPending && <StatePromotion game={game} />}
 
       <UpdateWatcher />
 

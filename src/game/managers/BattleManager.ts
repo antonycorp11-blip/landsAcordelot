@@ -85,6 +85,9 @@ function applyCasualties(units: UnitStack, casualties: number): number {
  * pergunta do jogo é "vale a pena vencer?" (§17).
  */
 export class BattleManager {
+  /** Bônus de defesa concedido ao jogador pelo general e pela ordem dele. */
+  policyDefense = 0;
+
   constructor(private state: GameState) {}
 
   // -- montagem -------------------------------------------------------------
@@ -96,8 +99,10 @@ export class BattleManager {
     const castle = t.castleId ? this.state.castles[t.castleId] : null;
     const level = castle?.level ?? 0;
     const isWalled = castle ? castle.kind === 'castle' || castle.kind === 'fort' : false;
-    const fort =
+    let fort =
       level * BATTLE.fortPerCastleLevel + (BATTLE.terrainBonus[t.biome] ?? 0) + t.defense / 400;
+    // Praça do jogador defendida sob a ordem do general.
+    if (t.ownerId === this.state.playerKingdomId) fort += this.policyDefense;
     const wallHp = isWalled ? level * BATTLE.wallHpPerCastleLevel : 0;
     return { fort, wallHp };
   }

@@ -378,7 +378,26 @@ export interface GameState {
   titleIndex: number;
   /** Ids das entradas de crônica já desbloqueadas, em ordem. */
   chronicle: string[];
+
+  /** Escala atual do domínio (§5). */
+  stage: RealmStage;
+  /** Nome dado pelo jogador ao Estado, quando promovido. */
+  stateName: string | null;
+  /** Governador e general escolhidos, com a ordem que cada um segue. */
+  governorId: string | null;
+  generalId: string | null;
+  civilPolicy: CivilPolicy;
+  warPolicy: WarPolicy;
+  /** Promoção pendente: a tela de fundação ainda não foi respondida. */
+  promotionPending: boolean;
 }
+
+export type RealmStage = 'kingdom' | 'state';
+
+/** Ordem permanente ao governador — cidade, povo e extração. */
+export type CivilPolicy = 'celeiros' | 'ordem' | 'crescimento';
+/** Ordem permanente ao general — tropa e fronteira. */
+export type WarPolicy = 'guerra' | 'fronteira' | 'expansao';
 
 export interface RealmStats {
   battlesWon: number;

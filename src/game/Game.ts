@@ -297,6 +297,19 @@ export class Game {
     const bonus = this.realm.bonus();
     this.economy.wageFactor = 1 - bonus.wageCut;
     this.economy.titleStorage = bonus.storage;
+    this.economy.policyProduction = bonus.production;
+    this.armies.policyTrainSpeed = bonus.trainSpeed;
+    this.armies.policyMorale = bonus.morale;
+    this.armies.policyMarchSpeed = bonus.marchSpeed;
+    this.battles.policyDefense = bonus.defense;
+    this.trade.policySpread = bonus.tradeSpread;
+
+    // Todo o mapa sob uma bandeira: abre a fundação do Estado (§5).
+    if (this.realm.shouldPromoteToState() && !this.state.promotionPending) {
+      this.state.promotionPending = true;
+      this.setSpeed(0);
+      this.touch();
+    }
     const promoted = this.realm.checkPromotion();
     if (promoted) {
       this.notify(`Novo título: ${promoted.name.toUpperCase()} — ${promoted.scale}.`, 6);
@@ -306,6 +319,36 @@ export class Game {
       this.notify(`Crônica: ${entry.title}`, 5);
       this.touch();
     }
+  }
+
+  /** Funda o Estado a partir da tela de promoção. */
+  foundState(
+    name: string,
+    governorId: string,
+    generalId: string,
+    civilPolicy: GameState['civilPolicy'],
+    warPolicy: GameState['warPolicy'],
+  ) {
+    this.realm.foundState(name, governorId, generalId, civilPolicy, warPolicy);
+    this.notify(`O Estado de ${this.state.stateName} está fundado.`, 7);
+    this.setSpeed(1);
+    this.touch();
+  }
+
+  /** Troca a ordem dada ao governador (cidade, povo, extração). */
+  setCivilPolicy(policy: GameState['civilPolicy']) {
+    if (this.state.civilPolicy === policy) return;
+    this.state.civilPolicy = policy;
+    this.notify('Nova ordem enviada ao governador.', 3);
+    this.touch();
+  }
+
+  /** Troca a ordem dada ao general (tropa e fronteira). */
+  setWarPolicy(policy: GameState['warPolicy']) {
+    if (this.state.warPolicy === policy) return;
+    this.state.warPolicy = policy;
+    this.notify('Nova ordem enviada ao general.', 3);
+    this.touch();
   }
 
   /** Define a vocação de uma cidade sua. */

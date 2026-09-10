@@ -274,6 +274,71 @@ export const RENOWN = {
   perUnitTrained: 3,
 } as const;
 
+/**
+ * Ordens permanentes. São duas mesas separadas: o governador cuida da cidade,
+ * do povo e do que sai do solo; o general cuida da tropa e da fronteira.
+ * Cada ordem é trocável a qualquer momento, no painel do Reino.
+ */
+export const CIVIL_POLICIES = {
+  celeiros: {
+    name: 'Encher os celeiros',
+    hint: 'Produção civil em primeiro lugar. O povo trabalha mais e reclama um pouco.',
+    production: 1.18,
+    stability: 0,
+    happiness: -3,
+    growth: 1,
+  },
+  ordem: {
+    name: 'Manter a ordem',
+    hint: 'Estabilidade e humor acima de tudo. Nada cresce rápido, mas nada quebra.',
+    production: 0.96,
+    stability: 14,
+    happiness: 8,
+    growth: 1,
+  },
+  crescimento: {
+    name: 'Fazer crescer',
+    hint: 'População em primeiro lugar: mais braços amanhã, menos produção hoje.',
+    production: 0.9,
+    stability: 4,
+    happiness: 5,
+    growth: 1.7,
+  },
+} as const;
+
+export const WAR_POLICIES = {
+  guerra: {
+    name: 'Pé de guerra',
+    hint: 'Treino rápido e tropa firme, ao custo da produção e do humor do povo.',
+    production: 0.9,
+    trainSpeed: 0.7,
+    morale: 12,
+    stability: -6,
+    claimCut: 0,
+    defense: 0,
+  },
+  fronteira: {
+    name: 'Guardar a fronteira',
+    hint: 'Defesa e ordem nas praças. Avançar fica caro, mas nada se perde fácil.',
+    production: 1,
+    trainSpeed: 1.05,
+    morale: 4,
+    stability: 6,
+    claimCut: 0,
+    defense: 0.3,
+  },
+  expansao: {
+    name: 'Empurrar a fronteira',
+    hint: 'Anexação bem mais barata; o Estado gasta o que tem para crescer.',
+    production: 0.96,
+    trainSpeed: 0.9,
+    morale: 4,
+    stability: -3,
+    claimCut: 0.25,
+    defense: 0,
+  },
+} as const;
+
 export const SAVE = {
   key: 'acord-kingdoms:save:v4',
   autosaveEverySeconds: 20,

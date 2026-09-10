@@ -36,6 +36,12 @@ interface SavePayload {
   stats?: GameState['stats'];
   titleIndex?: number;
   chronicle?: string[];
+  stage?: GameState['stage'];
+  stateName?: string | null;
+  governorId?: string | null;
+  generalId?: string | null;
+  civilPolicy?: GameState['civilPolicy'];
+  warPolicy?: GameState['warPolicy'];
   resources: Record<string, GameState['kingdoms'][string]['resources']>;
   territories: Record<string, SavedTerritory>;
   castles: Record<string, { level: number; hp: number }>;
@@ -80,6 +86,12 @@ export class SaveManager {
       stats: state.stats,
       titleIndex: state.titleIndex,
       chronicle: state.chronicle,
+      stage: state.stage,
+      stateName: state.stateName,
+      governorId: state.governorId,
+      generalId: state.generalId,
+      civilPolicy: state.civilPolicy,
+      warPolicy: state.warPolicy,
       resources: {},
       territories: {},
       castles: {},
@@ -153,6 +165,13 @@ export class SaveManager {
     if (payload.stats) state.stats = { ...state.stats, ...payload.stats };
     state.titleIndex = payload.titleIndex ?? 0;
     state.chronicle = payload.chronicle ?? [];
+    state.stage = payload.stage ?? 'kingdom';
+    state.stateName = payload.stateName ?? null;
+    state.governorId = payload.governorId ?? null;
+    state.generalId = payload.generalId ?? null;
+    state.civilPolicy = payload.civilPolicy ?? 'celeiros';
+    state.warPolicy = payload.warPolicy ?? 'fronteira';
+    state.promotionPending = false;
 
     for (const [id, res] of Object.entries(payload.resources ?? {})) {
       if (state.kingdoms[id]) state.kingdoms[id].resources = { ...res };

@@ -153,6 +153,13 @@ export function createWorld(): WorldBundle {
     stats: emptyStats(),
     titleIndex: 0,
     chronicle: [],
+    stage: 'kingdom',
+    stateName: null,
+    governorId: null,
+    generalId: null,
+    civilPolicy: 'celeiros',
+    warPolicy: 'fronteira',
+    promotionPending: false,
   };
 
   seedStartingBuildings(state);

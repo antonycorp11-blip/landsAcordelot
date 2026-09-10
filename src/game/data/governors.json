@@ -1,0 +1,48 @@
+[
+  {
+    "id": "gov_isolde",
+    "portrait": "portraits/queen",
+    "card": "advisors/gov_isolde",
+    "name": "Rainha Isolde",
+    "trait": "Mão firme",
+    "hint": "Governa por lei e por medo, nessa ordem. Províncias sob ela raramente se agitam.",
+    "bonus": {
+      "production": 1.0,
+      "wageCut": 0.08,
+      "stability": 12,
+      "happiness": 4,
+      "growth": 1.0
+    }
+  },
+  {
+    "id": "gov_maerwyn",
+    "portrait": "portraits/princess",
+    "card": "advisors/gov_maerwyn",
+    "name": "Princesa Maerwyn",
+    "trait": "Negociadora",
+    "hint": "Fecha acordos que exércitos não fechariam. As caravanas a adoram.",
+    "bonus": {
+      "production": 1.05,
+      "wageCut": 0.1,
+      "stability": 6,
+      "happiness": 8,
+      "growth": 1.05,
+      "tradeSpread": -0.08
+    }
+  },
+  {
+    "id": "gov_aldric",
+    "portrait": "portraits/lord",
+    "card": "advisors/gov_aldric",
+    "name": "Lorde Aldric, o Velho",
+    "trait": "Administrador",
+    "hint": "Serviu três reis. Conhece cada celeiro do Estado pelo nome do celeireiro.",
+    "bonus": {
+      "production": 1.16,
+      "wageCut": 0.04,
+      "stability": 4,
+      "happiness": 0,
+      "growth": 1.0
+    }
+  }
+]

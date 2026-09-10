@@ -1,0 +1,47 @@
+[
+  {
+    "id": "gen_cael",
+    "portrait": "portraits/prince",
+    "card": "advisors/gen_cael",
+    "name": "Príncipe Cael",
+    "trait": "Ímpeto",
+    "hint": "Jovem e impaciente. Marcha rápido, e às vezes cedo demais.",
+    "bonus": {
+      "morale": 6,
+      "trainSpeed": 0.8,
+      "marchSpeed": 1.25,
+      "defense": 0,
+      "upkeepCut": 0
+    }
+  },
+  {
+    "id": "gen_roderic",
+    "portrait": "portraits/king",
+    "card": "advisors/gen_roderic",
+    "name": "Marechal Roderic",
+    "trait": "Muralha viva",
+    "hint": "Nunca perdeu uma praça sitiada. Também nunca tomou uma depressa.",
+    "bonus": {
+      "morale": 10,
+      "trainSpeed": 1.05,
+      "marchSpeed": 0.9,
+      "defense": 0.25,
+      "upkeepCut": 0.1
+    }
+  },
+  {
+    "id": "gen_bryn",
+    "portrait": "units/knights",
+    "card": "advisors/gen_bryn",
+    "name": "Dame Bryn de Elmwood",
+    "trait": "Instrutora",
+    "hint": "Transforma camponês em soldado no tempo que outros levam para fardá-lo.",
+    "bonus": {
+      "morale": 4,
+      "trainSpeed": 0.65,
+      "marchSpeed": 1.0,
+      "defense": 0.1,
+      "upkeepCut": 0.15
+    }
+  }
+]

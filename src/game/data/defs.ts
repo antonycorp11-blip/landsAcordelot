@@ -36,6 +36,7 @@ export const LORE = loreRaw as {
   closing: string;
   tutorial: TutorialStepDef[];
   chronicle: ChronicleDef[];
+  statePromotion: { title: string; chapter: string; text: string[]; closing: string };
 };
 
 export const TUTORIAL_STEPS = LORE.tutorial;

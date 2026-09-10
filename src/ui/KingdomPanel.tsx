@@ -1,5 +1,8 @@
 import type { Game } from '../game/Game';
 import { RESOURCE_KINDS, type GameState } from '../game/types';
+import { CIVIL_POLICIES, WAR_POLICIES } from '../game/config/balance';
+import { spriteUrl } from '../game/config/version';
+import type { CivilPolicy, WarPolicy } from '../game/types';
 import { RESOURCE_ICON, RESOURCE_LABEL } from './icons';
 
 /** Título, renome e crônica — a progressão do reino (§5). */
@@ -7,12 +10,18 @@ function RealmHeader({ game }: { game: Game }) {
   const title = game.realm.title();
   const stats = game.state.stats;
   const chronicle = game.realm.unlocked();
+  const governor = game.realm.governor();
+  const general = game.realm.general();
 
   return (
     <>
       <div className="realm-title">
         <div className="rank">{title.name}</div>
-        <div className="scale">{title.scale}</div>
+        <div className="scale">
+          {game.state.stage === 'state' && game.state.stateName
+            ? `Estado de ${game.state.stateName}`
+            : title.scale}
+        </div>
         <div className="bar">
           <i style={{ width: `${title.progress * 100}%`, background: 'var(--gold-edge)' }} />
         </div>
@@ -21,6 +30,65 @@ function RealmHeader({ game }: { game: Game }) {
           {title.nextAt !== null && ` · ${title.nextName} aos ${title.nextAt}`}
         </div>
       </div>
+
+      {game.state.stage === 'state' && (
+        <>
+          <div className="section-title">Governo do Estado</div>
+          {governor && (
+            <>
+              <div className="row">
+                <img className="thumb" src={spriteUrl(governor.card ?? governor.portrait)} alt="" />
+                <div className="grow">
+                  <span className="name">{governor.name}</span>
+                  <span className="meta">Governador · {governor.trait}</span>
+                </div>
+              </div>
+              <div className="target-row" style={{ marginTop: 6 }}>
+                {(Object.keys(CIVIL_POLICIES) as CivilPolicy[]).map((p) => (
+                  <button
+                    key={p}
+                    className={`target ${game.state.civilPolicy === p ? 'active' : ''}`}
+                    onClick={() => game.setCivilPolicy(p)}
+                    title={CIVIL_POLICIES[p].hint}
+                  >
+                    {CIVIL_POLICIES[p].name}
+                  </button>
+                ))}
+              </div>
+              <div className="hint" style={{ marginTop: 0 }}>
+                {CIVIL_POLICIES[game.state.civilPolicy].hint}
+              </div>
+            </>
+          )}
+
+          {general && (
+            <>
+              <div className="row" style={{ marginTop: 10 }}>
+                <img className="thumb" src={spriteUrl(general.card ?? general.portrait)} alt="" />
+                <div className="grow">
+                  <span className="name">{general.name}</span>
+                  <span className="meta">General · {general.trait}</span>
+                </div>
+              </div>
+              <div className="target-row" style={{ marginTop: 6 }}>
+                {(Object.keys(WAR_POLICIES) as WarPolicy[]).map((p) => (
+                  <button
+                    key={p}
+                    className={`target ${game.state.warPolicy === p ? 'active' : ''}`}
+                    onClick={() => game.setWarPolicy(p)}
+                    title={WAR_POLICIES[p].hint}
+                  >
+                    {WAR_POLICIES[p].name}
+                  </button>
+                ))}
+              </div>
+              <div className="hint" style={{ marginTop: 0 }}>
+                {WAR_POLICIES[game.state.warPolicy].hint}
+              </div>
+            </>
+          )}
+        </>
+      )}
 
       <div className="stat-grid" style={{ marginBottom: 4 }}>
         <div className="stat">

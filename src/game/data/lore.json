@@ -114,6 +114,21 @@
       "id": "lost_land",
       "title": "O que se perde",
       "text": "Uma terra que era sua amanheceu com outra bandeira. O mapa não perdoa quem cresce mais rápido do que consegue defender."
+    },
+    {
+      "id": "state_founded",
+      "title": "Nasce um Estado",
+      "text": "O mapa que cabia num pergaminho agora precisa de um atlas. O que era reino virou província de si mesmo."
     }
-  ]
+  ],
+  "statePromotion": {
+    "title": "Os Reinos Unidos",
+    "chapter": "Capítulo II — O Estado de Acordelot",
+    "text": [
+      "Não sobrou bandeira rival entre as montanhas do norte e o Mar Sereno. As cinco casas que se odiavam há trezentos anos respondem, hoje, a um só estandarte.",
+      "Um castelo governa-se olhando pela janela. Um Estado, não: ele precisa de nome, de quem o administre em seu lugar, e de uma ordem clara sobre o que fazer quando você não estiver olhando.",
+      "Além destas fronteiras há mais mundo do que o que você acaba de tomar. Mas isso é assunto do próximo capítulo."
+    ],
+    "closing": "Dê um nome ao que você construiu."
+  }
 }

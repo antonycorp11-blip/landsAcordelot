@@ -133,7 +133,7 @@ export class BuildingLayer {
 
     // O castelo é o marco visual da região; a oficina fica bem menor para o
     // domínio inteiro caber na tela sem virar amontoado.
-    const scale = 0.33 + b.level * 0.055;
+    const scale = 0.26 + b.level * 0.045;
 
     // Anel de seleção: mostra qual construção o painel está editando.
     if (b.id === this.selectedBuildingId) {

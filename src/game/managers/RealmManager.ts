@@ -1,4 +1,6 @@
-import { RENOWN, TITLES } from '../config/balance';
+import { CIVIL_POLICIES, RENOWN, TITLES, WAR_POLICIES } from '../config/balance';
+import generalsRaw from '../data/generals.json';
+import governorsRaw from '../data/governors.json';
 import { LORE } from '../data/defs';
 import type { GameState } from '../types';
 
@@ -11,6 +13,21 @@ export interface TitleInfo {
   nextAt: number | null;
   progress: number;
 }
+
+/** Conselheiro: governador cuida da cidade, general cuida da tropa. */
+export interface AdvisorDef {
+  id: string;
+  portrait: string;
+  /** Carta ilustrada, quando existir arte dedicada. */
+  card?: string;
+  name: string;
+  trait: string;
+  hint: string;
+  bonus: Record<string, number>;
+}
+
+export const GOVERNORS = governorsRaw as unknown as AdvisorDef[];
+export const GENERALS = generalsRaw as unknown as AdvisorDef[];
 
 export interface ChronicleEntry {
   id: string;
@@ -67,10 +84,68 @@ export class RealmManager {
     };
   }
 
-  /** Bônus acumulado do título atual. */
+  /**
+   * Bônus somado: título do reino, conselheiros e as ordens dadas a eles.
+   * Tudo que a progressão promete tem que sair daqui — senão é enfeite.
+   */
   bonus() {
     const t = TITLES[Math.min(this.state.titleIndex, TITLES.length - 1)];
-    return { storage: t.storage, wageCut: t.wageCut, morale: t.morale, claimCut: t.claimCut };
+    const isState = this.state.stage === 'state';
+    const gov = isState ? this.governor()?.bonus ?? {} : {};
+    const gen = isState ? this.general()?.bonus ?? {} : {};
+    const civil = isState ? CIVIL_POLICIES[this.state.civilPolicy] : null;
+    const war = isState ? WAR_POLICIES[this.state.warPolicy] : null;
+
+    const n = (v: number | undefined, fallback = 0) => (typeof v === 'number' ? v : fallback);
+
+    return {
+      storage: t.storage,
+      wageCut: t.wageCut + n(gov.wageCut),
+      morale: t.morale + n(gen.morale) + (war?.morale ?? 0),
+      claimCut: Math.min(0.6, t.claimCut + (war?.claimCut ?? 0)),
+      production: n(gov.production, 1) * (civil?.production ?? 1) * (war?.production ?? 1),
+      trainSpeed: n(gen.trainSpeed, 1) * (war?.trainSpeed ?? 1),
+      marchSpeed: n(gen.marchSpeed, 1),
+      defense: n(gen.defense) + (war?.defense ?? 0),
+      upkeepCut: n(gen.upkeepCut),
+      tradeSpread: n(gov.tradeSpread),
+      stability: (civil?.stability ?? 0) + (war?.stability ?? 0) + n(gov.stability),
+      happiness: (civil?.happiness ?? 0) + n(gov.happiness),
+      growth: n(gov.growth, 1) * (civil?.growth ?? 1),
+    };
+  }
+
+  governor(): AdvisorDef | null {
+    return GOVERNORS.find((g) => g.id === this.state.governorId) ?? null;
+  }
+
+  general(): AdvisorDef | null {
+    return GENERALS.find((g) => g.id === this.state.generalId) ?? null;
+  }
+
+  /** Todo o mapa jogável sob uma só bandeira? Então é hora do Estado (§5). */
+  shouldPromoteToState(): boolean {
+    if (this.state.stage !== 'kingdom') return false;
+    const all = Object.values(this.state.territories);
+    return all.length > 0 && all.every((t) => t.ownerId === this.state.playerKingdomId);
+  }
+
+  /** Funda o Estado com nome, conselheiros e as duas ordens escolhidas. */
+  foundState(
+    name: string,
+    governorId: string,
+    generalId: string,
+    civilPolicy: GameState['civilPolicy'],
+    warPolicy: GameState['warPolicy'],
+  ) {
+    this.state.stage = 'state';
+    this.state.stateName = name.trim() || 'Acordelot';
+    this.state.governorId = governorId;
+    this.state.generalId = generalId;
+    this.state.civilPolicy = civilPolicy;
+    this.state.warPolicy = warPolicy;
+    this.state.promotionPending = false;
+    this.record('state_founded');
   }
 
   /** Sobe de título se o renome já alcançou o próximo degrau. */
