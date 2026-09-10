@@ -80,8 +80,12 @@ export function TopBar({
       <div className="crown-block">
         <img className="crown-banner" src={assetUrl('/ui/banner.webp')} alt="" />
         <div>
-          <div className="crown-name gilded">Reino de {kingdom.name}</div>
-          <div className="crown-motto">Paz, Prosperidade, Unidade</div>
+          <div className="crown-name gilded">
+            {state.stage === 'state' && state.stateName
+              ? `Estado de ${state.stateName}`
+              : `Reino de ${kingdom.name}`}
+          </div>
+          <div className="crown-motto">{game.realm.title().name}</div>
         </div>
       </div>
       <div className="crown-sep" />
