@@ -14,6 +14,7 @@ import { LoreIntro } from './ui/LoreIntro';
 import { Minimap } from './ui/Minimap';
 import { SaveTools } from './ui/SavePanel';
 import { SendTroops } from './ui/SendTroops';
+import { CouncilDemand } from './ui/CouncilDemand';
 import { StatePromotion } from './ui/StatePromotion';
 import { Tutorial } from './ui/Tutorial';
 import { TopBar } from './ui/TopBar';
@@ -574,6 +575,10 @@ export function App() {
       )}
 
       {started && game && snap?.state.promotionPending && <StatePromotion game={game} />}
+
+      {started && game && !snap?.state.promotionPending && game.council.pending && (
+        <CouncilDemand game={game} />
+      )}
 
       <UpdateWatcher />
 

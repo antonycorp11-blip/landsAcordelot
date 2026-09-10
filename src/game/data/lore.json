@@ -130,5 +130,180 @@
       "Além destas fronteiras há mais mundo do que o que você acaba de tomar. Mas isso é assunto do próximo capítulo."
     ],
     "closing": "Dê um nome ao que você construiu."
-  }
+  },
+  "decisions": [
+    {
+      "id": "dec_impostos",
+      "from": "governor",
+      "title": "A questão dos impostos",
+      "text": "O governador chega com os livros abertos. \"Os celeiros do sul renderam mais que o previsto. Podemos cobrar a diferença agora, enquanto ninguém contou as sacas, ou deixar com eles e ganhar o inverno inteiro de boa vontade.\"",
+      "require": {
+        "minTerritories": 2
+      },
+      "options": [
+        {
+          "label": "Cobrar a diferença",
+          "reply": "O ouro entrou. O povo reparou.",
+          "effects": {
+            "coin": 600,
+            "happiness": -10,
+            "stability": -4
+          }
+        },
+        {
+          "label": "Deixar com eles",
+          "reply": "Nenhum ouro, mas o sul lembra disso.",
+          "effects": {
+            "happiness": 12,
+            "stability": 6,
+            "loyalty": 6
+          }
+        }
+      ]
+    },
+    {
+      "id": "dec_desertores",
+      "from": "general",
+      "title": "Os que fugiram",
+      "text": "\"Sete homens abandonaram o posto na última noite. Se eu os enforcar, ninguém mais foge por um ano. Se eu perdoar, talvez eu ganhe sete soldados que devem a vida a você — e talvez perca setenta na próxima noite.\"",
+      "require": {
+        "minSoldiers": 10
+      },
+      "options": [
+        {
+          "label": "Enforcar os sete",
+          "reply": "A tropa endureceu. Ninguém mais olhou para a estrada.",
+          "effects": {
+            "morale": 14,
+            "happiness": -12,
+            "stability": -3
+          }
+        },
+        {
+          "label": "Perdoar",
+          "reply": "Voltaram ao posto de cabeça baixa. O acampamento inteiro viu.",
+          "effects": {
+            "morale": -6,
+            "happiness": 10,
+            "loyalty": 8
+          }
+        }
+      ]
+    },
+    {
+      "id": "dec_colheita",
+      "from": "governor",
+      "title": "A colheita ruim",
+      "text": "\"A chuva não veio no mês certo. Podemos abrir os armazéns do Estado agora e atravessar o inverno, ou segurar o grão para o exército e mandar o povo apertar o cinto.\"",
+      "require": {
+        "minTerritories": 3
+      },
+      "options": [
+        {
+          "label": "Abrir os armazéns",
+          "reply": "O povo comeu. Os celeiros esvaziaram.",
+          "effects": {
+            "food": -500,
+            "happiness": 16,
+            "stability": 8
+          }
+        },
+        {
+          "label": "Guardar para a tropa",
+          "reply": "O exército comeu. O povo murmurou.",
+          "effects": {
+            "morale": 10,
+            "happiness": -14,
+            "stability": -6
+          }
+        }
+      ]
+    },
+    {
+      "id": "dec_mercenarios",
+      "from": "general",
+      "title": "A companhia livre",
+      "text": "\"Uma companhia de mercenários acampou na fronteira e oferece serviço. São bons — e caros. Também são o tipo de gente que troca de lado se alguém pagar mais.\"",
+      "require": {
+        "minCoin": 900
+      },
+      "options": [
+        {
+          "label": "Contratar a companhia",
+          "reply": "Vieram armados e pagos. Por enquanto, leais.",
+          "effects": {
+            "coin": -900,
+            "units": {
+              "swordsman": 12,
+              "archer": 8
+            }
+          }
+        },
+        {
+          "label": "Mandar seguir caminho",
+          "reply": "Partiram sem discutir. Talvez apareçam do outro lado.",
+          "effects": {
+            "stability": 4
+          }
+        }
+      ]
+    },
+    {
+      "id": "dec_praca",
+      "from": "governor",
+      "title": "A praça vazia",
+      "text": "\"Há uma praça no coração da capital que ninguém usa desde a guerra. Um mercado ali renderia. Um monumento ao seu nome renderia outra coisa.\"",
+      "require": {
+        "minTerritories": 4
+      },
+      "options": [
+        {
+          "label": "Erguer um mercado",
+          "reply": "A praça encheu de barracas em uma semana.",
+          "effects": {
+            "coin": -300,
+            "production": 0
+          }
+        },
+        {
+          "label": "Erguer um monumento",
+          "reply": "Alto, de pedra, com seu nome na base.",
+          "effects": {
+            "coin": -500,
+            "happiness": 8,
+            "loyalty": 10,
+            "renown": 250
+          }
+        }
+      ]
+    },
+    {
+      "id": "dec_fronteira",
+      "from": "general",
+      "title": "A patrulha sumida",
+      "text": "\"Uma patrulha não voltou do passo. Posso mandar meia guarnição procurar, e deixar a praça descoberta por dois dias. Ou posso dá-los por mortos e dormir tranquilo.\"",
+      "require": {
+        "minSoldiers": 20
+      },
+      "options": [
+        {
+          "label": "Mandar buscar",
+          "reply": "Trouxeram três de volta. A tropa viu que você manda buscar.",
+          "effects": {
+            "morale": 12,
+            "loyalty": 6,
+            "stability": -4
+          }
+        },
+        {
+          "label": "Dá-los por mortos",
+          "reply": "Riscaram sete nomes do livro. Ninguém comentou.",
+          "effects": {
+            "morale": -10,
+            "stability": 3
+          }
+        }
+      ]
+    }
+  ]
 }

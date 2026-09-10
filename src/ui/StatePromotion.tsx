@@ -6,32 +6,70 @@ import type { Game } from '../game/Game';
 import { GENERALS, GOVERNORS, type AdvisorDef } from '../game/managers/RealmManager';
 import type { CivilPolicy, WarPolicy } from '../game/types';
 
-/** Grade de cartas de conselheiro. Usa a carta ilustrada quando existir. */
+/**
+ * Grade de cartas de conselheiro.
+ *
+ * A carta mostra tier, nome e ofício; abaixo dela vêm a história, o forte e o
+ * fraco. Conselheiro sem fraqueza é bônus disfarçado de personagem.
+ */
 function AdvisorGrid({
+  game,
   list,
   pickedId,
   onPick,
 }: {
+  game: Game;
   list: AdvisorDef[];
   pickedId: string;
   onPick: (id: string) => void;
 }) {
+  const picked = list.find((a) => a.id === pickedId);
   return (
     <>
-      <div className="gov-grid">
-        {list.map((a) => (
-          <button
-            key={a.id}
-            className={`gov ${pickedId === a.id ? 'active' : ''}`}
-            onClick={() => onPick(a.id)}
-          >
-            <img src={spriteUrl(a.card ?? a.portrait)} alt="" />
-            <span className="gn">{a.name}</span>
-            <span className="gt">{a.trait}</span>
-          </button>
-        ))}
+      <div className="card-row">
+        {list.map((a) => {
+          const lock = game.realm.advisorLock(a);
+          return (
+            <button
+              key={a.id}
+              className={`advisor-card ${pickedId === a.id ? 'active' : ''} ${lock ? 'locked' : ''}`}
+              onClick={() => !lock && onPick(a.id)}
+              disabled={Boolean(lock)}
+              title={lock ?? a.specialty}
+            >
+              <img src={spriteUrl(a.card)} alt="" />
+              <span className="cardname">{a.name}</span>
+              {lock && <span className="cardlock">{a.gacha ? '★ Chamado' : `T${a.tier}`}</span>}
+            </button>
+          );
+        })}
       </div>
-      <div className="hint">{list.find((a) => a.id === pickedId)?.hint}</div>
+
+      {picked && (
+        <div className="advisor-detail">
+          <div className="ad-head">
+            <span className="ad-name">{picked.name}</span>
+            <span className="ad-title">
+              T{picked.tier} · {picked.title} · {picked.specialty}
+            </span>
+          </div>
+          <p className="ad-history">{picked.history}</p>
+          <div className="ad-traits">
+            <div>
+              <span className="cap good">Forte</span>
+              {picked.strengths.map((x) => (
+                <span key={x}>{x}</span>
+              ))}
+            </div>
+            <div>
+              <span className="cap bad">Fraco</span>
+              {picked.weaknesses.map((x) => (
+                <span key={x}>{x}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
@@ -115,7 +153,7 @@ export function StatePromotion({ game }: { game: Game }) {
               quanta gente nasce e o humor com que ela acorda.
             </p>
 
-            <AdvisorGrid list={GOVERNORS} pickedId={governorId} onPick={setGovernorId} />
+            <AdvisorGrid game={game} list={GOVERNORS} pickedId={governorId} onPick={setGovernorId} />
 
             <div className="section-title">Ordem ao governador</div>
             <div className="target-row">
@@ -151,7 +189,7 @@ export function StatePromotion({ game }: { game: Game }) {
               firmeza marcha e o que acontece quando batem no seu portão.
             </p>
 
-            <AdvisorGrid list={GENERALS} pickedId={generalId} onPick={setGeneralId} />
+            <AdvisorGrid game={game} list={GENERALS} pickedId={generalId} onPick={setGeneralId} />
 
             <div className="section-title">Ordem ao general</div>
             <div className="target-row">

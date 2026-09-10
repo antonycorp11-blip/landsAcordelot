@@ -3,6 +3,7 @@ import { TUTORIAL_STEPS, UNIT_DEFS } from './data/defs';
 import { AIManager } from './managers/AIManager';
 import { ArmyManager, stackSize, type MarchCheck, type UnitStack } from './managers/ArmyManager';
 import { BattleManager, type BattlePreview } from './managers/BattleManager';
+import { CouncilManager } from './managers/CouncilManager';
 import { RealmManager } from './managers/RealmManager';
 import { BuildingManager } from './managers/BuildingManager';
 import { Camera } from './managers/Camera';
@@ -60,6 +61,7 @@ export class Game {
   readonly ai: AIManager;
   readonly trade: TradeManager;
   readonly realm: RealmManager;
+  readonly council: CouncilManager;
   readonly saves: SaveManager;
 
   private renderer: Renderer | null = null;
@@ -112,6 +114,7 @@ export class Game {
     this.ai = new AIManager(this.state, this.economy, this.buildings, this.armies, this.battles);
     this.trade = new TradeManager(this.state);
     this.realm = new RealmManager(this.state);
+    this.council = new CouncilManager(this.state);
     this.saves = new SaveManager();
   }
 
@@ -288,6 +291,13 @@ export class Game {
     this.trade.tick(simDt);
     this.ai.tick(simDt);
     this.checkRealm();
+
+    // O conselho traz uma demanda: o jogo pausa e espera a decisão.
+    const demand = this.council.tick(simDt);
+    if (demand) {
+      this.setSpeed(0);
+      this.touch();
+    }
     this.saves.tick(simDt, this.state);
     this.advanceTutorial();
   }
@@ -331,6 +341,15 @@ export class Game {
   ) {
     this.realm.foundState(name, governorId, generalId, civilPolicy, warPolicy);
     this.notify(`O Estado de ${this.state.stateName} está fundado.`, 7);
+    this.setSpeed(1);
+    this.touch();
+  }
+
+  /** Responde a demanda aberta do conselho. */
+  decide(optionIndex: number) {
+    const option = this.council.decide(optionIndex);
+    if (!option) return;
+    this.notify(option.reply, 6);
     this.setSpeed(1);
     this.touch();
   }

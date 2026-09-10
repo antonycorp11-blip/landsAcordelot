@@ -463,5 +463,55 @@
     "w": 300,
     "h": 292,
     "ay": 0.86
+  },
+  "advisors/gov_t1": {
+    "w": 430,
+    "h": 672,
+    "ay": 0.5
+  },
+  "advisors/gov_t2": {
+    "w": 430,
+    "h": 660,
+    "ay": 0.5
+  },
+  "advisors/gov_t3": {
+    "w": 430,
+    "h": 662,
+    "ay": 0.5
+  },
+  "advisors/gov_t4": {
+    "w": 430,
+    "h": 652,
+    "ay": 0.5
+  },
+  "advisors/gov_t5": {
+    "w": 430,
+    "h": 655,
+    "ay": 0.5
+  },
+  "advisors/gen_t1": {
+    "w": 430,
+    "h": 669,
+    "ay": 0.5
+  },
+  "advisors/gen_t2": {
+    "w": 430,
+    "h": 660,
+    "ay": 0.5
+  },
+  "advisors/gen_t3": {
+    "w": 430,
+    "h": 669,
+    "ay": 0.5
+  },
+  "advisors/gen_t4": {
+    "w": 430,
+    "h": 664,
+    "ay": 0.5
+  },
+  "advisors/gen_t5": {
+    "w": 430,
+    "h": 662,
+    "ay": 0.5
   }
 }

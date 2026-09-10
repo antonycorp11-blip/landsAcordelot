@@ -1068,9 +1068,95 @@ button { font-family: inherit; }
 .gov .gn { font-size: 11px; font-weight: 650; line-height: 1.2; }
 .gov .gt { font-size: 9.5px; color: var(--muted); }
 
+/* ------------------------------------------------ cartas de conselheiro -- */
+
+/* A carta é a personagem: fica grande, e o texto dela vem embaixo. */
+.card-row {
+  display: flex; gap: 8px; margin-top: 12px;
+  overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin;
+}
+.advisor-card {
+  position: relative; flex: 0 0 auto; width: 96px; padding: 0; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  background: none; border: none; color: var(--text);
+}
+.advisor-card img {
+  width: 100%; border-radius: 9px; display: block;
+  border: 1px solid rgba(232,195,90,.22);
+  box-shadow: 0 6px 16px rgba(0,0,0,.5);
+  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+}
+.advisor-card:hover:not(.locked) img { transform: translateY(-2px); }
+.advisor-card.active img {
+  border-color: rgba(232,195,90,.95);
+  box-shadow: 0 0 0 2px rgba(232,195,90,.45), 0 10px 24px rgba(0,0,0,.6);
+}
+.advisor-card.locked { cursor: not-allowed; }
+.advisor-card.locked img { filter: grayscale(.85) brightness(.5); }
+.cardname {
+  font-size: 10px; font-weight: 650; line-height: 1.25; text-align: center;
+  color: #d8e2f0;
+}
+.advisor-card.locked .cardname { color: var(--muted); }
+.cardlock {
+  position: absolute; top: 6px; left: 50%; transform: translateX(-50%);
+  font-size: 9px; font-weight: 750; letter-spacing: .6px; white-space: nowrap;
+  padding: 2px 7px; border-radius: 999px;
+  background: rgba(6,13,26,.9); color: var(--gold-300);
+  border: 1px solid rgba(232,195,90,.4);
+}
+
+.advisor-detail {
+  margin-top: 11px; padding: 11px 13px; border-radius: 10px;
+  background: rgba(6,13,26,.55); border: 1px solid rgba(232,195,90,.18);
+}
+.ad-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.ad-name { font-size: 14px; font-weight: 750; letter-spacing: .3px; color: var(--gold-100); }
+.ad-title { font-size: 10.5px; color: var(--muted); letter-spacing: .3px; }
+.ad-history {
+  font-size: 11.5px !important; line-height: 1.6 !important; color: #b9c6d8 !important;
+  margin: 7px 0 0 !important; font-style: italic;
+}
+.ad-traits { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 9px; }
+.ad-traits > div { display: flex; flex-direction: column; gap: 3px; }
+.ad-traits span { font-size: 11px; line-height: 1.35; color: #cfdaea; }
+.cap {
+  font-size: 9px !important; font-weight: 750; letter-spacing: 1.2px; text-transform: uppercase;
+}
+.cap.good { color: #6fd39a !important; }
+.cap.bad { color: #e08a8a !important; }
+
+/* --------------------------------------------- demandas do conselho -- */
+
+.council-opts { display: grid; gap: 8px; margin-top: 14px; }
+.council-opt {
+  display: flex; align-items: center; gap: 10px; text-align: left; cursor: pointer;
+  padding: 11px 13px; border-radius: 10px; color: var(--text);
+  background: rgba(255,255,255,.045); border: 1px solid rgba(232,195,90,.24);
+}
+.council-opt:hover { background: rgba(232,195,90,.13); border-color: rgba(232,195,90,.6); }
+.council-opt .ol { flex: 1; font-size: 13px; font-weight: 650; }
+.council-opt .oc { display: flex; gap: 7px; flex-wrap: wrap; justify-content: flex-end; }
+.council-opt .oc span { font-size: 10.5px; font-weight: 700; letter-spacing: .2px; }
+.council-opt .oc .up { color: #6fd39a; }
+.council-opt .oc .down { color: #e08a8a; }
+
+.council-who { display: flex; gap: 12px; align-items: flex-start; margin-top: 12px; }
+.council-who img {
+  width: 108px; flex: 0 0 auto; border-radius: 10px;
+  border: 1px solid rgba(232,195,90,.35); box-shadow: 0 10px 24px rgba(0,0,0,.55);
+}
+.council-who .cw-text { flex: 1; min-width: 0; }
+
 @media (max-height: 560px) {
   .promo-card { padding: 14px 16px; width: min(500px, 100%); }
   .promo-card h2 { font-size: 19px; }
   .promo-card p { font-size: 11.5px; line-height: 1.55; margin-top: 8px; }
   .gov img { max-width: 54px; }
+  .advisor-card { width: 72px; }
+  .ad-history { font-size: 10.5px !important; line-height: 1.45 !important; }
+  .ad-traits span { font-size: 10px; }
+  .council-who img { width: 78px; }
+  .council-opt { padding: 8px 10px; }
+  .council-opt .ol { font-size: 11.5px; }
 }

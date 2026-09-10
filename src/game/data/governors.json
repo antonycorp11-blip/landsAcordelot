@@ -1,48 +1,124 @@
 [
   {
-    "id": "gov_isolde",
-    "portrait": "portraits/queen",
-    "card": "advisors/gov_isolde",
-    "name": "Rainha Isolde",
-    "trait": "Mão firme",
-    "hint": "Governa por lei e por medo, nessa ordem. Províncias sob ela raramente se agitam.",
+    "id": "gov_t1",
+    "tier": 1,
+    "card": "advisors/gov_t1",
+    "name": "Edrin de Valdória",
+    "title": "Escrivão-mor",
+    "history": "Filho de comerciante, aprendeu a contar sacas antes de aprender a ler. Assumiu os livros do castelo quando o antigo escrivão morreu no inverno e nunca devolveu a pena.",
+    "specialty": "Contabilidade",
+    "strengths": [
+      "Salários enxutos",
+      "Nunca perde uma saca de vista"
+    ],
+    "weaknesses": [
+      "Pouca autoridade sobre nobres",
+      "O povo não o conhece"
+    ],
     "bonus": {
-      "production": 1.0,
+      "production": 1.06,
       "wageCut": 0.08,
-      "stability": 12,
-      "happiness": 4,
-      "growth": 1.0
-    }
-  },
-  {
-    "id": "gov_maerwyn",
-    "portrait": "portraits/princess",
-    "card": "advisors/gov_maerwyn",
-    "name": "Princesa Maerwyn",
-    "trait": "Negociadora",
-    "hint": "Fecha acordos que exércitos não fechariam. As caravanas a adoram.",
-    "bonus": {
-      "production": 1.05,
-      "wageCut": 0.1,
-      "stability": 6,
-      "happiness": 8,
-      "growth": 1.05,
-      "tradeSpread": -0.08
-    }
-  },
-  {
-    "id": "gov_aldric",
-    "portrait": "portraits/lord",
-    "card": "advisors/gov_aldric",
-    "name": "Lorde Aldric, o Velho",
-    "trait": "Administrador",
-    "hint": "Serviu três reis. Conhece cada celeiro do Estado pelo nome do celeireiro.",
-    "bonus": {
-      "production": 1.16,
-      "wageCut": 0.04,
-      "stability": 4,
+      "stability": 2,
       "happiness": 0,
       "growth": 1.0
+    }
+  },
+  {
+    "id": "gov_t2",
+    "tier": 2,
+    "card": "advisors/gov_t2",
+    "name": "Dama Sera das Chaves",
+    "title": "Guardiã dos celeiros",
+    "history": "Carrega as chaves de todos os armazéns do reino numa argola de ferro. Diz-se que sabe de cor quanto grão há em cada província — e que nunca errou.",
+    "specialty": "Abastecimento",
+    "strengths": [
+      "Armazéns maiores",
+      "Povo bem alimentado é povo calmo"
+    ],
+    "weaknesses": [
+      "Avessa a gastos militares"
+    ],
+    "bonus": {
+      "production": 1.1,
+      "wageCut": 0.06,
+      "stability": 8,
+      "happiness": 6,
+      "growth": 1.15,
+      "storage": 1200
+    }
+  },
+  {
+    "id": "gov_t3",
+    "tier": 3,
+    "card": "advisors/gov_t3",
+    "name": "Conde Halvard",
+    "title": "Administrador do Selo",
+    "history": "Governou três províncias antes de chegar à corte, e nenhuma delas se revoltou. Costuma dizer que um bom governo é aquele de que ninguém fala.",
+    "specialty": "Administração",
+    "strengths": [
+      "Produção elevada",
+      "Ordem firme nas cidades"
+    ],
+    "weaknesses": [
+      "Cauteloso demais para crescer rápido"
+    ],
+    "bonus": {
+      "production": 1.2,
+      "wageCut": 0.12,
+      "stability": 12,
+      "happiness": 4,
+      "growth": 1.05
+    }
+  },
+  {
+    "id": "gov_t4",
+    "tier": 4,
+    "card": "advisors/gov_t4",
+    "name": "Arquiduquesa Elvia",
+    "title": "Voz do Trono",
+    "history": "Serviu ao Alto Rei antes do Acordo se desfazer. Sobreviveu a duas cortes e a um envenenamento. Fala pouco e é obedecida muito.",
+    "specialty": "Estadismo",
+    "strengths": [
+      "Tudo funciona melhor sob sua mão",
+      "Comércio favorecido"
+    ],
+    "weaknesses": [
+      "Exige tesouro cheio para agir"
+    ],
+    "bonus": {
+      "production": 1.28,
+      "wageCut": 0.16,
+      "stability": 16,
+      "happiness": 8,
+      "growth": 1.2,
+      "tradeSpread": -0.07,
+      "storage": 2400
+    }
+  },
+  {
+    "id": "gov_t5",
+    "tier": 5,
+    "gacha": true,
+    "card": "advisors/gov_t5",
+    "name": "Rei Aurelian, o Provedor",
+    "title": "Coroa Administradora",
+    "history": "Reinou quarenta anos sem perder uma safra. Dizem que sob Aurelian nenhuma criança do reino passou fome — e que por isso o povo perdoou tudo o mais.",
+    "specialty": "Prosperidade",
+    "strengths": [
+      "Produção e crescimento excepcionais",
+      "Reino próspero e estável"
+    ],
+    "weaknesses": [
+      "Só através do Chamado (em breve)"
+    ],
+    "bonus": {
+      "production": 1.42,
+      "wageCut": 0.22,
+      "stability": 22,
+      "happiness": 14,
+      "growth": 1.4,
+      "tradeSpread": -0.1,
+      "storage": 4200
     }
   }
 ]

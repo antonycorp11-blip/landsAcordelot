@@ -407,6 +407,8 @@ export interface RealmStats {
   buildingsRaised: number;
   unitsTrained: number;
   caravansSent: number;
+  /** Renome ganho fora do mapa: decisões do conselho, feitos únicos. */
+  renownGranted: number;
 }
 
 export function emptyStats(): RealmStats {
@@ -418,5 +420,6 @@ export function emptyStats(): RealmStats {
     buildingsRaised: 0,
     unitsTrained: 0,
     caravansSent: 0,
+    renownGranted: 0,
   };
 }

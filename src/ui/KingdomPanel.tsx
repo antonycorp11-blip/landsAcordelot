@@ -37,10 +37,10 @@ function RealmHeader({ game }: { game: Game }) {
           {governor && (
             <>
               <div className="row">
-                <img className="thumb" src={spriteUrl(governor.card ?? governor.portrait)} alt="" />
+                <img className="thumb" src={spriteUrl(governor.card)} alt="" />
                 <div className="grow">
                   <span className="name">{governor.name}</span>
-                  <span className="meta">Governador · {governor.trait}</span>
+                  <span className="meta">Governador T{governor.tier} · {governor.specialty}</span>
                 </div>
               </div>
               <div className="target-row" style={{ marginTop: 6 }}>
@@ -64,10 +64,10 @@ function RealmHeader({ game }: { game: Game }) {
           {general && (
             <>
               <div className="row" style={{ marginTop: 10 }}>
-                <img className="thumb" src={spriteUrl(general.card ?? general.portrait)} alt="" />
+                <img className="thumb" src={spriteUrl(general.card)} alt="" />
                 <div className="grow">
                   <span className="name">{general.name}</span>
-                  <span className="meta">General · {general.trait}</span>
+                  <span className="meta">General T{general.tier} · {general.specialty}</span>
                 </div>
               </div>
               <div className="target-row" style={{ marginTop: 6 }}>

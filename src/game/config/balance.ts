@@ -275,6 +275,12 @@ export const RENOWN = {
 } as const;
 
 /**
+ * Renome exigido por tier de conselheiro. T5 não entra por aqui: é do Chamado.
+ * Amarrar o desbloqueio ao título faz a progressão do reino valer alguma coisa.
+ */
+export const ADVISOR_TIER_RENOWN = [0, 0, 1100, 2200, 4000, Infinity] as const;
+
+/**
  * Ordens permanentes. São duas mesas separadas: o governador cuida da cidade,
  * do povo e do que sai do solo; o general cuida da tropa e da fronteira.
  * Cada ordem é trocável a qualquer momento, no painel do Reino.

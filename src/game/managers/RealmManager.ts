@@ -1,4 +1,4 @@
-import { CIVIL_POLICIES, RENOWN, TITLES, WAR_POLICIES } from '../config/balance';
+import { ADVISOR_TIER_RENOWN, CIVIL_POLICIES, RENOWN, TITLES, WAR_POLICIES } from '../config/balance';
 import generalsRaw from '../data/generals.json';
 import governorsRaw from '../data/governors.json';
 import { LORE } from '../data/defs';
@@ -17,12 +17,16 @@ export interface TitleInfo {
 /** Conselheiro: governador cuida da cidade, general cuida da tropa. */
 export interface AdvisorDef {
   id: string;
-  portrait: string;
-  /** Carta ilustrada, quando existir arte dedicada. */
-  card?: string;
+  tier: number;
+  /** Só entra pelo Chamado — ainda não implementado. */
+  gacha?: boolean;
+  card: string;
   name: string;
-  trait: string;
-  hint: string;
+  title: string;
+  history: string;
+  specialty: string;
+  strengths: string[];
+  weaknesses: string[];
   bonus: Record<string, number>;
 }
 
@@ -51,7 +55,8 @@ export class RealmManager {
     let total =
       s.battlesWon * RENOWN.perBattleWon +
       s.territoriesTaken * RENOWN.perTerritoryTaken +
-      s.unitsTrained * RENOWN.perUnitTrained;
+      s.unitsTrained * RENOWN.perUnitTrained +
+      (s.renownGranted ?? 0);
 
     for (const t of Object.values(this.state.territories)) {
       if (t.ownerId !== this.state.playerKingdomId) continue;
@@ -99,7 +104,7 @@ export class RealmManager {
     const n = (v: number | undefined, fallback = 0) => (typeof v === 'number' ? v : fallback);
 
     return {
-      storage: t.storage,
+      storage: t.storage + n(gov.storage),
       wageCut: t.wageCut + n(gov.wageCut),
       morale: t.morale + n(gen.morale) + (war?.morale ?? 0),
       claimCut: Math.min(0.6, t.claimCut + (war?.claimCut ?? 0)),
@@ -117,6 +122,23 @@ export class RealmManager {
 
   governor(): AdvisorDef | null {
     return GOVERNORS.find((g) => g.id === this.state.governorId) ?? null;
+  }
+
+  /**
+   * Conselheiro disponível? T1 sempre; os demais exigem renome, e o T5 é do
+   * Chamado, que ainda não existe.
+   */
+  advisorAvailable(a: AdvisorDef): boolean {
+    if (a.gacha) return false;
+    return this.renown() >= (ADVISOR_TIER_RENOWN[a.tier] ?? Infinity);
+  }
+
+  /** Motivo de um conselheiro estar fora de alcance, para a UI ser honesta. */
+  advisorLock(a: AdvisorDef): string | null {
+    if (a.gacha) return 'Apenas pelo Chamado — em breve';
+    const need = ADVISOR_TIER_RENOWN[a.tier] ?? Infinity;
+    if (this.renown() >= need) return null;
+    return `Exige ${need} de renome`;
   }
 
   general(): AdvisorDef | null {
