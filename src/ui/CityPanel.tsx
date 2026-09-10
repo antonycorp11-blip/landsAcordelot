@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { spriteUrl } from '../game/config/version';
 import type { Game } from '../game/Game';
 import { BUILDING_LIST, BUILDING_DEFS, UNIT_LIST, UNIT_DEFS } from '../game/data/defs';
 import { WORKFORCE } from '../game/config/balance';
@@ -91,7 +92,7 @@ function Thumb({ sprite, fallback }: { sprite?: string; fallback: string }) {
       </div>
     );
   }
-  return <img className="thumb" src={`/assets/${sprite}.webp`} alt="" onError={() => setOk(false)} />;
+  return <img className="thumb" src={spriteUrl(sprite)} alt="" onError={() => setOk(false)} />;
 }
 
 /**

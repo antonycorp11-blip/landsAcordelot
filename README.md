@@ -18,6 +18,28 @@ O projeto é um app Vite estático. Na Vercel, o preset padrão já serve:
 - **Output Directory:** `dist`
 - **Install Command:** `npm install`
 
+### Como a atualização chega no aparelho
+
+PWA instalado é o caso mais chato: o aparelho guarda o que baixou e não
+pergunta de novo. A estratégia aqui tem três camadas e **não usa service
+worker de propósito** — um SW mal configurado é a causa mais comum de app
+travado numa versão velha.
+
+1. **URL carimbada.** `vite.config.ts` gera um `__BUILD_ID__` novo a cada
+   build. Todo sprite e o manifesto de arte são pedidos como
+   `/assets/…?v=<BUILD_ID>`. O navegador indexa o cache pela URL inteira, então
+   uma build nova nunca reaproveita o arquivo antigo.
+2. **Cabeçalhos explícitos** (`vercel.json`): `index.html` e
+   `manifest.webmanifest` com `max-age=0, must-revalidate`; tudo em `/assets/`
+   com `immutable`, porque ou tem hash no nome (bundles) ou tem `?v=` (arte).
+3. **Aviso dentro do jogo.** `UpdateWatcher` relê o `index.html` com
+   `cache: 'no-store'` a cada 2 minutos e ao voltar para o app, compara o
+   bundle publicado com o que está rodando e oferece **Atualizar** — que limpa
+   Cache Storage, remove service workers órfãos e recarrega.
+
+A versão em execução aparece no painel **Ajuda**, junto com um botão de
+**Forçar atualização** para depurar no aparelho.
+
 ## Assets
 
 A arte original (PNG grandes, ~115 MB) fica em `AssetsAcordKingdons/` e **não é

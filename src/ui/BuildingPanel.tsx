@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { spriteUrl } from '../game/config/version';
 import { BUILDING_DEFS, UNIT_DEFS, UNIT_LIST } from '../game/data/defs';
 import type { Game } from '../game/Game';
 import { BUILDING_WORKER, buildingSprite } from '../game/render/spriteCatalog';
@@ -15,7 +16,7 @@ import { RESOURCE_ICON, RESOURCE_LABEL } from './icons';
 function Sprite({ path, className }: { path?: string; className: string }) {
   const [ok, setOk] = useState(true);
   if (!path || !ok) return <div className={className} />;
-  return <img className={className} src={`/assets/${path}.webp`} alt="" onError={() => setOk(false)} />;
+  return <img className={className} src={spriteUrl(path)} alt="" onError={() => setOk(false)} />;
 }
 
 function CostList({ cost, have }: { cost: Partial<ResourceBag>; have: ResourceBag }) {

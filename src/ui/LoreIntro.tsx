@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { LORE } from '../game/data/defs';
+import { spriteUrl } from '../game/config/version';
 import { assets } from '../game/render/AssetManager';
 import { PRELOAD_KEYS } from '../game/render/spriteCatalog';
 
@@ -25,7 +26,7 @@ export function LoreIntro({ onStart, hasSave }: { onStart: () => void; hasSave: 
   return (
     <div className="lore">
       <div className="lore-inner">
-        <img className="lore-portrait" src="/assets/portraits/king.webp" alt="" />
+        <img className="lore-portrait" src={spriteUrl('portraits/king')} alt="" />
         <div className="lore-text">
           <h1>{LORE.title}</h1>
           <div className="chapter">{LORE.chapter}</div>

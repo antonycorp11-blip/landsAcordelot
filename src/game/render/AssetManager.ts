@@ -8,6 +8,8 @@
  *    para não custar nada por frame.
  */
 
+import { assetUrl, spriteUrl } from '../config/version';
+
 export interface SpriteMeta {
   w: number;
   h: number;
@@ -31,7 +33,7 @@ export class AssetManager {
 
   async load(): Promise<void> {
     try {
-      const res = await fetch(`${this.base}/manifest.json`);
+      const res = await fetch(assetUrl(`${this.base}/manifest.json`), { cache: 'no-cache' });
       if (res.ok) this.manifest = (await res.json()) as Manifest;
     } catch {
       this.manifest = {};
@@ -55,7 +57,7 @@ export class AssetManager {
 
     const img = new Image();
     img.decoding = 'async';
-    img.src = `${this.base}/${key}.webp`;
+    img.src = spriteUrl(key);
     img.onerror = () => this.failed.add(key);
     this.images.set(key, img);
     return null;

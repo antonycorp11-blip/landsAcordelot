@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { CAMERA } from './game/config/balance';
+import { BUILD_ID } from './game/config/version';
 import { Game, type GameSnapshot } from './game/Game';
 import { assets } from './game/render/AssetManager';
 import { CampaignPanel } from './ui/CampaignPanel';
@@ -13,6 +14,7 @@ import { LoreIntro } from './ui/LoreIntro';
 import { Minimap } from './ui/Minimap';
 import { Tutorial } from './ui/Tutorial';
 import { TopBar } from './ui/TopBar';
+import { UpdateWatcher } from './ui/UpdateWatcher';
 
 type Rail = 'kingdom' | 'campaigns' | 'help' | 'debug' | null;
 
@@ -354,6 +356,30 @@ export function App() {
                   e o exército debanda.
                 </div>
                 <div className="hint">O jogo salva sozinho a cada 20 segundos no navegador.</div>
+                <div className="hint" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span>
+                    Versão <strong>{BUILD_ID}</strong>
+                  </span>
+                  <button
+                    className="btn sm"
+                    style={{ marginLeft: 'auto' }}
+                    onClick={() => {
+                      void (async () => {
+                        try {
+                          if ('caches' in window) {
+                            const keys = await caches.keys();
+                            await Promise.all(keys.map((k) => caches.delete(k)));
+                          }
+                        } catch {
+                          /* segue mesmo assim */
+                        }
+                        window.location.replace(`${window.location.pathname}?r=${Date.now()}`);
+                      })();
+                    }}
+                  >
+                    Forçar atualização
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -383,6 +409,8 @@ export function App() {
           {snap.message && <div className="toast">{snap.message}</div>}
         </div>
       )}
+
+      <UpdateWatcher />
 
       <div className="rotate-hint">
         <div>
