@@ -120,12 +120,24 @@ export interface DepositSeed {
  */
 export const FRAME = { width: 5200, height: 3000 } as const;
 
+/** Massa gaussiana que levanta terra ou abre mar, em coordenadas de quadro. */
+export interface LandAnchor {
+  x: number;
+  y: number;
+  r: number;
+  amp: number;
+}
+
 /** Recorte do canvas: tamanho total e onde o quadro original começa nele. */
 export interface WorldFrame {
   width: number;
   height: number;
   originX: number;
   originY: number;
+  /** Terras que só existem depois que o mapa cresce (§5). */
+  land?: LandAnchor[];
+  /** Mares novos, para o continente novo não virar um bloco só. */
+  sea?: LandAnchor[];
 }
 
 export const KINGDOM_FRAME: WorldFrame = {
@@ -184,6 +196,8 @@ export function buildWorld(
   const H = frame.height;
   const ox = frame.originX;
   const oy = frame.originY;
+  const extraLand = frame.land ?? [];
+  const extraSea = frame.sea ?? [];
   const cell = WORLD.cell;
   const w = Math.ceil(W / cell);
   const h = Math.ceil(H / cell);
@@ -217,7 +231,13 @@ export function buildWorld(
       for (const a of WILDERNESS_ANCHORS) {
         value += a.amp * Math.exp(-(((fx - a.x) / a.r) ** 2 + ((fy - a.y) / a.r) ** 2));
       }
+      for (const a of extraLand) {
+        value += a.amp * Math.exp(-(((fx - a.x) / a.r) ** 2 + ((fy - a.y) / a.r) ** 2));
+      }
       for (const a of SEA_ANCHORS) {
+        value -= a.amp * Math.exp(-(((fx - a.x) / a.r) ** 2 + ((fy - a.y) / a.r) ** 2));
+      }
+      for (const a of extraSea) {
         value -= a.amp * Math.exp(-(((fx - a.x) / a.r) ** 2 + ((fy - a.y) / a.r) ** 2));
       }
 
@@ -225,9 +245,11 @@ export function buildWorld(
       // duas penalidades, nunca a soma — somar mudaria a costa que já existe.
       const edgeFrame = Math.min(fx, fy, FRAME.width - fx, FRAME.height - fy);
       const edgeCanvas = Math.min(x, y, W - x, H - y);
+      // Teto em 1: fora do quadro a penalidade satura em vez de explodir, e
+      // é isso que deixa as terras novas nascerem do outro lado da borda.
       value -= Math.max(
-        Math.max(0, 1 - edgeFrame / 420),
-        Math.max(0, 1 - edgeCanvas / 420),
+        Math.min(1, Math.max(0, 1 - edgeFrame / 420)),
+        Math.min(1, Math.max(0, 1 - edgeCanvas / 420)),
       ) * 1.15;
       value += fbmSigned(fx / 620, fy / 620, 4, seed) * 0.42;
       value += fbmSigned(fx / 180, fy / 180, 3, seed + 7) * 0.11;

@@ -1,3 +1,4 @@
+import countriesRaw from './data/countries.json';
 import kingdomsRaw from './data/kingdoms.json';
 import territoriesRaw from './data/territories.json';
 import type { KingdomDef, TerritoryDef } from './data/schema';
@@ -15,10 +16,78 @@ import type {
   Territory,
   UnitKind,
 } from './types';
-import { buildWorld, type BuiltWorld, type TerritorySeedInput } from './world/WorldBuilder';
+import {
+  KINGDOM_FRAME,
+  buildWorld,
+  type BuiltWorld,
+  type LandAnchor,
+  type TerritorySeedInput,
+  type WorldFrame,
+} from './world/WorldBuilder';
 
 const TERRITORY_DEFS = territoriesRaw as TerritoryDef[];
 const KINGDOM_DEFS = kingdomsRaw as KingdomDef[];
+
+/**
+ * Ondas de expansão (§5).
+ *
+ * O País não aparece inteiro de uma vez: cada onda revela os vizinhos que
+ * fazem fronteira com o que você já domina, cresce o canvas o bastante para
+ * caberem, e liga as duas malhas por passagens declaradas. O quadro original
+ * nunca se move em coordenadas de quadro — só ganha moldura em volta.
+ */
+export interface CountryWave {
+  id: string;
+  title: string;
+  frame: { width: number; height: number; originX: number; originY: number };
+  land: LandAnchor[];
+  sea: LandAnchor[];
+  /** Pares de territórios que passam a fazer fronteira. */
+  bridges: [string, string][];
+  states: { kingdom: KingdomDef; territories: TerritoryDef[] }[];
+}
+
+export const COUNTRY_WAVES = countriesRaw as unknown as CountryWave[];
+
+/** Quantas ondas existem para revelar além do reino inicial. */
+export const MAX_WAVES = COUNTRY_WAVES.length;
+
+/** Quadro e defs válidos para um dado número de ondas reveladas. */
+function composition(waves: number) {
+  const active = COUNTRY_WAVES.slice(0, Math.max(0, Math.min(waves, MAX_WAVES)));
+  const last = active[active.length - 1];
+
+  const frame: WorldFrame = last
+    ? {
+        ...last.frame,
+        land: active.flatMap((w) => w.land),
+        sea: active.flatMap((w) => w.sea),
+      }
+    : KINGDOM_FRAME;
+
+  const territoryDefs: TerritoryDef[] = TERRITORY_DEFS.map((d) => ({ ...d, neighbors: [...d.neighbors] }));
+  const kingdomDefs: KingdomDef[] = [...KINGDOM_DEFS];
+  for (const wave of active) {
+    for (const st of wave.states) {
+      kingdomDefs.push(st.kingdom);
+      for (const t of st.territories) territoryDefs.push({ ...t, neighbors: [...t.neighbors] });
+    }
+  }
+
+  // Passagens: fronteira vale nos dois sentidos, senão a regra §6 trava um lado.
+  const byId = new Map(territoryDefs.map((d) => [d.id, d]));
+  for (const wave of active) {
+    for (const [a, b] of wave.bridges) {
+      const ta = byId.get(a);
+      const tb = byId.get(b);
+      if (!ta || !tb) continue;
+      if (!ta.neighbors.includes(b)) ta.neighbors.push(b);
+      if (!tb.neighbors.includes(a)) tb.neighbors.push(a);
+    }
+  }
+
+  return { frame, territoryDefs, kingdomDefs };
+}
 
 export const STATE_VERSION = 4;
 
@@ -28,19 +97,22 @@ export interface WorldBundle {
 }
 
 /** Constrói geometria + estado inicial a partir dos JSONs de dados. */
-export function createWorld(): WorldBundle {
-  const seeds: TerritorySeedInput[] = TERRITORY_DEFS.map((d) => ({
+export function createWorld(waves = 0): WorldBundle {
+  const { frame, territoryDefs, kingdomDefs } = composition(waves);
+
+  // As sementes vivem em coordenadas de quadro; o mundo trabalha em canvas.
+  const seeds: TerritorySeedInput[] = territoryDefs.map((d) => ({
     id: d.id,
-    seed: d.seed,
+    seed: { x: d.seed.x + frame.originX, y: d.seed.y + frame.originY },
     weight: d.weight,
     biome: d.biome,
     ...{ neighbors: d.neighbors, features: d.features },
   }));
 
-  const world = buildWorld(seeds);
+  const world = buildWorld(seeds, frame);
 
   const kingdoms: Record<string, Kingdom> = {};
-  for (const k of KINGDOM_DEFS) {
+  for (const k of kingdomDefs) {
     kingdoms[k.id] = {
       id: k.id,
       name: k.name,
@@ -82,9 +154,10 @@ export function createWorld(): WorldBundle {
     (depositsByTerritory[d.territoryId] ??= []).push(id);
   }
 
-  for (const d of TERRITORY_DEFS) {
+  for (const d of territoryDefs) {
     const owner = d.owner ? kingdoms[d.owner] : null;
-    const anchor = world.anchors[d.id] ?? d.seed;
+    const fallback = { x: d.seed.x + frame.originX, y: d.seed.y + frame.originY };
+    const anchor = world.anchors[d.id] ?? fallback;
     const castleId = `castle_${d.id}`;
     const lvl = Math.max(1, Math.min(5, d.settlement.level));
     const stats = CASTLE_LEVELS[lvl]!;
@@ -126,7 +199,7 @@ export function createWorld(): WorldBundle {
       tradeCooldown: 0,
       vocation: 'balanced',
       polygon: world.polygons[d.id] ?? [],
-      center: world.centers[d.id] ?? d.seed,
+      center: world.centers[d.id] ?? fallback,
       area: world.areas[d.id] ?? 0,
       locked: d.locked ?? false,
       lockReason: d.lockReason,

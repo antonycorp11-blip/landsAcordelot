@@ -1,0 +1,387 @@
+[
+  {
+    "id": "wave_1",
+    "title": "Os primeiros vizinhos",
+    "frame": {
+      "width": 9008,
+      "height": 5104,
+      "originX": 3392,
+      "originY": 2096
+    },
+    "land": [
+      {
+        "x": -1500,
+        "y": 1500,
+        "r": 1600,
+        "amp": 1.25
+      },
+      {
+        "x": -2500,
+        "y": 1200,
+        "r": 1200,
+        "amp": 1.1
+      },
+      {
+        "x": -1900,
+        "y": 2350,
+        "r": 900,
+        "amp": 0.85
+      },
+      {
+        "x": -300,
+        "y": 1350,
+        "r": 700,
+        "amp": 0.95
+      },
+      {
+        "x": 2300,
+        "y": -1700,
+        "r": 1700,
+        "amp": 1.25
+      },
+      {
+        "x": 3400,
+        "y": -1500,
+        "r": 1100,
+        "amp": 1.0
+      },
+      {
+        "x": 1400,
+        "y": -1500,
+        "r": 1000,
+        "amp": 0.95
+      },
+      {
+        "x": 2350,
+        "y": -300,
+        "r": 650,
+        "amp": 0.8
+      }
+    ],
+    "sea": [
+      {
+        "x": -3400,
+        "y": 2600,
+        "r": 1300,
+        "amp": 1.2
+      },
+      {
+        "x": 700,
+        "y": -2500,
+        "r": 1400,
+        "amp": 1.15
+      }
+    ],
+    "bridges": [
+      [
+        "t09_aurenna",
+        "c1w_marlen"
+      ],
+      [
+        "t10_trigais",
+        "c1w_corvel"
+      ],
+      [
+        "t06_coroa",
+        "c1n_gatepass"
+      ],
+      [
+        "t03_elmwood",
+        "c1n_gatepass"
+      ]
+    ],
+    "states": [
+      {
+        "kingdom": {
+          "id": "k_oeste",
+          "name": "Confederação do Oeste",
+          "ownerKind": "AI",
+          "color": "#3fb98f",
+          "colorDark": "#1d6b52",
+          "emblem": "tree",
+          "capitalTerritoryId": "c1w_marlen",
+          "aiProfile": "ECONOMIC"
+        },
+        "territories": [
+          {
+            "id": "c1w_marlen",
+            "name": "Porto Marlen",
+            "seed": {
+              "x": -1400,
+              "y": 900
+            },
+            "weight": 1.1,
+            "biome": "coast",
+            "features": [
+              "harbor",
+              "farmland",
+              "forest"
+            ],
+            "tags": [
+              "harbor"
+            ],
+            "owner": "k_oeste",
+            "settlement": {
+              "kind": "castle",
+              "level": 4,
+              "name": "Casa das Cordas",
+              "specialty": "trade"
+            },
+            "population": 3100,
+            "defense": 46,
+            "happiness": 74,
+            "loyalty": 92,
+            "stability": 82,
+            "neighbors": [
+              "c1w_corvel",
+              "c1w_idren"
+            ]
+          },
+          {
+            "id": "c1w_corvel",
+            "name": "Baía de Corvel",
+            "seed": {
+              "x": -1500,
+              "y": 1850
+            },
+            "weight": 1.0,
+            "biome": "fertile",
+            "features": [
+              "farmland",
+              "farmland",
+              "forest"
+            ],
+            "tags": [],
+            "owner": "k_oeste",
+            "settlement": {
+              "kind": "town",
+              "level": 2,
+              "name": "Corvel",
+              "specialty": "none"
+            },
+            "population": 1400,
+            "defense": 28,
+            "happiness": 70,
+            "loyalty": 84,
+            "stability": 76,
+            "neighbors": [
+              "c1w_marlen",
+              "c1w_idren",
+              "c1w_vestry"
+            ]
+          },
+          {
+            "id": "c1w_idren",
+            "name": "Planalto de Idren",
+            "seed": {
+              "x": -2350,
+              "y": 1250
+            },
+            "weight": 1.0,
+            "biome": "hills",
+            "features": [
+              "quarry",
+              "iron_mine",
+              "gold_mine"
+            ],
+            "tags": [
+              "mountain_pass"
+            ],
+            "owner": "k_oeste",
+            "settlement": {
+              "kind": "fort",
+              "level": 2,
+              "name": "Forte Idren",
+              "specialty": "iron"
+            },
+            "population": 900,
+            "defense": 38,
+            "happiness": 64,
+            "loyalty": 80,
+            "stability": 72,
+            "neighbors": [
+              "c1w_marlen",
+              "c1w_corvel",
+              "c1w_vestry"
+            ]
+          },
+          {
+            "id": "c1w_vestry",
+            "name": "Charnecas de Vestry",
+            "seed": {
+              "x": -2100,
+              "y": 2350
+            },
+            "weight": 0.95,
+            "biome": "marsh",
+            "features": [
+              "forest",
+              "iron_mine"
+            ],
+            "tags": [],
+            "owner": "k_oeste",
+            "settlement": {
+              "kind": "village",
+              "level": 1,
+              "name": "Vestry",
+              "specialty": "none"
+            },
+            "population": 620,
+            "defense": 22,
+            "happiness": 62,
+            "loyalty": 74,
+            "stability": 68,
+            "neighbors": [
+              "c1w_corvel",
+              "c1w_idren"
+            ]
+          }
+        ]
+      },
+      {
+        "kingdom": {
+          "id": "k_norte",
+          "name": "Skaldheim",
+          "ownerKind": "AI",
+          "color": "#8f7ae0",
+          "colorDark": "#4d3c96",
+          "emblem": "stag",
+          "capitalTerritoryId": "c1n_skald",
+          "aiProfile": "AGGRESSIVE"
+        },
+        "territories": [
+          {
+            "id": "c1n_gatepass",
+            "name": "Portão de Hjalt",
+            "seed": {
+              "x": 2400,
+              "y": -1000
+            },
+            "weight": 1.15,
+            "biome": "mountains",
+            "features": [
+              "quarry",
+              "iron_mine"
+            ],
+            "tags": [
+              "mountain_pass"
+            ],
+            "owner": "k_norte",
+            "settlement": {
+              "kind": "fort",
+              "level": 3,
+              "name": "Portão de Hjalt",
+              "specialty": "mountain"
+            },
+            "population": 800,
+            "defense": 62,
+            "happiness": 60,
+            "loyalty": 88,
+            "stability": 80,
+            "neighbors": [
+              "c1n_skald",
+              "c1n_thornvik"
+            ]
+          },
+          {
+            "id": "c1n_skald",
+            "name": "Skaldheim",
+            "seed": {
+              "x": 2250,
+              "y": -2200
+            },
+            "weight": 1.1,
+            "biome": "plains",
+            "features": [
+              "farmland",
+              "farmland",
+              "gold_mine"
+            ],
+            "tags": [
+              "old_capital"
+            ],
+            "owner": "k_norte",
+            "settlement": {
+              "kind": "castle",
+              "level": 4,
+              "name": "Salão de Skaldheim",
+              "specialty": "none"
+            },
+            "population": 2900,
+            "defense": 50,
+            "happiness": 72,
+            "loyalty": 94,
+            "stability": 84,
+            "neighbors": [
+              "c1n_gatepass",
+              "c1n_thornvik",
+              "c1n_ravnhal"
+            ]
+          },
+          {
+            "id": "c1n_thornvik",
+            "name": "Thornvik",
+            "seed": {
+              "x": 3450,
+              "y": -1750
+            },
+            "weight": 1.0,
+            "biome": "forest",
+            "features": [
+              "forest",
+              "forest",
+              "iron_mine"
+            ],
+            "tags": [],
+            "owner": "k_norte",
+            "settlement": {
+              "kind": "town",
+              "level": 2,
+              "name": "Thornvik",
+              "specialty": "none"
+            },
+            "population": 1300,
+            "defense": 30,
+            "happiness": 68,
+            "loyalty": 82,
+            "stability": 74,
+            "neighbors": [
+              "c1n_gatepass",
+              "c1n_skald"
+            ]
+          },
+          {
+            "id": "c1n_ravnhal",
+            "name": "Ravnhal",
+            "seed": {
+              "x": 1300,
+              "y": -1800
+            },
+            "weight": 1.0,
+            "biome": "hills",
+            "features": [
+              "quarry",
+              "farmland"
+            ],
+            "tags": [],
+            "owner": "k_norte",
+            "settlement": {
+              "kind": "town",
+              "level": 2,
+              "name": "Ravnhal",
+              "specialty": "none"
+            },
+            "population": 1150,
+            "defense": 32,
+            "happiness": 66,
+            "loyalty": 80,
+            "stability": 74,
+            "neighbors": [
+              "c1n_skald"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]
