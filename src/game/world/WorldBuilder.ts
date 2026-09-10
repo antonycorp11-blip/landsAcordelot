@@ -110,6 +110,31 @@ export interface DepositSeed {
   richness: number;
 }
 
+/**
+ * O quadro original — o reino que o jogador conhece.
+ *
+ * Todo o relevo é calculado em coordenadas DESTE quadro, nunca do canvas.
+ * É o que garante que, quando o mapa cresce para o País, a terra natal saia
+ * exatamente igual: mesma costa, mesmos morros, mesmas cidades em pé onde
+ * sempre estiveram. Canvas é moldura; quadro é o mundo.
+ */
+export const FRAME = { width: 5200, height: 3000 } as const;
+
+/** Recorte do canvas: tamanho total e onde o quadro original começa nele. */
+export interface WorldFrame {
+  width: number;
+  height: number;
+  originX: number;
+  originY: number;
+}
+
+export const KINGDOM_FRAME: WorldFrame = {
+  width: FRAME.width,
+  height: FRAME.height,
+  originX: 0,
+  originY: 0,
+};
+
 const SEA_ANCHORS = [
   { x: 2500, y: 3320, r: 1500, amp: 1.35 },
   { x: 5750, y: 2000, r: 1500, amp: 1.3 },
@@ -151,9 +176,14 @@ function distToPolyline(p: Vec2, line: Vec2[]): number {
   return best;
 }
 
-export function buildWorld(seeds: TerritorySeedInput[]): BuiltWorld {
-  const W = WORLD.width;
-  const H = WORLD.height;
+export function buildWorld(
+  seeds: TerritorySeedInput[],
+  frame: WorldFrame = KINGDOM_FRAME,
+): BuiltWorld {
+  const W = frame.width;
+  const H = frame.height;
+  const ox = frame.originX;
+  const oy = frame.originY;
   const cell = WORLD.cell;
   const w = Math.ceil(W / cell);
   const h = Math.ceil(H / cell);
@@ -172,33 +202,42 @@ export function buildWorld(seeds: TerritorySeedInput[]): BuiltWorld {
     for (let i = 0; i < w; i++) {
       const x = (i + 0.5) * cell;
       const y = (j + 0.5) * cell;
+      // Coordenada de quadro: é nela que todo o relevo é decidido.
+      const fx = x - ox;
+      const fy = y - oy;
       const idx = j * w + i;
 
       let value = -0.34;
-      value += 0.5 * Math.exp(-(((x - W * 0.48) / 2900) ** 2 + ((y - H * 0.45) / 1750) ** 2));
+      value += 0.5 * Math.exp(-(((fx - FRAME.width * 0.48) / 2900) ** 2 + ((fy - FRAME.height * 0.45) / 1750) ** 2));
 
       for (const s of seeds) {
         const r = 560 * s.weight;
         value += 1.25 * Math.exp(-(((x - s.seed.x) / r) ** 2 + ((y - s.seed.y) / r) ** 2));
       }
       for (const a of WILDERNESS_ANCHORS) {
-        value += a.amp * Math.exp(-(((x - a.x) / a.r) ** 2 + ((y - a.y) / a.r) ** 2));
+        value += a.amp * Math.exp(-(((fx - a.x) / a.r) ** 2 + ((fy - a.y) / a.r) ** 2));
       }
       for (const a of SEA_ANCHORS) {
-        value -= a.amp * Math.exp(-(((x - a.x) / a.r) ** 2 + ((y - a.y) / a.r) ** 2));
+        value -= a.amp * Math.exp(-(((fx - a.x) / a.r) ** 2 + ((fy - a.y) / a.r) ** 2));
       }
 
-      const edge = Math.min(x, y, W - x, H - y);
-      value -= Math.max(0, 1 - edge / 420) * 1.15;
-      value += fbmSigned(x / 620, y / 620, 4, seed) * 0.42;
-      value += fbmSigned(x / 180, y / 180, 3, seed + 7) * 0.11;
+      // Duas bordas: a do quadro original e a do canvas. Vale a maior das
+      // duas penalidades, nunca a soma — somar mudaria a costa que já existe.
+      const edgeFrame = Math.min(fx, fy, FRAME.width - fx, FRAME.height - fy);
+      const edgeCanvas = Math.min(x, y, W - x, H - y);
+      value -= Math.max(
+        Math.max(0, 1 - edgeFrame / 420),
+        Math.max(0, 1 - edgeCanvas / 420),
+      ) * 1.15;
+      value += fbmSigned(fx / 620, fy / 620, 4, seed) * 0.42;
+      value += fbmSigned(fx / 180, fy / 180, 3, seed + 7) * 0.11;
 
       const isLand = value > 0 ? 1 : 0;
       land[idx] = isLand;
 
       // Elevação
-      const ridgeD = distToPolyline({ x, y }, RIDGE);
-      let e = 0.12 + fbm(x / 900, y / 900, 4, seed + 31) * 0.5;
+      const ridgeD = distToPolyline({ x: fx, y: fy }, RIDGE);
+      let e = 0.12 + fbm(fx / 900, fy / 900, 4, seed + 31) * 0.5;
       e += 0.62 * Math.exp(-((ridgeD / 340) ** 2));
       e += 0.28 * Math.exp(-((ridgeD / 720) ** 2));
       e += Math.max(0, value) * 0.08;
@@ -206,7 +245,7 @@ export function buildWorld(seeds: TerritorySeedInput[]): BuiltWorld {
       // Posse de território por distância deformada (fronteiras orgânicas §50).
       let bestD = Infinity;
       let best = -1;
-      const warp = 1 + fbmSigned(x / 430, y / 430, 3, seed + 91) * 0.42;
+      const warp = 1 + fbmSigned(fx / 430, fy / 430, 3, seed + 91) * 0.42;
       for (let k = 0; k < seeds.length; k++) {
         const s = seeds[k];
         const d = (Math.hypot(x - s.seed.x, y - s.seed.y) / s.weight) * warp;
@@ -225,7 +264,7 @@ export function buildWorld(seeds: TerritorySeedInput[]): BuiltWorld {
       }
       e = Math.max(0, Math.min(1, e));
       elev[idx] = e;
-      shade[idx] = fbm(x / 95, y / 95, 3, seed + 13);
+      shade[idx] = fbm(fx / 95, fy / 95, 3, seed + 13);
 
       // Bioma final
       let code: number;
@@ -240,11 +279,11 @@ export function buildWorld(seeds: TerritorySeedInput[]): BuiltWorld {
         if (code === BIOME_CODE.mountains && e < 0.6) code = BIOME_CODE.hills;
         // Manchas internas: nenhum território é um bloco de cor única.
         if (code === BIOME_CODE.plains || code === BIOME_CODE.fertile) {
-          const m = fbm(x / 290, y / 290, 3, seed + 55);
+          const m = fbm(fx / 290, fy / 290, 3, seed + 55);
           if (m > 0.615) code = BIOME_CODE.forest;
           else if (m < 0.37 && e > 0.5) code = BIOME_CODE.hills;
         } else if (code === BIOME_CODE.forest) {
-          const m = fbm(x / 260, y / 260, 3, seed + 77);
+          const m = fbm(fx / 260, fy / 260, 3, seed + 77);
           if (m < 0.38) code = BIOME_CODE.plains;
         }
       } else if (e > 0.6) {
@@ -323,7 +362,7 @@ export function buildWorld(seeds: TerritorySeedInput[]): BuiltWorld {
   const roads = buildRoads(seeds, anchors, grid, rivers);
 
   // ---- Props decorativos --------------------------------------------------
-  const props = buildProps(seeds, polygons, grid, roads);
+  const props = buildProps(seeds, polygons, grid, roads, W, H);
 
   // ---- Depósitos e vagas urbanas -----------------------------------------
   const deposits = buildDeposits(seeds, polygons, grid);
@@ -733,6 +772,8 @@ function buildProps(
   polygons: Record<string, Vec2[]>,
   grid: WorldGrid,
   roads: RoadPath[],
+  worldW: number,
+  worldH: number,
 ): PropInstance[] {
   const props: PropInstance[] = [];
   const roadPoints: Vec2[] = [];
@@ -748,8 +789,8 @@ function buildProps(
   // Vegetação e relevo por todo o mundo, inclusive fora dos territórios.
   const rng = makeRng(WORLD.seed + 4242);
   const step = 46;
-  for (let y = 40; y < WORLD.height - 20; y += step) {
-    for (let x = 40; x < WORLD.width - 20; x += step) {
+  for (let y = 40; y < worldH - 20; y += step) {
+    for (let x = 40; x < worldW - 20; x += step) {
       const jx = x + range(rng, -20, 20);
       const jy = y + range(rng, -20, 20);
       const idx = sampleCell(grid, jx, jy);
