@@ -397,6 +397,16 @@ export interface GameState {
    * levado a ver os vizinhos novos.
    */
   pendingReveal: boolean;
+  /**
+   * Capítulos de "O Acordo Quebrado" já revelados, e como cada um chegou.
+   *
+   * A mesma verdade lida sobre uma arca tomada à força e ouvida da boca de
+   * quem a guardou por quarenta anos não é a mesma cena — por isso o caminho
+   * fica gravado junto.
+   */
+  saga: Record<string, 'conquest' | 'friendship'>;
+  /** Capítulo esperando ser mostrado; o jogo pausa até o jogador ler. */
+  sagaPending: string | null;
   /** Nome dado pelo jogador ao Estado, quando promovido. */
   stateName: string | null;
   /** Governador e general escolhidos, com a ordem que cada um segue. */

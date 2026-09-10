@@ -1,5 +1,6 @@
 import { ADVISOR_TIER_RENOWN, CIVIL_POLICIES, RENOWN, TITLES, WAR_POLICIES } from '../config/balance';
 import generalsRaw from '../data/generals.json';
+import { SAGA_CHAPTERS, type SagaChapterDef } from '../data/saga';
 import governorsRaw from '../data/governors.json';
 import { LORE } from '../data/defs';
 import type { GameState } from '../types';
@@ -168,6 +169,55 @@ export class RealmManager {
     this.state.warPolicy = warPolicy;
     this.state.promotionPending = false;
     this.record('state_founded');
+  }
+
+  /**
+   * "O Acordo Quebrado": o pedaço da história que este vizinho guardava.
+   *
+   * Cada casa tem um capítulo, e há dois jeitos de obtê-lo — tomar a capital
+   * dela ou merecer a confiança de quem a governa. É de propósito: uma partida
+   * inteira de conquista e uma inteira de diplomacia contam a mesma verdade
+   * com cenas diferentes, e nenhum dos dois caminhos é o caminho errado.
+   *
+   * Devolve o capítulo recém-aberto, ou nulo.
+   */
+  checkSaga(attitudeOf: (kingdomId: string) => { attitude: number; friendly: boolean }): SagaChapterDef | null {
+    for (const chapter of SAGA_CHAPTERS) {
+      if (this.state.saga[chapter.id]) continue;
+
+      if (chapter.kingdomId === null) {
+        // O capítulo final exige os outros quatro e o mapa inteiro na sua mão.
+        const rest = SAGA_CHAPTERS.filter((c) => c.kingdomId !== null);
+        if (!rest.every((c) => this.state.saga[c.id])) continue;
+        if (!this.holdsEverything()) continue;
+        const via = rest.every((c) => this.state.saga[c.id] === 'friendship')
+          ? 'friendship'
+          : 'conquest';
+        this.state.saga[chapter.id] = via;
+        return chapter;
+      }
+
+      const kingdomId: string = chapter.kingdomId;
+      const kingdom = this.state.kingdoms[kingdomId];
+      if (!kingdom) continue;
+      const capital = kingdom.capitalTerritoryId
+        ? this.state.territories[kingdom.capitalTerritoryId]
+        : null;
+      const conquered = Boolean(capital) && capital?.ownerId === this.state.playerKingdomId;
+      const standing = attitudeOf(kingdomId);
+      const befriended = standing.friendly || standing.attitude >= 60;
+      if (!conquered && !befriended) continue;
+
+      this.state.saga[chapter.id] = conquered ? 'conquest' : 'friendship';
+      return chapter;
+    }
+    return null;
+  }
+
+  /** Todo o mapa conhecido sob a sua bandeira. */
+  private holdsEverything(): boolean {
+    const all = Object.values(this.state.territories);
+    return all.length > 0 && all.every((t) => t.ownerId === this.state.playerKingdomId);
   }
 
   /** Sobe de título se o renome já alcançou o próximo degrau. */

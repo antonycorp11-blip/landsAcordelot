@@ -37,6 +37,7 @@ interface SavePayload {
   waves?: number;
   relations?: GameState['relations'];
   pendingReveal?: boolean;
+  saga?: GameState['saga'];
   titleIndex?: number;
   chronicle?: string[];
   stage?: GameState['stage'];
@@ -90,6 +91,7 @@ export class SaveManager {
       waves: state.waves,
       relations: state.relations,
       pendingReveal: state.pendingReveal,
+      saga: state.saga,
       titleIndex: state.titleIndex,
       chronicle: state.chronicle,
       stage: state.stage,
@@ -193,6 +195,8 @@ export class SaveManager {
     state.waves = payload.waves ?? 0;
     state.relations = payload.relations ?? {};
     state.pendingReveal = payload.pendingReveal ?? false;
+    state.saga = payload.saga ?? {};
+    state.sagaPending = null;
     state.stateName = payload.stateName ?? null;
     state.governorId = payload.governorId ?? null;
     state.generalId = payload.generalId ?? null;

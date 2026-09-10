@@ -337,6 +337,23 @@ export class Game {
     this.battles.policyDefense = bonus.defense;
     this.trade.policySpread = bonus.tradeSpread;
 
+    // "O Acordo Quebrado": o vizinho caiu, ou passou a confiar em você. Nos
+    // dois casos ele entrega o pedaço da história que guardava.
+    if (!this.state.sagaPending) {
+      const chapter = this.realm.checkSaga((id) => {
+        const rel = this.diplomacy.relation(id);
+        return {
+          attitude: rel?.attitude ?? 0,
+          friendly: rel?.pact === 'alliance' || rel?.married === true,
+        };
+      });
+      if (chapter) {
+        this.state.sagaPending = chapter.id;
+        this.setSpeed(0);
+        this.touch();
+      }
+    }
+
     // Todo o mapa sob uma bandeira: abre a fundação do Estado (§5).
     if (this.realm.shouldPromoteToState() && !this.state.promotionPending) {
       this.state.promotionPending = true;
@@ -410,6 +427,14 @@ export class Game {
     }
     this.touch();
     return result.ok;
+  }
+
+  /** O jogador terminou de ler o capítulo: o reino volta a andar. */
+  closeSaga() {
+    this.state.sagaPending = null;
+    this.setSpeed(1);
+    this.saves.save(this.state);
+    this.touch();
   }
 
   /** Responde a demanda aberta do conselho. */

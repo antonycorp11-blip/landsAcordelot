@@ -1,0 +1,100 @@
+{
+  "title": "O Acordo Quebrado",
+  "chapters": [
+    {
+      "id": "saga_silvarden",
+      "kingdomId": "k_silvarden",
+      "order": 1,
+      "chapter": "O TEXTO",
+      "title": "O que estava escrito no santuário",
+      "conquest": [
+        "Os monges do bosque não resistiram. Entregaram a arca porque a regra deles manda entregar a arca a quem tomar o santuário — foi escrito assim justamente para que ninguém morresse guardando papel.",
+        "Dentro, o Acordo. Não a cópia de cortesia que circula nas cortes: o original, com doze selos de cera em volta da margem, um por casa signatária.",
+        "E uma cláusula que nenhuma das cópias traz. O Acordo não morre com o Alto Rei. Ele adormece — e desperta quando os doze selos voltarem a estar sob uma só mão."
+      ],
+      "friendship": [
+        "Aldan não mandou buscar a arca. Levou você até ela, o que é diferente, e ficou olhando enquanto você lia.",
+        "— Meu pai me mostrou isto aos sete anos — disse. — Depois me fez jurar que eu só mostraria a alguém que perguntasse antes de tomar.",
+        "Dentro, o Acordo original, doze selos de cera na margem. E a cláusula que nenhuma cópia traz: o Acordo não morre com o Alto Rei. Adormece, até os doze selos voltarem a uma só mão."
+      ],
+      "closing": "Não é conquista. É reunião. E ninguém nas outras cortes sabe disso — ou finge não saber."
+    },
+    {
+      "id": "saga_aurenna",
+      "kingdomId": "k_aurenna",
+      "order": 2,
+      "chapter": "O LIVRO",
+      "title": "A última linha do Alto Rei",
+      "conquest": [
+        "Isaure não queimou os livros. Deixou-os abertos sobre a mesa, na página certa, e esperou sentada — porque um livro queimado seria confissão, e um livro aberto é só contabilidade.",
+        "A última linha lançada em vida do Alto Rei não é um empréstimo tomado. É um pagamento feito. Saiu do tesouro real três dias antes de ele adoecer.",
+        "O valor é alto demais para um favor e baixo demais para um exército. E o destinatário está anotado com a letra miúda que ela reserva para o que não deveria estar ali: Casa Karn."
+      ],
+      "friendship": [
+        "— Você vai perguntar de qualquer jeito — disse Isaure. — Prefiro que pergunte antes de invadir. Sai mais barato para nós dois.",
+        "Ela virou o livro na sua direção, já aberto na página. A última linha lançada em vida do Alto Rei não é dívida tomada: é pagamento feito, três dias antes de ele adoecer.",
+        "— Alto demais para um favor, baixo demais para um exército — disse. — E foi para a Casa Karn. Guardei isso vinte anos porque não sabia a quem entregar sem começar uma guerra."
+      ],
+      "closing": "Alguém pagou Karneth para fazer alguma coisa. Ou para não fazer nada."
+    },
+    {
+      "id": "saga_karneth",
+      "kingdomId": "k_karneth",
+      "order": 3,
+      "chapter": "O FERRO",
+      "title": "O que Torvald comprou",
+      "conquest": [
+        "Nos livros de Karneth aquele dinheiro não virou lança, nem muro, nem cavalo. Entrou e saiu no mesmo mês, para um único destino, e Torvald não tentou esconder.",
+        "— Meu pai recebeu para manter as colunas paradas por uma estação — disse, sem baixar os olhos. — Não perguntou por quê. Karneth estava com fome. Fome faz reis honestos aceitarem dinheiro sujo.",
+        "— Paradas contra quem? — você perguntou.",
+        "— Contra ninguém. Só paradas. Para que a estrada do norte de Valdória ficasse aberta por trinta dias, sem escolta e sem pergunta."
+      ],
+      "friendship": [
+        "Torvald mandou os livros de Karneth por enviado, lacrados, sem que você pedisse. Veio um bilhete de uma linha: 'Você perguntou como se importasse. Ninguém perguntou assim antes.'",
+        "O dinheiro do Alto Rei não virou lança, nem muro. Entrou e saiu no mesmo mês.",
+        "— Meu pai recebeu para manter as colunas paradas por uma estação — escreveu Torvald. — Não contra alguém. Só paradas, para que a estrada do norte de Valdória ficasse trinta dias aberta, sem escolta e sem pergunta. Ele morreu achando que tinha vendido pouco."
+      ],
+      "closing": "Alguém precisava que uma estrada ficasse sem vigia. Uma estrada que sai do pântano e entra em Valdória."
+    },
+    {
+      "id": "saga_morvath",
+      "kingdomId": "k_morvath",
+      "order": 4,
+      "chapter": "O PÂNTANO",
+      "title": "O que atravessou a estrada sem vigia",
+      "conquest": [
+        "Vespera não fugiu quando as tropas entraram. Estava sentada no mesmo lugar de sempre, como quem esperava há décadas — o que, você entenderia depois, era exatamente o caso.",
+        "— Foi daqui — disse. — Não neguei nunca porque ninguém teve coragem de perguntar. Cresce em três charcos deste pântano e em nenhum outro lugar do mundo conhecido.",
+        "— A senhora vendeu.",
+        "— Eu guardo. É diferente. Uma noite de outono o depósito foi aberto por dentro, com a chave certa, e o que saiu de lá saiu pela estrada do norte. Trinta dias sem escolta, lembra? Não fui eu que combinei isso."
+      ],
+      "friendship": [
+        "— Você demorou — disse Vespera, quando você finalmente perguntou. — Eu esperei quarenta anos alguém montar as peças na ordem certa.",
+        "— Foi daqui. Cresce em três charcos deste pântano e em nenhum outro lugar conhecido. Eu guardo; nunca vendi.",
+        "— Então como saiu?",
+        "— Por dentro, com a chave certa, numa noite de outono. E foi embora pela estrada do norte, que naquele mês estava sem escolta. Eu soube na hora que não tinha sido roubo. Roubo arromba. Aquilo foi aberto."
+      ],
+      "closing": "O Alto Rei não adoeceu. E quem abriu o depósito tinha a chave — o que quer dizer que era de dentro."
+    },
+    {
+      "id": "saga_verdade",
+      "kingdomId": null,
+      "order": 5,
+      "chapter": "O SELO",
+      "title": "A mão que segurava a chave",
+      "conquest": [
+        "Os doze selos estão sob uma só mão: a sua. E ao alinhá-los para o lacre do Acordo, você vê o que ninguém viu em quarenta anos, porque ninguém teve os doze juntos.",
+        "O décimo segundo selo não é de uma casa. É o selo do Chanceler do Acordo — o homem que guardava as chaves de todos os depósitos reais, inclusive dos que ficavam fora do reino.",
+        "Ele desapareceu no inverno seguinte à morte do Alto Rei. Nenhuma casa o acusou, porque acusar o Chanceler era acusar a assinatura dele em cada tratado de trezentos anos.",
+        "E há um documento em que aquele selo aparece uma última vez, dois meses depois do desaparecimento. A carta de doação que entregou as margens do Rio Sereno a um capitão sem terras chamado Valdor — seu bisavô."
+      ],
+      "friendship": [
+        "Os doze selos estão sob uma só mão: a sua. E ao alinhá-los, você vê o que ninguém viu em quarenta anos, porque ninguém teve os doze juntos.",
+        "O décimo segundo selo não é de uma casa. É o do Chanceler do Acordo — o homem que guardava as chaves de todos os depósitos reais, inclusive os de fora do reino. Desapareceu no inverno seguinte à morte do Alto Rei, e nenhuma casa o acusou: acusá-lo era rasgar trezentos anos de tratados que levavam a assinatura dele.",
+        "Aquele selo reaparece uma vez só, dois meses depois. Na carta de doação que entregou as margens do Rio Sereno a um capitão sem terras chamado Valdor.",
+        "Seu bisavô."
+      ],
+      "closing": "Valdória não nasceu de um serviço prestado ao Alto Rei. Nasceu do preço pago por ele. Refundar o Acordo deixou de ser ambição — é a única forma de devolver o que sua casa recebeu."
+    }
+  ]
+}

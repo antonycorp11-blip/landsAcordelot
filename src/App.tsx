@@ -16,6 +16,7 @@ import { SaveTools } from './ui/SavePanel';
 import { SendTroops } from './ui/SendTroops';
 import { CouncilDemand } from './ui/CouncilDemand';
 import { DiplomacyPanel } from './ui/DiplomacyPanel';
+import { SagaChapter } from './ui/SagaChapter';
 import { StatePromotion } from './ui/StatePromotion';
 import { Tutorial } from './ui/Tutorial';
 import { TopBar } from './ui/TopBar';
@@ -613,9 +614,13 @@ export function App() {
         </div>
       )}
 
-      {started && game && snap?.state.promotionPending && <StatePromotion game={game} />}
+      {started && game && snap?.state.sagaPending && <SagaChapter game={game} />}
 
-      {started && game && !snap?.state.promotionPending && game.council.pending && (
+      {started && game && !snap?.state.sagaPending && snap?.state.promotionPending && (
+        <StatePromotion game={game} />
+      )}
+
+      {started && game && !snap?.state.sagaPending && !snap?.state.promotionPending && game.council.pending && (
         <CouncilDemand game={game} />
       )}
 

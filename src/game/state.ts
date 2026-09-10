@@ -318,6 +318,8 @@ export function createWorld(waves = 0): WorldBundle {
     waves: 0,
     relations: {},
     pendingReveal: false,
+    saga: {},
+    sagaPending: null,
     stateName: null,
     governorId: null,
     generalId: null,
