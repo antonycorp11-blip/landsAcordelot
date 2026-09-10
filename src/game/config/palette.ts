@@ -5,28 +5,28 @@
 
 export const PALETTE = {
   // Água
-  oceanDeep: '#1d5f9c',
-  ocean: '#2b7ec4',
-  oceanShallow: '#48a8de',
+  oceanDeep: '#155384',
+  ocean: '#247bb7',
+  oceanShallow: '#4ab3d5',
   surf: '#bfe9f7',
   river: '#3f9fd8',
   riverLight: '#79cbee',
 
   // Terra
   sand: '#e8d29a',
-  plainsLow: '#7ab84f',
-  plains: '#8cc85c',
-  plainsHigh: '#a2d76c',
-  fertile: '#b9d95c',
-  fertileDark: '#93bb43',
-  forest: '#3f8f47',
-  forestDark: '#2f7038',
-  hills: '#9aab55',
-  hillsDark: '#7d8f44',
+  plainsLow: '#6fa34a',
+  plains: '#83b957',
+  plainsHigh: '#a3ca6a',
+  fertile: '#b2ce62',
+  fertileDark: '#8fb249',
+  forest: '#347d42',
+  forestDark: '#245c34',
+  hills: '#92a45a',
+  hillsDark: '#718044',
   rock: '#9aa2ab',
   rockDark: '#767f8a',
   snow: '#f2f6fa',
-  marsh: '#6f9a5f',
+  marsh: '#648e66',
 
   // Estruturas
   wall: '#d9d6cd',

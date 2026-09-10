@@ -119,6 +119,10 @@ NAMED_MAP = {
     'market_b.png':    ('buildings', 'market_b',   300, 0.86),
     'market_c.png':    ('buildings', 'market_c',   300, 0.86),
     'barracks.png':    ('buildings', 'barracks',   320, 0.86),
+    # Decoração de chão de Valdória. São decals largos e baixos: ficam por
+    # baixo das árvores/prédios e quebram a aparência lisa do terreno.
+    'valdoria_meadow.png':     ('nature', 'meadow_lush',        520, 0.90),
+    'valdoria_undergrowth.png':('nature', 'forest_undergrowth', 520, 0.90),
     'gov_t1.png': ('advisors', 'gov_t1', 430, 0.5),
     'gov_t2.png': ('advisors', 'gov_t2', 430, 0.5),
     'gov_t3.png': ('advisors', 'gov_t3', 430, 0.5),

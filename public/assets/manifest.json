@@ -264,6 +264,16 @@
     "h": 237,
     "ay": 0.88
   },
+  "nature/meadow_lush": {
+    "w": 520,
+    "h": 221,
+    "ay": 0.9
+  },
+  "nature/forest_undergrowth": {
+    "w": 520,
+    "h": 212,
+    "ay": 0.9
+  },
   "portraits/prince": {
     "w": 420,
     "h": 603,

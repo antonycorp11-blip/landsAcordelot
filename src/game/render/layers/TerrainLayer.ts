@@ -141,7 +141,7 @@ export class TerrainLayer {
         const wx = originX + (px + 0.5) * step;
         const i = Math.min(g.w - 1, Math.max(0, Math.floor(wx / g.cell)));
         const idx = j * g.w + i;
-        const rgb = this.colorAt(idx);
+        const rgb = this.colorAt(idx, wx, wy);
         const o = (py * w + px) * 4;
         data[o] = rgb[0];
         data[o + 1] = rgb[1];
@@ -151,7 +151,7 @@ export class TerrainLayer {
     }
   }
 
-  private colorAt(idx: number): RGB {
+  private colorAt(idx: number, wx: number, wy: number): RGB {
     const g = this.grid;
     const code = g.biome[idx];
     const n = g.shade[idx];
@@ -161,7 +161,7 @@ export class TerrainLayer {
       const depth = Math.min(1, Math.max(0, (-dist - 0.5) / 7));
       let c = mix(C.oceanShallow, C.ocean, Math.min(1, depth * 2));
       c = mix(c, C.oceanDeep, Math.max(0, depth - 0.5) * 2);
-      return shade(c, 0.94 + n * 0.12);
+      return shade(c, (0.94 + n * 0.12) * (0.975 + microNoise(wx, wy) * 0.045));
     }
 
     let base: RGB;
@@ -198,7 +198,11 @@ export class TerrainLayer {
     const here = g.elev[idx];
     const slope = (here - left) * 1.2 + (here - up) * 1.2;
     const light = 1 + Math.max(-0.22, Math.min(0.22, slope * 2.6));
-    return shade(base, light * (0.97 + n * 0.06));
+    // Grão em duas escalas. A primeira quebra a aparência de gradiente liso;
+    // a segunda cria manchas largas como pinceladas, sem formar um tile/grid.
+    const grain = microNoise(wx, wy);
+    const broad = microNoise(wx * 0.19 + 137, wy * 0.19 - 71);
+    return shade(base, light * (0.965 + n * 0.055 + grain * 0.035 + broad * 0.025));
   }
 
   /** Invalida chunks (usado quando o mundo mudar visualmente no futuro). */
@@ -206,6 +210,15 @@ export class TerrainLayer {
     this.chunks.clear();
     this.chunkOrder = [];
   }
+}
+
+/** Hash barato e determinístico; roda só quando um chunk é assado. */
+function microNoise(x: number, y: number): number {
+  const ix = Math.floor(x / 5);
+  const iy = Math.floor(y / 5);
+  let h = Math.imul(ix, 374761393) ^ Math.imul(iy, 668265263);
+  h = Math.imul(h ^ (h >>> 13), 1274126177);
+  return ((h ^ (h >>> 16)) >>> 24) / 255 - 0.5;
 }
 
 export interface Bounds {

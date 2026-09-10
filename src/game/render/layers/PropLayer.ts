@@ -101,19 +101,34 @@ export class PropLayer {
     for (const p of visible) {
       switch (p.kind) {
         case 'tree_round': {
-          // Alterna árvore isolada e moita para o bosque não virar carimbo.
-          const grove = p.phase > 0.72;
-          const key = grove ? 'terrain/grove_small' : 'nature/tree_oak';
-          const sc = (grove ? 0.16 : 0.13) * p.s;
+          // Massas de copa + árvores soltas: de longe lê-se floresta; de perto
+          // ainda há variedade. Os bons bosques do kit quase não eram usados.
+          const dense = p.phase > 0.82;
+          const grove = p.phase > 0.55;
+          const key = dense
+            ? 'nature/grove_wide'
+            : grove
+              ? 'terrain/grove_small'
+              : p.phase < 0.22
+                ? 'nature/tree_big'
+                : 'nature/tree_oak';
+          const sc = (dense ? 0.18 : grove ? 0.18 : 0.19) * p.s;
+          assets.drawShadow(ctx, p.x, p.y + 2, (dense || grove ? 24 : 11) * p.s);
           if (!assets.draw(ctx, key, p.x, p.y, sc, { flip: p.phase > 0.5 })) {
             drawTreeRound(ctx, p.x, p.y, p.s);
           }
           break;
         }
         case 'tree_pine': {
-          const grove = p.phase > 0.68;
-          const key = grove ? 'terrain/grove_small' : 'terrain/tree_lone';
-          const sc = (grove ? 0.17 : 0.14) * p.s;
+          const dense = p.phase > 0.78;
+          const grove = p.phase > 0.5;
+          const key = dense
+            ? 'nature/forest_dense'
+            : grove
+              ? 'nature/grove_mixed'
+              : 'terrain/tree_lone';
+          const sc = (dense ? 0.18 : grove ? 0.18 : 0.155) * p.s;
+          assets.drawShadow(ctx, p.x, p.y + 2, (dense || grove ? 25 : 10) * p.s);
           if (!assets.draw(ctx, key, p.x, p.y, sc, { flip: p.phase < 0.34 })) {
             drawTreePine(ctx, p.x, p.y, p.s);
           }

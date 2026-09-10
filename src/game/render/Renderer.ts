@@ -6,6 +6,7 @@ import { ArmyLayer } from './layers/ArmyLayer';
 import { BorderLayer } from './layers/BorderLayer';
 import { BuildingLayer } from './layers/BuildingLayer';
 import { FeatureLayer } from './layers/FeatureLayer';
+import { GroundDetailLayer } from './layers/GroundDetailLayer';
 import { OverlayLayer } from './layers/OverlayLayer';
 import { PropLayer } from './layers/PropLayer';
 import { TerrainLayer } from './layers/TerrainLayer';
@@ -20,6 +21,7 @@ import { TerrainLayer } from './layers/TerrainLayer';
 export class Renderer {
   private terrain: TerrainLayer;
   private features: FeatureLayer;
+  private groundDetails: GroundDetailLayer;
   private borders: BorderLayer;
   private props: PropLayer;
   private buildings: BuildingLayer;
@@ -43,6 +45,7 @@ export class Renderer {
   constructor(world: BuiltWorld, private camera: Camera) {
     this.terrain = new TerrainLayer(world);
     this.features = new FeatureLayer(world);
+    this.groundDetails = new GroundDetailLayer(world);
     this.borders = new BorderLayer();
     this.props = new PropLayer(world);
     this.buildings = new BuildingLayer();
@@ -80,6 +83,7 @@ export class Renderer {
 
     this.terrain.draw(ctx, bounds, zoom);
     this.features.drawCoast(ctx, bounds, zoom, time);
+    this.groundDetails.draw(ctx, bounds, zoom);
     this.features.drawRivers(ctx, bounds, zoom);
     if (this.layers.provinces) this.borders.drawFills(ctx, state, bounds);
     if (this.layers.routes) this.features.drawRoads(ctx, bounds, zoom);

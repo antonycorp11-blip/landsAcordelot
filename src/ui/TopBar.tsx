@@ -15,7 +15,9 @@ function fmt(n: number): string {
  * o que o jogador vê nascer no mapa; tábuas, tijolos e minério de ouro vivem no
  * painel de economia, junto com os gargalos que explicam cada número.
  */
-const PRIMARY: ResourceKind[] = ['coin', 'food', 'wood', 'stone', 'iron'];
+// O topo é leitura instantânea, não inventário. Matérias-primas e refinados
+// ficam no painel de Recursos, onde há espaço para explicar entradas/gargalos.
+const PRIMARY: ResourceKind[] = ['coin', 'food'];
 
 function Chip({ kind, value, rate }: { kind: ResourceKind; value: number; rate: number }) {
   const [tip, setTip] = useState(false);
@@ -94,7 +96,7 @@ export function TopBar({
         {PRIMARY.map((k) => (
           <Chip key={k} kind={k} value={kingdom.resources[k]} rate={rates[k]} />
         ))}
-        <div className="res" title="População do reino">
+        <div className="res population" title="População do reino">
           <span className="icon">
             <IconPop />
           </span>
@@ -109,6 +111,7 @@ export function TopBar({
           title="Economia do reino: cadeia completa, estoque e gargalos"
         >
           <IconChain />
+          <span className="econ-label">Recursos</span>
           {stalled > 0 && <i className="dot" />}
         </button>
       </div>

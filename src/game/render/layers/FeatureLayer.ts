@@ -17,6 +17,14 @@ export class FeatureLayer {
     ctx.lineCap = 'round';
     for (const loop of this.world.coastlines) {
       if (!intersects(loop, bounds)) continue;
+      // Talude e areia úmida assentam a ilha no oceano. Só espuma branca
+      // deixava a costa parecendo uma linha de editor vetorial.
+      ctx.strokeStyle = 'rgba(33,58,52,0.42)';
+      ctx.lineWidth = 18 / Math.max(0.58, zoom) + 5;
+      strokePath(ctx, loop, true);
+      ctx.strokeStyle = 'rgba(232,210,154,0.9)';
+      ctx.lineWidth = 12 / Math.max(0.58, zoom) + 3;
+      strokePath(ctx, loop, true);
       // Espuma pulsando suavemente
       ctx.strokeStyle = `rgba(191,233,247,${0.55 + Math.sin(time * 1.4) * 0.12})`;
       ctx.lineWidth = 7 / Math.max(0.5, zoom) + 3;
@@ -32,6 +40,12 @@ export class FeatureLayer {
     ctx.lineCap = 'round';
     for (const river of this.world.rivers) {
       if (!intersects(river, bounds)) continue;
+      ctx.strokeStyle = 'rgba(63,88,43,0.36)';
+      ctx.lineWidth = 31;
+      strokePath(ctx, river, false);
+      ctx.strokeStyle = 'rgba(221,199,140,0.52)';
+      ctx.lineWidth = 24;
+      strokePath(ctx, river, false);
       ctx.strokeStyle = 'rgba(28,86,140,0.35)';
       ctx.lineWidth = 20;
       strokePath(ctx, river, false);
@@ -49,11 +63,17 @@ export class FeatureLayer {
     ctx.lineCap = 'round';
     for (const road of this.world.roads) {
       if (!intersects(road.points, bounds)) continue;
+      ctx.strokeStyle = 'rgba(74,73,45,0.24)';
+      ctx.lineWidth = 13;
+      strokePath(ctx, road.points, false);
       ctx.strokeStyle = PALETTE.roadDark;
       ctx.lineWidth = 8.5;
       strokePath(ctx, road.points, false);
       ctx.strokeStyle = PALETTE.road;
       ctx.lineWidth = 5.5;
+      strokePath(ctx, road.points, false);
+      ctx.strokeStyle = 'rgba(255,244,203,0.48)';
+      ctx.lineWidth = 1.15;
       strokePath(ctx, road.points, false);
     }
     if (zoom < CAMERA.lodProps) return;
