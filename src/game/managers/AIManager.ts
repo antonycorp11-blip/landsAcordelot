@@ -147,9 +147,13 @@ export class AIManager {
     for (const t of owned) {
       if (this.armies.barracksLevel(t) <= 0) continue;
       for (const unit of options) {
-        if (this.armies.checkRecruit(t, unit.id, kingdom.id).ok) {
-          this.armies.recruit(t.id, unit.id, kingdom.id);
-          this.note(`${kingdom.name} treina ${unit.name} em ${t.name}.`);
+        // A IA também recruta em lote, proporcional ao que consegue pagar.
+        const cabem = this.armies.maxRecruitable(t, unit.id, kingdom.id);
+        if (cabem <= 0) continue;
+        const lote = Math.max(1, Math.min(cabem, unit.requiresBarracks >= 3 ? 2 : 4));
+        if (this.armies.checkRecruit(t, unit.id, lote, kingdom.id).ok) {
+          this.armies.recruit(t.id, unit.id, lote, kingdom.id);
+          this.note(`${kingdom.name} treina ${lote}× ${unit.name} em ${t.name}.`);
           return;
         }
       }

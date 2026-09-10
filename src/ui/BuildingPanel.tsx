@@ -36,6 +36,32 @@ function CostList({ cost, have }: { cost: Partial<ResourceBag>; have: ResourceBa
 }
 
 /**
+ * Botões de lote: ×1, ×5, ×10 e Máx.
+ *
+ * Recrutar de um em um era sofrível no celular. Aqui o jogador escolhe o
+ * tamanho do lote com um toque, e o "Máx" já sabe quanto cabe entre recursos
+ * e habitantes disponíveis.
+ */
+function BatchButtons({ max, onPick }: { max: number; onPick: (n: number) => void }) {
+  const options = [1, 5, 10].filter((n) => n <= max);
+  return (
+    <div className="batch">
+      {options.map((n) => (
+        <button key={n} className="batch-btn" onClick={() => onPick(n)}>
+          ×{n}
+        </button>
+      ))}
+      {max > 1 && (
+        <button className="batch-btn max" onClick={() => onPick(max)}>
+          Máx {max}
+        </button>
+      )}
+      {max <= 0 && <span className="batch-off">sem recursos ou gente</span>}
+    </div>
+  );
+}
+
+/**
  * BuildingPanel — a tela da construção.
  *
  * Quando o jogador abre a madeireira, ele vê a madeireira: os trabalhadores
@@ -232,51 +258,68 @@ export function BuildingPanel({
         {/* ------------------------------- quartel ------------------------- */}
         {!underConstruction && isBarracks && (
           <>
-            <div className="section-title">Unidades liberadas</div>
+            <div className="section-title">Recrutar</div>
             {UNIT_LIST.map((u) => {
               const locked = level < u.requiresBarracks;
-              const check = game.armies.checkRecruit(territory, u.id);
+              const max = game.armies.maxRecruitable(territory, u.id);
               return (
                 <div className={`row ${locked ? '' : 'ok'}`} key={u.id}>
                   <Sprite path={`units/${u.id}`} className="thumb" />
                   <div className="grow">
                     <span className="name">{u.name}</span>
                     <span className="meta">
-                      {locked ? `Exige nível ${u.requiresBarracks}` : u.description}
+                      {locked
+                        ? `Exige Quartel nível ${u.requiresBarracks}`
+                        : `${u.trainTime}s cada · cabem ${max} agora`}
                     </span>
                     <CostList cost={u.cost} have={wallet} />
+                    {!locked && (
+                      <BatchButtons
+                        max={max}
+                        onPick={(n) => game.recruit(territory.id, u.id, n)}
+                      />
+                    )}
                   </div>
-                  <button
-                    className="btn sm primary"
-                    disabled={!check.ok}
-                    title={check.reason}
-                    onClick={() => game.recruit(territory.id, u.id)}
-                  >
-                    {u.trainTime}s
-                  </button>
                 </div>
               );
             })}
+            <div className="hint">
+              O quartel treina <strong>{level}</strong> ordem
+              {level === 1 ? '' : 's'} ao mesmo tempo — evoluir o quartel abre mais baias.
+            </div>
+
             {state.training.filter((o) => o.territoryId === territory.id).length > 0 && (
               <>
                 <div className="section-title">Na fila</div>
                 {state.training
                   .filter((o) => o.territoryId === territory.id)
-                  .map((o) => (
-                    <div className="row busy" key={o.id}>
+                  .map((o, i) => (
+                    <div className={`row ${i < level ? 'busy' : ''}`} key={o.id}>
+                      <Sprite path={`units/${o.unit}`} className="thumb" />
                       <div className="grow">
-                        <span className="name">{UNIT_DEFS[o.unit as UnitKind].name}</span>
-                        <span className="meta">{Math.ceil(o.remaining)}s</span>
+                        <span className="name">
+                          {UNIT_DEFS[o.unit as UnitKind].name}
+                          {o.count > 1 && <span style={{ color: 'var(--gold-300)' }}> ×{o.count}</span>}
+                        </span>
+                        <span className="meta">
+                          {i < level
+                            ? `${Math.ceil(o.remaining)}s para o próximo`
+                            : 'aguardando baia livre'}
+                        </span>
                         <div className="bar">
                           <i
                             style={{
-                              width: `${(1 - o.remaining / o.total) * 100}%`,
-                              background: '#4bd07f',
+                              width: `${i < level ? (1 - o.remaining / o.total) * 100 : 0}%`,
+                              background: '#5cd08a',
                             }}
                           />
                         </div>
                       </div>
-                      <button className="btn sm danger" onClick={() => game.cancelTraining(o.id)}>
+                      <button
+                        className="btn sm danger"
+                        title="Cancelar (devolve metade)"
+                        onClick={() => game.cancelTraining(o.id)}
+                      >
                         ✕
                       </button>
                     </div>

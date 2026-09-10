@@ -175,7 +175,11 @@ export class SaveManager {
     }
     state.battles = {};
     for (const [id, b] of Object.entries(payload.battles ?? {})) state.battles[id] = b;
-    state.training = payload.training ?? [];
+    // Ordens de treino antigas não tinham `count` (uma ordem = um soldado).
+    state.training = (payload.training ?? []).map((o) => ({
+      ...o,
+      count: typeof o.count === 'number' && o.count > 0 ? Math.floor(o.count) : 1,
+    }));
 
     // Coerência: descarta referências órfãs vindas de saves antigos.
     for (const t of Object.values(state.territories)) {

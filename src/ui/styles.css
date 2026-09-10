@@ -938,3 +938,28 @@ button { font-family: inherit; }
   .led-head .flow { min-width: 78px; }
   .led-head .net { width: 40px; }
 }
+
+/* ------------------------------------------------------- lotes e reforço -- */
+
+.batch { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.batch-btn {
+  padding: 5px 9px; border-radius: 7px; cursor: pointer;
+  border: 1px solid rgba(232, 195, 90, .32); background: rgba(6, 13, 26, .6);
+  color: var(--text); font-size: 11px; font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.batch-btn:hover { background: rgba(232, 195, 90, .16); border-color: rgba(232, 195, 90, .6); }
+.batch-btn.max {
+  background: linear-gradient(180deg, #4b8ef2, #2a63bd);
+  border-color: rgba(255, 255, 255, .28); color: #fff;
+}
+.batch-btn.max:hover { background: linear-gradient(180deg, #5f9df5, #3672cf); }
+.batch-off { font-size: 10.5px; color: var(--muted); }
+
+/* Destino amigo na lista de marcha: reforço, não ataque. */
+.target em {
+  font-style: normal; font-size: 8.5px; letter-spacing: .5px;
+  text-transform: uppercase; color: var(--muted); margin-left: 2px;
+}
+.target.friendly { border-color: rgba(92, 208, 138, .4); }
+.target.friendly em { color: var(--good); }

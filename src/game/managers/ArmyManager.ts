@@ -3,6 +3,7 @@ import { BUILDING_DEFS, UNIT_DEFS } from '../data/defs';
 import {
   RESOURCE_KINDS,
   type Army,
+  type TrainingOrder,
   type GameState,
   type ResourceBag,
   type Territory,
@@ -15,8 +16,12 @@ import type { EconomyManager } from './EconomyManager';
 export interface RecruitCheck {
   ok: boolean;
   reason: string;
+  /** Custo do lote inteiro. */
   cost: Partial<ResourceBag>;
+  /** Segundos até o lote inteiro ficar pronto. */
   time: number;
+  /** Quantos cabem de fato, entre recursos e gente disponível. */
+  max: number;
 }
 
 export interface MarchCheck {
@@ -121,38 +126,65 @@ export class ArmyManager {
 
   // -- recrutamento ---------------------------------------------------------
 
-  checkRecruit(t: Territory, unit: UnitKind, actor?: string): RecruitCheck {
+  /**
+   * Quantos soldados deste tipo cabem agora, olhando recursos e habitantes.
+   * É o que alimenta o botão "Máx" — o jogador não precisa fazer a conta.
+   */
+  maxRecruitable(t: Territory, unit: UnitKind, actor?: string): number {
     const def = UNIT_DEFS[unit];
-    const cost = def.cost;
-    const time = def.trainTime;
-    const fail = (reason: string): RecruitCheck => ({ ok: false, reason, cost, time });
+    if (!t.ownerId || t.ownerId !== (actor ?? this.state.playerKingdomId)) return 0;
+    const level = this.barracksLevel(t);
+    if (level <= 0 || level < def.requiresBarracks) return 0;
+
+    const kingdom = this.state.kingdoms[t.ownerId];
+    let byResources: number = MILITARY.maxPerOrder;
+    for (const k of RESOURCE_KINDS) {
+      const unitCost = def.cost[k] ?? 0;
+      if (unitCost > 0) byResources = Math.min(byResources, Math.floor(kingdom.resources[k] / unitCost));
+    }
+
+    const pool = this.economy.laborPool(t);
+    const soldiers = this.economy.soldiersOf(t.id);
+    const queued = this.state.training
+      .filter((o) => o.territoryId === t.id)
+      .reduce((a, o) => a + UNIT_DEFS[o.unit].manpower * o.count, 0);
+    const freeManpower = pool - soldiers - queued - t.hiredWorkers;
+    const byPeople = Math.floor(Math.max(0, freeManpower) / def.manpower);
+
+    return Math.max(0, Math.min(byResources, byPeople, MILITARY.maxPerOrder));
+  }
+
+  checkRecruit(t: Territory, unit: UnitKind, count = 1, actor?: string): RecruitCheck {
+    const def = UNIT_DEFS[unit];
+    const n = Math.max(1, Math.floor(count));
+    const cost: Partial<ResourceBag> = {};
+    for (const k of RESOURCE_KINDS) {
+      if (def.cost[k]) cost[k] = def.cost[k]! * n;
+    }
+    const time = def.trainTime * n;
+    const max = this.maxRecruitable(t, unit, actor);
+    const fail = (reason: string): RecruitCheck => ({ ok: false, reason, cost, time, max });
 
     if (!t.ownerId) return fail('Território sem dono.');
     if (t.ownerId !== (actor ?? this.state.playerKingdomId)) return fail('Território não é seu.');
     const level = this.barracksLevel(t);
     if (level <= 0) return fail('Construa um Quartel primeiro.');
     if (level < def.requiresBarracks) return fail(`Exige Quartel nível ${def.requiresBarracks}.`);
-
-    const pool = this.economy.laborPool(t);
-    const soldiers = this.economy.soldiersOf(t.id);
-    const queued = this.state.training
-      .filter((o) => o.territoryId === t.id)
-      .reduce((a, o) => a + UNIT_DEFS[o.unit].manpower, 0);
-    if (soldiers + queued + def.manpower + t.hiredWorkers > pool) {
-      return fail('Sem habitantes disponíveis para as armas.');
+    if (max <= 0) {
+      const kingdom = this.state.kingdoms[t.ownerId];
+      const semRecurso = RESOURCE_KINDS.some((k) => (def.cost[k] ?? 0) > kingdom.resources[k]);
+      return fail(semRecurso ? 'Recursos insuficientes.' : 'Sem habitantes disponíveis para as armas.');
     }
+    if (n > max) return fail(`Cabem no máximo ${max} agora.`);
 
-    const kingdom = this.state.kingdoms[t.ownerId];
-    const missing = RESOURCE_KINDS.find((k) => (cost[k] ?? 0) > kingdom.resources[k] + 1e-6);
-    if (missing) return fail('Recursos insuficientes.');
-
-    return { ok: true, reason: 'Pronto para treinar.', cost, time };
+    return { ok: true, reason: `${n} em treinamento.`, cost, time, max };
   }
 
-  recruit(territoryId: string, unit: UnitKind, actor?: string): boolean {
+  recruit(territoryId: string, unit: UnitKind, count = 1, actor?: string): boolean {
     const t = this.state.territories[territoryId];
     if (!t) return false;
-    const check = this.checkRecruit(t, unit, actor);
+    const n = Math.max(1, Math.floor(count));
+    const check = this.checkRecruit(t, unit, n, actor);
     if (!check.ok) return false;
 
     const kingdom = this.state.kingdoms[t.ownerId!];
@@ -163,8 +195,9 @@ export class ArmyManager {
       id: nextId('trn'),
       territoryId,
       unit,
-      remaining: check.time,
-      total: check.time,
+      count: n,
+      remaining: UNIT_DEFS[unit].trainTime,
+      total: UNIT_DEFS[unit].trainTime,
     });
     return true;
   }
@@ -180,8 +213,9 @@ export class ArmyManager {
     const def = UNIT_DEFS[order.unit];
     if (t?.ownerId) {
       const kingdom = this.state.kingdoms[t.ownerId];
+      // Metade de volta pelo que ainda não virou soldado.
       for (const k of RESOURCE_KINDS) {
-        if (def.cost[k]) kingdom.resources[k] += def.cost[k]! * 0.5;
+        if (def.cost[k]) kingdom.resources[k] += def.cost[k]! * order.count * 0.5;
       }
     }
     this.state.training.splice(idx, 1);
@@ -373,21 +407,43 @@ export class ArmyManager {
 
   // -- simulação ------------------------------------------------------------
 
-  /** Avança a fila de treino. Devolve o que ficou pronto e onde. */
+  /**
+   * Avança a fila de treino. Devolve o que ficou pronto e onde.
+   *
+   * O quartel tem baias: o nível dele define quantas ordens correm ao mesmo
+   * tempo naquele território. Antes todas avançavam juntas e a fila não era
+   * fila — pedir doze milícias entregava as doze de uma vez.
+   */
   tickTraining(dtSeconds: number): { unit: UnitKind; territoryId: string; ownerId: string }[] {
     const finished: { unit: UnitKind; territoryId: string; ownerId: string }[] = [];
-    for (let i = this.state.training.length - 1; i >= 0; i--) {
-      const order = this.state.training[i];
-      order.remaining -= dtSeconds;
-      if (order.remaining > 0) continue;
-      this.state.training.splice(i, 1);
-      const t = this.state.territories[order.territoryId];
-      if (!t?.ownerId) continue;
-      const army = this.ensureGarrison(order.territoryId);
-      if (!army) continue;
-      army.units[order.unit] = (army.units[order.unit] ?? 0) + 1;
-      finished.push({ unit: order.unit, territoryId: order.territoryId, ownerId: t.ownerId });
+
+    const byTerritory = new Map<string, TrainingOrder[]>();
+    for (const order of this.state.training) {
+      const list = byTerritory.get(order.territoryId);
+      if (list) list.push(order);
+      else byTerritory.set(order.territoryId, [order]);
     }
+
+    for (const [territoryId, orders] of byTerritory) {
+      const t = this.state.territories[territoryId];
+      if (!t?.ownerId) continue;
+      const bays = Math.max(1, this.barracksLevel(t));
+
+      for (const order of orders.slice(0, bays)) {
+        order.remaining -= dtSeconds;
+        // Um passo grande pode terminar mais de um soldado de uma vez.
+        while (order.remaining <= 0 && order.count > 0) {
+          const army = this.ensureGarrison(territoryId);
+          if (!army) break;
+          army.units[order.unit] = (army.units[order.unit] ?? 0) + 1;
+          finished.push({ unit: order.unit, territoryId, ownerId: t.ownerId });
+          order.count -= 1;
+          if (order.count > 0) order.remaining += order.total;
+        }
+      }
+    }
+
+    this.state.training = this.state.training.filter((o) => o.count > 0);
     return finished;
   }
 

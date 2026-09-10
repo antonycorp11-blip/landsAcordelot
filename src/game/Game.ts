@@ -689,17 +689,21 @@ export class Game {
 
   // -- ações militares ------------------------------------------------------
 
-  recruit(territoryId: string, unit: UnitKind): boolean {
+  recruit(territoryId: string, unit: UnitKind, count = 1): boolean {
     const t = this.state.territories[territoryId];
     if (!t) return false;
-    const check = this.armies.checkRecruit(t, unit);
+    const n = Math.max(1, Math.floor(count));
+    const check = this.armies.checkRecruit(t, unit, n);
     if (!check.ok) {
       this.notify(check.reason);
       return false;
     }
-    const ok = this.armies.recruit(territoryId, unit);
+    const ok = this.armies.recruit(territoryId, unit, n);
     if (ok) {
-      this.notify(`${UNIT_DEFS[unit].name} em treinamento.`, 2);
+      this.notify(
+        n > 1 ? `${n}× ${UNIT_DEFS[unit].name} em treinamento.` : `${UNIT_DEFS[unit].name} em treinamento.`,
+        2.5,
+      );
       this.touch();
     }
     return ok;

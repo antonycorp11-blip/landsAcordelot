@@ -225,7 +225,11 @@ export class ArmyLayer {
       ctx.fillStyle = 'rgba(238,244,251,0.85)';
       ctx.font = '600 10px "Inter", system-ui, sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(UNIT_DEFS[order.unit].name.toUpperCase(), x, y + 26);
+      const rotulo =
+        order.count > 1
+          ? `${UNIT_DEFS[order.unit].name.toUpperCase()} ×${order.count}`
+          : UNIT_DEFS[order.unit].name.toUpperCase();
+      ctx.fillText(rotulo, x, y + 26);
     }
   }
 }

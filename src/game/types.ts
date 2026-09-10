@@ -243,7 +243,11 @@ export interface TrainingOrder {
   id: string;
   territoryId: TerritoryId;
   unit: UnitKind;
+  /** Quantos ainda faltam sair desta ordem. */
+  count: number;
+  /** Segundos restantes do soldado que está em treino agora. */
   remaining: number;
+  /** Tempo de treino de um soldado, para a barra de progresso. */
   total: number;
 }
 

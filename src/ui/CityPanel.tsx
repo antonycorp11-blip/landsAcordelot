@@ -71,6 +71,26 @@ function Cost({ cost, have }: { cost: Partial<ResourceBag>; have: ResourceBag })
   );
 }
 
+/** Lotes de recrutamento: um toque em vez de vinte cliques. */
+function BatchRecruit({ max, onPick }: { max: number; onPick: (n: number) => void }) {
+  if (max <= 0) return <span className="batch-off">indisponível</span>;
+  const options = [1, 5, 10].filter((n) => n <= max);
+  return (
+    <div className="batch">
+      {options.map((n) => (
+        <button key={n} className="batch-btn" onClick={() => onPick(n)}>
+          ×{n}
+        </button>
+      ))}
+      {max > 1 && (
+        <button className="batch-btn max" onClick={() => onPick(max)}>
+          Máx {max}
+        </button>
+      )}
+    </div>
+  );
+}
+
 function Meter({ label, value, color }: { label: string; value: number; color: string }) {
   return (
     <div className="stat">
@@ -526,13 +546,18 @@ function ArmyTab({
   }, [territory.id]);
 
   const sending = Object.values(expedition).reduce((a, n) => a + (n ?? 0), 0);
+  // Vizinhos alcançáveis. Os seus entram na lista: mover tropa entre cidades
+  // próprias é reforço, e antes isto ficava de fora e travava a junção.
   const targets = territory.neighbors
     .map((id) => state.territories[id])
-    .filter((t): t is Territory => Boolean(t) && !t.locked && t.ownerId !== territory.ownerId);
+    .filter((t): t is Territory => Boolean(t) && !t.locked);
+  const target = targetId ? state.territories[targetId] : null;
+  const friendly = target ? target.ownerId === territory.ownerId : false;
 
   const march = targetId ? game.marchCheck(territory.id, targetId, expedition) : null;
+  // Reforço não tem batalha para prever.
   const preview =
-    targetId && sending > 0
+    targetId && sending > 0 && !friendly
       ? game.battlePreview(expedition, garrison?.morale ?? 60, targetId)
       : null;
 
@@ -574,8 +599,11 @@ function ArmyTab({
           {orders.map((o) => (
             <div className="row busy" key={o.id}>
               <div className="grow">
-                <span className="name">{UNIT_DEFS[o.unit].name}</span>
-                <span className="meta">{Math.ceil(o.remaining)}s restantes</span>
+                <span className="name">
+                  {UNIT_DEFS[o.unit].name}
+                  {o.count > 1 && <span style={{ color: 'var(--gold-300)' }}> ×{o.count}</span>}
+                </span>
+                <span className="meta">{Math.ceil(o.remaining)}s para o próximo</span>
                 <div className="bar">
                   <i style={{ width: `${(1 - o.remaining / o.total) * 100}%`, background: '#4bd07f' }} />
                 </div>
@@ -620,18 +648,21 @@ function ArmyTab({
       {/* ---------------------------- campanha ---------------------------- */}
       {garrison && targets.length > 0 && (
         <>
-          <div className="section-title">Campanha militar</div>
+          <div className="section-title">Mover tropas</div>
           <div className="target-row">
             {targets.map((t) => {
               const k = t.ownerId ? state.kingdoms[t.ownerId] : null;
+              const mine = t.ownerId === territory.ownerId;
               return (
                 <button
                   key={t.id}
-                  className={`target ${targetId === t.id ? 'active' : ''}`}
+                  className={`target ${targetId === t.id ? 'active' : ''} ${mine ? 'friendly' : ''}`}
                   onClick={() => setTargetId(targetId === t.id ? null : t.id)}
+                  title={mine ? 'Reforçar guarnição' : 'Atacar'}
                 >
                   <span className="owner-dot" style={{ background: k?.color ?? '#b9c2cd' }} />
                   {t.name}
+                  <em>{mine ? 'reforço' : 'ataque'}</em>
                 </button>
               );
             })}
@@ -673,6 +704,21 @@ function ArmyTab({
                 </button>
               </div>
 
+              {friendly && march && sending > 0 && (
+                <div className="forecast win">
+                  <div className="verdict">Reforço</div>
+                  <div className="lines">
+                    <span>
+                      {sending} soldados se juntam à guarnição de <b>{target?.name}</b>
+                    </span>
+                    <span>
+                      Viagem: <b>{Math.ceil(march.travelTime)}s</b> · mobilização{' '}
+                      <b>{march.cost.coin}</b> ouro e <b>{march.cost.food}</b> comida
+                    </span>
+                  </div>
+                </div>
+              )}
+
               {preview && march && (
                 <div className={`forecast ${preview.winner === 'attacker' ? 'win' : 'lose'}`}>
                   <div className="verdict">
@@ -712,7 +758,8 @@ function ArmyTab({
                     }
                   }}
                 >
-                  Marchar com {sending} soldados
+                  {friendly ? 'Enviar reforço' : 'Marchar'} com {sending} soldado
+                  {sending === 1 ? '' : 's'}
                 </button>
                 {march && !march.ok && <div className="hint">{march.reason}</div>}
               </div>
@@ -725,7 +772,6 @@ function ArmyTab({
         <>
           <div className="section-title">Recrutar</div>
           {UNIT_LIST.map((u) => {
-            const check = game.armies.checkRecruit(territory, u.id);
             const locked = barracks < u.requiresBarracks;
             return (
               <div className="row" key={u.id}>
@@ -737,14 +783,10 @@ function ArmyTab({
                   </span>
                   <Cost cost={u.cost} have={wallet} />
                 </div>
-                <button
-                  className="btn sm primary"
-                  disabled={!check.ok}
-                  title={check.reason}
-                  onClick={() => game.recruit(territory.id, u.id)}
-                >
-                  {u.trainTime}s
-                </button>
+                <BatchRecruit
+                  max={game.armies.maxRecruitable(territory, u.id)}
+                  onPick={(n) => game.recruit(territory.id, u.id, n)}
+                />
               </div>
             );
           })}

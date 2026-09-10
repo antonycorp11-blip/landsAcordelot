@@ -135,6 +135,8 @@ export const CASTLE_LEVELS = [
 ] as const;
 
 export const MILITARY = {
+  /** Teto de soldados por ordem — evita fila de mil por engano. */
+  maxPerOrder: 50,
   /** Moral inicial de um exército recém-formado. */
   startingMorale: 70,
   /** Habitantes por ponto de manpower. */
