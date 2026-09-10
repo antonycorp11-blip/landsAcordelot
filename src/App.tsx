@@ -14,6 +14,7 @@ import { LoreIntro } from './ui/LoreIntro';
 import { Minimap } from './ui/Minimap';
 import { Tutorial } from './ui/Tutorial';
 import { TopBar } from './ui/TopBar';
+import { safeAreaReport, watchSafeArea } from './ui/safeArea';
 import { UpdateWatcher } from './ui/UpdateWatcher';
 
 type Rail = 'kingdom' | 'campaigns' | 'help' | 'debug' | null;
@@ -108,6 +109,9 @@ export function App() {
   const [started, setStarted] = useState(false);
   const [hasSave, setHasSave] = useState(false);
   const isDev = import.meta.env.DEV;
+
+  // Mede o recorte da tela antes de qualquer coisa aparecer.
+  useEffect(() => watchSafeArea(), []);
 
   // Cria o jogo e carrega o manifesto de sprites (o mundo é gerado uma vez).
   useEffect(() => {
@@ -404,6 +408,14 @@ export function App() {
                   e o exército debanda.
                 </div>
                 <div className="hint">O jogo salva sozinho a cada 20 segundos no navegador.</div>
+                <div className="hint">
+                  Recorte da tela: <strong>{safeAreaReport.top}</strong> topo ·{' '}
+                  <strong>{safeAreaReport.right}</strong> dir ·{' '}
+                  <strong>{safeAreaReport.bottom}</strong> base ·{' '}
+                  <strong>{safeAreaReport.left}</strong> esq
+                  {safeAreaReport.standalone ? ' · app instalado' : ' · no navegador'}
+                  {safeAreaReport.fallback ? ' · usando folga de segurança' : ''}
+                </div>
                 <div className="hint" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <span>
                     Versão <strong>{BUILD_ID}</strong>

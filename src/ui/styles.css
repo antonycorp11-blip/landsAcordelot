@@ -61,15 +61,15 @@ html, body, #root {
   --top-h: 46px;
 
   /*
-   * Recortes do aparelho (notch/ilha).
-   * Atenção: no PWA em standalone o Safari nem sempre resolve env() lido
-   * através de custom property — por isso o CSS abaixo chama env() direto
-   * em cada propriedade, e estas variáveis ficam só como referência.
+   * Recortes do aparelho (notch, ilha dinâmica, barra inferior).
+   * Preenchidos por medição em JS (ui/safeArea.ts): no PWA em standalone o
+   * env() do iOS às vezes resolve como zero e a HUD ia parar sob o notch.
+   * Aqui é sempre um valor em pixels de verdade.
    */
-  --safe-t: env(safe-area-inset-top, 0px);
-  --safe-r: env(safe-area-inset-right, 0px);
-  --safe-b: env(safe-area-inset-bottom, 0px);
-  --safe-l: env(safe-area-inset-left, 0px);
+  --safe-t: 0px;
+  --safe-r: 0px;
+  --safe-b: 0px;
+  --safe-l: 0px;
 }
 
 .game-root { position: relative; width: 100%; height: 100%; overflow: hidden; }
@@ -127,9 +127,9 @@ button { font-family: inherit; }
 
 .topbar {
   position: absolute;
-  top: calc(6px + env(safe-area-inset-top, 0px));
-  left: calc(6px + env(safe-area-inset-left, 0px));
-  right: calc(6px + env(safe-area-inset-right, 0px));
+  top: calc(6px + var(--safe-t));
+  left: calc(6px + var(--safe-l));
+  right: calc(6px + var(--safe-r));
   display: flex; align-items: stretch; gap: 8px;
   padding: 5px 8px 5px 5px;
   background: linear-gradient(180deg, rgba(18, 36, 62, 0.96), rgba(7, 14, 26, 0.97));
@@ -222,10 +222,15 @@ button { font-family: inherit; }
 
 .rail {
   position: absolute;
-  left: calc(8px + env(safe-area-inset-left, 0px));
+  left: calc(8px + var(--safe-l));
   top: 50%; transform: translateY(-50%);
   display: flex; flex-direction: column; gap: 7px;
   padding: 8px 6px;
+  /* Nunca ultrapassa a tela: sobra vira rolagem em vez de botão escondido. */
+  max-height: calc(100% - var(--top-h) - 24px - var(--safe-t) - var(--safe-b));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
   background: linear-gradient(180deg, rgba(18, 36, 62, 0.9), rgba(7, 14, 26, 0.94));
   border-radius: 13px;
   box-shadow:
@@ -236,8 +241,10 @@ button { font-family: inherit; }
   backdrop-filter: blur(12px);
 }
 
+.rail::-webkit-scrollbar { display: none; }
+
 .rail button {
-  width: 54px; padding: 4px 2px 5px;
+  width: 54px; padding: 4px 2px 5px; flex: 0 0 auto;
   display: flex; flex-direction: column; align-items: center; gap: 3px;
   border-radius: 9px; border: 1px solid transparent;
   background: transparent; color: var(--muted); cursor: pointer;
@@ -273,8 +280,8 @@ button { font-family: inherit; }
 
 .panel {
   position: absolute;
-  top: calc(var(--top-h) + 12px + env(safe-area-inset-top, 0px));
-  right: calc(10px + env(safe-area-inset-right, 0px));
+  top: calc(var(--top-h) + 12px + var(--safe-t));
+  right: calc(10px + var(--safe-r));
   width: var(--panel-w); max-height: calc(100% - var(--top-h) - 24px);
   display: flex; flex-direction: column;
   background: linear-gradient(180deg, rgba(16, 32, 56, 0.95), rgba(7, 14, 26, 0.97));
@@ -287,7 +294,7 @@ button { font-family: inherit; }
   backdrop-filter: blur(16px);
   overflow: hidden;
 }
-.panel.left { left: calc(var(--rail) + 14px + env(safe-area-inset-left, 0px)); right: auto; }
+.panel.left { left: calc(var(--rail) + 14px + var(--safe-l)); right: auto; }
 
 .panel-head {
   display: flex; align-items: center; gap: 10px;
@@ -535,8 +542,8 @@ button { font-family: inherit; }
 
 .minimap {
   position: absolute;
-  left: calc(8px + env(safe-area-inset-left, 0px));
-  bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+  left: calc(8px + var(--safe-l));
+  bottom: calc(8px + var(--safe-b));
   padding: 7px;
   background: linear-gradient(180deg, rgba(18, 36, 62, 0.94), rgba(7, 14, 26, 0.96));
   border-radius: 12px;
@@ -583,7 +590,7 @@ button { font-family: inherit; }
 /* ----------------------------------------------------------------- toast -- */
 
 .toast {
-  position: absolute; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%);
+  position: absolute; bottom: calc(18px + var(--safe-b)); left: 50%; transform: translateX(-50%);
   padding: 10px 16px; border-radius: 10px; max-width: 70vw; text-align: center;
   background: rgba(9,14,24,.94); border: 1px solid var(--stroke-strong);
   font-size: 12.5px; font-weight: 600; letter-spacing: .2px;
@@ -596,8 +603,8 @@ button { font-family: inherit; }
 
 .tutorial {
   position: absolute;
-  left: calc(var(--rail) + 20px + env(safe-area-inset-left, 0px));
-  top: calc(var(--top-h) + 12px + env(safe-area-inset-top, 0px));
+  left: calc(var(--rail) + 20px + var(--safe-l));
+  top: calc(var(--top-h) + 12px + var(--safe-t));
   width: 292px; padding: 12px 14px;
   background: linear-gradient(180deg, rgba(18,36,62,.95), rgba(7,14,26,.96));
   border-radius: 11px;
@@ -663,7 +670,7 @@ button { font-family: inherit; }
 /* ----------------------------------------------------------------- debug -- */
 
 .debug {
-  position: absolute; left: calc(var(--rail) + 14px + env(safe-area-inset-left, 0px)); bottom: calc(10px + env(safe-area-inset-bottom, 0px)); width: 200px;
+  position: absolute; left: calc(var(--rail) + 14px + var(--safe-l)); bottom: calc(10px + var(--safe-b)); width: 200px;
   background: var(--panel); border: 1px solid var(--stroke);
   border-radius: 10px; padding: 9px; font-size: 11px;
 }
@@ -697,38 +704,68 @@ button { font-family: inherit; }
 /* ======================================================= telas pequenas == */
 
 /* Celular deitado: altura curta é o gargalo, não a largura. */
-/* Em paisagem o notch fica na lateral: garante folga mesmo sem env(). */
-@media (orientation: landscape) and (pointer: coarse) {
-  .rail { left: max(14px, calc(8px + env(safe-area-inset-left, 0px))); }
-  .panel.left { left: max(calc(var(--rail) + 20px), calc(var(--rail) + 14px + env(safe-area-inset-left, 0px))); }
-  .tutorial { left: max(calc(var(--rail) + 20px), calc(var(--rail) + 14px + env(safe-area-inset-left, 0px))); }
-  .panel { right: max(14px, calc(10px + env(safe-area-inset-right, 0px))); }
-  .topbar { max-width: calc(100vw - 28px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)); }
-}
-
 @media (max-height: 560px) {
-  .bld-art { max-width: 130px; }
-  .bld-title .name { font-size: 14px; }
-  .worker-grid { grid-template-columns: repeat(auto-fill, minmax(42px, 1fr)); gap: 5px; }
-  :root { --panel-w: 318px; --rail: 50px; --top-h: 42px; }
-  /* Em tela baixa, o painel manda: o tutorial some para não brigar por espaço. */
+  /*
+   * Celular deitado: a altura é o gargalo, não a largura.
+   * Nada aqui pode fixar `left`/`right`/`top` em pixel cru — a posição das
+   * bordas sai sempre do recorte medido, senão a HUD volta para baixo do notch.
+   */
+  :root { --panel-w: 318px; --rail: 56px; --top-h: 44px; }
+
   .hud.panel-open .tutorial { display: none; }
+  .hud.panel-open .minimap { display: none; }
+
+  .topbar { padding: 3px 6px 3px 4px; gap: 5px; min-height: 38px; }
+  .crown-block { gap: 6px; padding-right: 6px; }
+  .crown-banner { width: 22px; height: 30px; flex-basis: 22px; margin-top: -5px; }
+  .crown-name { font-size: 11px; }
+  .crown-motto { display: none; }
+  .res { padding: 2px 7px 2px 3px; gap: 5px; }
+  .res .icon { width: 20px; height: 20px; flex-basis: 20px; }
+  .res .icon svg { width: 13px; height: 13px; }
+  .res .val { font-size: 11px; }
+  .res .rate { font-size: 7.5px; }
+  .econ-toggle { width: 26px; height: 26px; flex-basis: 26px; margin-left: 3px; }
+  .clock .sun { display: none; }
+  .clock .date .d { font-size: 10.5px; }
+  .clock .date .s { font-size: 8px; }
+  .speed-btn { min-width: 24px; height: 22px; font-size: 9.5px; padding: 0 4px; }
+
+  .rail { top: calc(var(--top-h) + 8px + var(--safe-t)); transform: none; padding: 5px 4px; gap: 3px; }
+  .rail button { width: 44px; padding: 2px 2px 3px; gap: 1px; }
+  .rail button .medal { width: 25px; height: 25px; }
+  .rail button .tag { font-size: 6.5px; letter-spacing: .3px; }
+  .rail button .badge { min-width: 13px; height: 13px; font-size: 8px; right: 2px; }
+
+  .panel { top: calc(var(--top-h) + 8px + var(--safe-t)); max-height: calc(100% - var(--top-h) - 16px - var(--safe-t) - var(--safe-b)); }
+  .panel-body { padding: 10px 11px 12px; }
   .tabs button { font-size: 9.5px; padding: 6px 7px; }
   .stat .v { font-size: 13px; }
   .row { padding: 7px 8px; font-size: 11.5px; }
   .thumb { width: 32px; height: 32px; flex-basis: 32px; }
-  .topbar { top: 6px; padding: 4px; gap: 3px; }
-  .res { padding: 3px 6px; gap: 4px; }
-  .res .icon { width: 15px; height: 15px; flex-basis: 15px; }
-  .res .val { font-size: 11.5px; }
-  .res .rate { font-size: 8px; }
-  .speed-btn { width: 24px; height: 24px; }
-  .rail { left: 6px; padding: 4px; gap: 3px; }
-  .rail { padding: 6px 4px; gap: 5px; }
-  .rail button { width: 46px; padding: 3px 2px 4px; }
-  .rail button .medal { width: 30px; height: 30px; }
-  .rail button .tag { font-size: 7px; }
   .stepper button { width: 30px; height: 30px; }
+
+  .bld-art { max-width: 130px; }
+  .bld-title .name { font-size: 14px; }
+  .worker-grid { grid-template-columns: repeat(auto-fill, minmax(42px, 1fr)); gap: 5px; }
+
+  .tutorial { width: 240px; padding: 10px 11px; }
+  .tutorial .title { font-size: 12.5px; }
+  .tutorial .text { font-size: 11px; }
+
+  /* No celular o minimapa vai para a direita: à esquerda ele bate no trilho. */
+  .minimap { left: auto; right: calc(8px + var(--safe-r)); padding: 4px; }
+  .minimap canvas { width: 126px !important; height: 78px !important; }
+  .layers { min-width: 96px; }
+  .layer { font-size: 9px; }
+
+  .lore-inner { gap: 18px; }
+  .lore-logo { width: 150px; flex-basis: 150px; }
+  .lore p { font-size: 11.5px; line-height: 1.55; margin-top: 8px; }
+  .lore .chapter { font-size: 10px; letter-spacing: 2px; }
+
+  .toast { bottom: calc(10px + var(--safe-b)); padding: 8px 13px; font-size: 11.5px; }
+}
   .btn.sm { padding: 8px 11px; }
   .speed-btn { width: 27px; height: 27px; }
   .panel { top: calc(var(--top-h) + 8px); right: 6px; max-height: calc(100% - var(--top-h) - 16px); }
@@ -737,12 +774,12 @@ button { font-family: inherit; }
   .tutorial .title { font-size: 12.5px; }
   .tutorial .text { font-size: 11px; }
   /* Trilho ancorado abaixo da barra: em 360px de altura, centralizar colide. */
-  .rail { top: calc(var(--top-h) + 10px + env(safe-area-inset-top, 0px)); transform: none; }
+  .rail { top: calc(var(--top-h) + 10px + var(--safe-t)); transform: none; }
   /* No celular o minimapa vai para a direita: à esquerda ele bate no trilho. */
   .minimap {
     padding: 4px;
     left: auto;
-    right: calc(8px + env(safe-area-inset-left, 0px) + env(safe-area-inset-right, 0px));
+    right: calc(8px + var(--safe-r));
   }
   .minimap canvas { width: 126px !important; height: 78px !important; }
   .layers { min-width: 96px; }
@@ -757,7 +794,7 @@ button { font-family: inherit; }
 }
 
 @media (max-width: 780px) {
-  .topbar { left: 8px; right: 8px; transform: none; overflow-x: auto; justify-content: flex-start; }
+  .topbar { overflow-x: auto; justify-content: flex-start; }
   .topbar::-webkit-scrollbar { display: none; }
   .panel { width: min(var(--panel-w), calc(100vw - var(--rail) - 24px)); }
 }
@@ -788,7 +825,7 @@ button { font-family: inherit; }
 }
 
 .econ-pop {
-  position: absolute; top: calc(var(--top-h) + 14px + env(safe-area-inset-top, 0px));
+  position: absolute; top: calc(var(--top-h) + 14px + var(--safe-t));
   left: 50%; transform: translateX(-50%);
   width: min(560px, calc(100vw - 24px));
   max-height: calc(100% - var(--top-h) - 28px);
@@ -856,7 +893,7 @@ button { font-family: inherit; }
 .update-bar {
   position: absolute; z-index: 40;
   left: 50%; transform: translateX(-50%);
-  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  bottom: calc(16px + var(--safe-b));
   display: flex; align-items: center; gap: 12px;
   padding: 10px 12px 10px 16px; border-radius: 11px;
   background: rgba(9, 14, 24, .95);
@@ -867,5 +904,5 @@ button { font-family: inherit; }
 }
 
 @media (max-height: 560px) {
-  .update-bar { bottom: calc(8px + env(safe-area-inset-bottom, 0px)); font-size: 11.5px; padding: 8px 10px 8px 13px; }
+  .update-bar { bottom: calc(8px + var(--safe-b)); font-size: 11.5px; padding: 8px 10px 8px 13px; }
 }
