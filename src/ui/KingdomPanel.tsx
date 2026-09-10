@@ -2,6 +2,52 @@ import type { Game } from '../game/Game';
 import { RESOURCE_KINDS, type GameState } from '../game/types';
 import { RESOURCE_ICON, RESOURCE_LABEL } from './icons';
 
+/** Título, renome e crônica — a progressão do reino (§5). */
+function RealmHeader({ game }: { game: Game }) {
+  const title = game.realm.title();
+  const stats = game.state.stats;
+  const chronicle = game.realm.unlocked();
+
+  return (
+    <>
+      <div className="realm-title">
+        <div className="rank">{title.name}</div>
+        <div className="scale">{title.scale}</div>
+        <div className="bar">
+          <i style={{ width: `${title.progress * 100}%`, background: 'var(--gold-edge)' }} />
+        </div>
+        <div className="renown">
+          {title.renown} de renome
+          {title.nextAt !== null && ` · ${title.nextName} aos ${title.nextAt}`}
+        </div>
+      </div>
+
+      <div className="stat-grid" style={{ marginBottom: 4 }}>
+        <div className="stat">
+          <div className="k">Batalhas vencidas</div>
+          <div className="v">{stats.battlesWon}</div>
+        </div>
+        <div className="stat">
+          <div className="k">Terras tomadas</div>
+          <div className="v">{stats.territoriesTaken}</div>
+        </div>
+      </div>
+
+      {chronicle.length > 0 && (
+        <>
+          <div className="section-title">Crônica de Acordelot</div>
+          {[...chronicle].reverse().map((c) => (
+            <div className="chron" key={c.id}>
+              <span className="ct">{c.title}</span>
+              <span className="cx">{c.text}</span>
+            </div>
+          ))}
+        </>
+      )}
+    </>
+  );
+}
+
 /** Visão geral do reino, produção somada e vizinhos conhecidos. */
 export function KingdomPanel({
   game,
@@ -35,6 +81,8 @@ export function KingdomPanel({
         </button>
       </div>
       <div className="panel-body">
+        <RealmHeader game={game} />
+
         <div className="stat-grid">
           <div className="stat">
             <div className="k">Territórios</div>

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { spriteUrl } from '../game/config/version';
 import type { Game } from '../game/Game';
 import { BUILDING_LIST, BUILDING_DEFS, UNIT_LIST, UNIT_DEFS } from '../game/data/defs';
-import { WORKFORCE } from '../game/config/balance';
+import { VOCATIONS, WORKFORCE } from '../game/config/balance';
 import type { UnitStack } from '../game/managers/ArmyManager';
 import {
   RESOURCE_KINDS,
@@ -258,6 +258,23 @@ function ViewTab({
 
       {isPlayer && (
         <>
+          <div className="section-title">Vocação da cidade</div>
+          <div className="target-row">
+            {(Object.keys(VOCATIONS) as (keyof typeof VOCATIONS)[]).map((v) => (
+              <button
+                key={v}
+                className={`target ${territory.vocation === v ? 'active' : ''}`}
+                onClick={() => game.setVocation(territory.id, v)}
+                title={VOCATIONS[v].hint}
+              >
+                {VOCATIONS[v].name}
+              </button>
+            ))}
+          </div>
+          <div className="hint" style={{ marginTop: 0 }}>
+            {VOCATIONS[territory.vocation]?.hint}
+          </div>
+
           <div className="section-title">Saldo do território / min</div>
           {positives.length === 0 && <div className="empty">Nada sendo produzido aqui ainda.</div>}
           {positives.map((k) => {

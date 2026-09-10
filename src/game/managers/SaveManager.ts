@@ -23,6 +23,7 @@ interface SavedTerritory {
   level: number;
   locked: boolean;
   buildingIds: string[];
+  vocation?: GameState['territories'][string]['vocation'];
 }
 
 interface SavePayload {
@@ -32,6 +33,9 @@ interface SavePayload {
   playerKingdomId: string;
   tutorialStep: number;
   tutorialDone: boolean;
+  stats?: GameState['stats'];
+  titleIndex?: number;
+  chronicle?: string[];
   resources: Record<string, GameState['kingdoms'][string]['resources']>;
   territories: Record<string, SavedTerritory>;
   castles: Record<string, { level: number; hp: number }>;
@@ -73,6 +77,9 @@ export class SaveManager {
       playerKingdomId: state.playerKingdomId,
       tutorialStep: state.tutorialStep,
       tutorialDone: state.tutorialDone,
+      stats: state.stats,
+      titleIndex: state.titleIndex,
+      chronicle: state.chronicle,
       resources: {},
       territories: {},
       castles: {},
@@ -96,6 +103,7 @@ export class SaveManager {
         defense: t.defense,
         level: t.level,
         locked: t.locked,
+        vocation: t.vocation,
         buildingIds: [...t.buildingIds],
       };
     }
@@ -141,6 +149,10 @@ export class SaveManager {
     if (state.time.speed === 0) state.time.speed = 1;
     state.tutorialStep = payload.tutorialStep ?? 0;
     state.tutorialDone = payload.tutorialDone ?? false;
+    // Campos novos não existem em saves anteriores: entram com o padrão.
+    if (payload.stats) state.stats = { ...state.stats, ...payload.stats };
+    state.titleIndex = payload.titleIndex ?? 0;
+    state.chronicle = payload.chronicle ?? [];
 
     for (const [id, res] of Object.entries(payload.resources ?? {})) {
       if (state.kingdoms[id]) state.kingdoms[id].resources = { ...res };
@@ -149,6 +161,7 @@ export class SaveManager {
       const target = state.territories[id];
       if (!target) continue;
       Object.assign(target, t);
+      target.vocation = t.vocation ?? 'balanced';
     }
     for (const [id, c] of Object.entries(payload.castles ?? {})) {
       const target = state.castles[id];

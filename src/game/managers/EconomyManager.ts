@@ -1,4 +1,4 @@
-import { BUILD, CASTLE_LEVEL_YIELD_MULT, ECONOMY, TIME, WORKFORCE } from '../config/balance';
+import { BUILD, CASTLE_LEVEL_YIELD_MULT, ECONOMY, TIME, VOCATIONS, WORKFORCE } from '../config/balance';
 import { BUILDING_DEFS, UNIT_DEFS } from '../data/defs';
 import {
   addBag,
@@ -56,6 +56,8 @@ export interface TerritoryReport {
  */
 export class EconomyManager {
   private accumulator = 0;
+  /** Desconto de salário concedido pelo título do reino. */
+  wageFactor = 1;
 
   constructor(private state: GameState) {}
 
@@ -75,7 +77,12 @@ export class EconomyManager {
     const castle = t.castleId ? this.state.castles[t.castleId] : null;
     const castleMult = CASTLE_LEVEL_YIELD_MULT[castle?.level ?? 1] ?? 1;
     const mood = 0.65 + (t.happiness / 100) * 0.25 + (t.stability / 100) * 0.1;
-    return b.level * BUILD.levelOutputMult * staff * richness * castleMult * mood;
+
+    // Vocação: a cidade rende no que escolheu ser boa, e menos no resto.
+    const voc = VOCATIONS[t.vocation] ?? VOCATIONS.balanced;
+    const category = def.category === 'refining' ? voc.refining : def.category === 'extraction' ? voc.extraction : 1;
+
+    return b.level * BUILD.levelOutputMult * staff * richness * castleMult * mood * category;
   }
 
   laborPool(t: Territory): number {
@@ -136,7 +143,7 @@ export class EconomyManager {
     }
 
     const taxes = t.population * ECONOMY.taxPerPopPerMinute * (0.5 + t.happiness / 150);
-    const wages = employed * WORKFORCE.wagePerMinute;
+    const wages = employed * WORKFORCE.wagePerMinute * this.wageFactor;
     const foodUpkeep = t.population * ECONOMY.foodPerPopPerMinute;
 
     const armyUpkeep = emptyBag();
@@ -250,8 +257,11 @@ export class EconomyManager {
     return total;
   }
 
+  /** Armazém extra concedido pelo título do reino. */
+  titleStorage = 0;
+
   kingdomStorage(kingdomId: KingdomId): number {
-    let cap = 0;
+    let cap = this.titleStorage;
     for (const t of Object.values(this.state.territories)) {
       if (t.ownerId !== kingdomId) continue;
       cap += this.storageOf(t);

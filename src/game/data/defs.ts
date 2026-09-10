@@ -23,12 +23,19 @@ export interface TutorialStepDef {
   hint: string;
 }
 
+export interface ChronicleDef {
+  id: string;
+  title: string;
+  text: string;
+}
+
 export const LORE = loreRaw as {
   title: string;
   chapter: string;
   intro: string[];
   closing: string;
   tutorial: TutorialStepDef[];
+  chronicle: ChronicleDef[];
 };
 
 export const TUTORIAL_STEPS = LORE.tutorial;

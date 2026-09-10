@@ -1,6 +1,6 @@
 import { PALETTE } from '../config/palette';
 import type { Camera } from '../managers/Camera';
-import type { GameState } from '../types';
+import type { GameState, Vec2 } from '../types';
 import type { BuiltWorld } from '../world/WorldBuilder';
 import { ArmyLayer } from './layers/ArmyLayer';
 import { BorderLayer } from './layers/BorderLayer';
@@ -32,6 +32,11 @@ export class Renderer {
   claimableIds: Set<string> = new Set();
   focusedDepositId: string | null = null;
   selectedBuildingId: string | null = null;
+  /** Exército selecionado, destinos acesos e o arrasto em curso. */
+  selectedArmyId: string | null = null;
+  armyTargets: Set<string> = new Set();
+  dragTo: Vec2 | null = null;
+  dragTargetId: string | null = null;
   /** Camadas ligáveis pelo painel do minimapa (§conceito). */
   layers = { provinces: true, resources: true, routes: true, armies: true };
 
@@ -87,7 +92,51 @@ export class Renderer {
     this.buildings.selectedTerritoryId = this.selectedId;
     this.buildings.draw(ctx, state, bounds, zoom, time);
 
-    if (this.layers.armies) this.armiesLayer.draw(ctx, state, bounds, zoom, time);
+    // Destinos acesos do exército selecionado, por baixo das tropas.
+    if (this.selectedArmyId && this.armyTargets.size > 0) {
+      for (const id of this.armyTargets) {
+        const t = state.territories[id];
+        if (!t) continue;
+        const friendly = t.ownerId === state.playerKingdomId;
+        const hovered = id === this.dragTargetId;
+        this.borders.drawHighlight(
+          ctx,
+          t,
+          friendly ? '#5cd08a' : '#f0616a',
+          zoom,
+          hovered,
+          time,
+        );
+      }
+    }
+
+    if (this.layers.armies) {
+      this.armiesLayer.selectedArmyId = this.selectedArmyId;
+      this.armiesLayer.draw(ctx, state, bounds, zoom, time);
+    }
+
+    // Linha elástica do arrasto: de onde a coluna sai para onde ela vai.
+    const dragArmy = this.selectedArmyId ? state.armies[this.selectedArmyId] : null;
+    if (dragArmy && this.dragTo) {
+      const target = this.dragTargetId ? state.territories[this.dragTargetId] : null;
+      const friendly = target?.ownerId === state.playerKingdomId;
+      const color = !target ? 'rgba(232,195,90,0.75)' : friendly ? '#5cd08a' : '#f0616a';
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 4 / zoom;
+      ctx.setLineDash([16 / zoom, 11 / zoom]);
+      ctx.lineDashOffset = -time * 40;
+      ctx.beginPath();
+      ctx.moveTo(dragArmy.position.x, dragArmy.position.y);
+      ctx.lineTo(this.dragTo.x, this.dragTo.y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(this.dragTo.x, this.dragTo.y, 7 / zoom + 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
 
     // Destaques de seleção/hover e alvos disputáveis.
     for (const id of this.claimableIds) {

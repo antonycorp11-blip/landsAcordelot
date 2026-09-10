@@ -13,6 +13,7 @@ import { KingdomPanel } from './ui/KingdomPanel';
 import { LoreIntro } from './ui/LoreIntro';
 import { Minimap } from './ui/Minimap';
 import { SaveTools } from './ui/SavePanel';
+import { SendTroops } from './ui/SendTroops';
 import { Tutorial } from './ui/Tutorial';
 import { TopBar } from './ui/TopBar';
 import { safeAreaReport, watchSafeArea } from './ui/safeArea';
@@ -107,6 +108,8 @@ export function App() {
   const [rail, setRail] = useState<Rail>(null);
   const [dragging, setDragging] = useState(false);
   const [economyOpen, setEconomyOpen] = useState(false);
+  // Destino escolhido para a coluna: abre a tela de "quantos enviar".
+  const [sendTarget, setSendTarget] = useState<string | null>(null);
   // O trilho é só atalho: quem já sabe onde tudo fica prefere a tela limpa.
   const [railOpen, setRailOpen] = useState(() => {
     try {
@@ -230,11 +233,18 @@ export function App() {
       return { x: e.clientX - r.left, y: e.clientY - r.top };
     };
 
+    // Arrastar um exército não move a câmera: vira ordem de marcha.
+    let draggingArmy = false;
+
     const onDown = (e: PointerEvent) => {
       canvas.setPointerCapture(e.pointerId);
-      pointers.set(e.pointerId, local(e));
+      const p = local(e);
+      pointers.set(e.pointerId, p);
       moved = 0;
-      if (pointers.size === 1) setDragging(true);
+      if (pointers.size === 1) {
+        draggingArmy = game.beginArmyDrag(p.x, p.y);
+        setDragging(!draggingArmy);
+      }
     };
 
     const onMove = (e: PointerEvent) => {
@@ -260,6 +270,11 @@ export function App() {
       const dx = p.x - prev.x;
       const dy = p.y - prev.y;
       moved += Math.abs(dx) + Math.abs(dy);
+
+      if (draggingArmy) {
+        game.updateArmyDrag(p.x, p.y);
+        return;
+      }
       game.camera.panBy(dx, dy);
     };
 
@@ -268,7 +283,19 @@ export function App() {
       pointers.delete(e.pointerId);
       if (pointers.size < 2) pinchDist = 0;
       if (pointers.size === 0) setDragging(false);
-      if (p && moved < 8) game.selectAt(p.x, p.y);
+
+      if (draggingArmy) {
+        draggingArmy = false;
+        const target = game.endArmyDrag();
+        if (target) setSendTarget(target);
+        else if (moved < 8 && p) game.selectAt(p.x, p.y);
+        return;
+      }
+      if (p && moved < 8) {
+        game.selectAt(p.x, p.y);
+        // Tocar num destino aceso também vale como ordem.
+        if (game.dragTargetId) setSendTarget(game.dragTargetId);
+      }
     };
 
     const onWheel = (e: WheelEvent) => {
@@ -298,6 +325,11 @@ export function App() {
   }, [snap]);
 
   // Construção aberta tem tela própria e toma o lugar do painel do território.
+  // Fecha a tela de envio se a seleção mudar por fora.
+  useEffect(() => {
+    if (!snap?.selectedArmyId) setSendTarget(null);
+  }, [snap?.selectedArmyId]);
+
   const openBuilding = useMemo(() => {
     if (!game || !snap?.selectedBuildingId) return null;
     return snap.state.buildings[snap.selectedBuildingId] ?? null;
@@ -484,6 +516,16 @@ export function App() {
                 </div>
               </div>
             </div>
+          )}
+
+          {snap.selectedArmyId && sendTarget && (
+            <SendTroops
+              game={game}
+              state={snap.state}
+              armyId={snap.selectedArmyId}
+              targetId={sendTarget}
+              onClose={() => setSendTarget(null)}
+            />
           )}
 
           {openBuilding ? (

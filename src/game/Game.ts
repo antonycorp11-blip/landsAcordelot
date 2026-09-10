@@ -3,6 +3,7 @@ import { TUTORIAL_STEPS, UNIT_DEFS } from './data/defs';
 import { AIManager } from './managers/AIManager';
 import { ArmyManager, stackSize, type MarchCheck, type UnitStack } from './managers/ArmyManager';
 import { BattleManager, type BattlePreview } from './managers/BattleManager';
+import { RealmManager } from './managers/RealmManager';
 import { BuildingManager } from './managers/BuildingManager';
 import { Camera } from './managers/Camera';
 import { EconomyManager } from './managers/EconomyManager';
@@ -34,6 +35,9 @@ export interface GameSnapshot {
   state: GameState;
   selectedId: string | null;
   selectedBuildingId: string | null;
+  selectedArmyId: string | null;
+  armyTargets: Set<string>;
+  dragTargetId: string | null;
   hoveredId: string | null;
   claimable: Set<string>;
   fps: number;
@@ -55,6 +59,7 @@ export class Game {
   readonly battles: BattleManager;
   readonly ai: AIManager;
   readonly trade: TradeManager;
+  readonly realm: RealmManager;
   readonly saves: SaveManager;
 
   private renderer: Renderer | null = null;
@@ -85,6 +90,12 @@ export class Game {
   focusedDepositId: string | null = null;
   /** Construção selecionada no mapa (abre o cartão de detalhe). */
   selectedBuildingId: string | null = null;
+  /** Exército selecionado no mapa e para onde ele pode ir. */
+  selectedArmyId: string | null = null;
+  armyTargets = new Set<string>();
+  /** Ponta do arrasto em curso, para a linha elástica. */
+  dragTo: Vec2 | null = null;
+  dragTargetId: string | null = null;
   /** Aba que o painel deve abrir na próxima seleção (vem de cliques no mapa). */
   requestedTab: 'view' | 'build' | 'work' | 'army' | 'trade' | 'borders' | null = null;
 
@@ -100,6 +111,7 @@ export class Game {
     this.battles = new BattleManager(this.state);
     this.ai = new AIManager(this.state, this.economy, this.buildings, this.armies, this.battles);
     this.trade = new TradeManager(this.state);
+    this.realm = new RealmManager(this.state);
     this.saves = new SaveManager();
   }
 
@@ -209,6 +221,10 @@ export class Game {
       this.renderer.claimableIds = this.claimable;
       this.renderer.focusedDepositId = this.focusedDepositId;
       this.renderer.selectedBuildingId = this.selectedBuildingId;
+      this.renderer.selectedArmyId = this.selectedArmyId;
+      this.renderer.armyTargets = this.armyTargets;
+      this.renderer.dragTo = this.dragTo;
+      this.renderer.dragTargetId = this.dragTargetId;
       this.renderer.update(dt);
       if (this.ctx) this.renderer.draw(this.ctx, this.state, this.time, this.dpr);
     }
@@ -261,6 +277,7 @@ export class Game {
 
     for (const done of this.armies.tickTraining(simDt)) {
       if (done.ownerId !== this.state.playerKingdomId) continue;
+      this.state.stats.unitsTrained++;
       const where = this.state.territories[done.territoryId]?.name ?? '';
       this.notify(`${UNIT_DEFS[done.unit].name} pronto em ${where}.`, 2.5);
     }
@@ -270,8 +287,42 @@ export class Game {
 
     this.trade.tick(simDt);
     this.ai.tick(simDt);
+    this.checkRealm();
     this.saves.tick(simDt, this.state);
     this.advanceTutorial();
+  }
+
+  /** Sobe de título e abre entradas da crônica quando o mundo merece. */
+  private checkRealm() {
+    const bonus = this.realm.bonus();
+    this.economy.wageFactor = 1 - bonus.wageCut;
+    this.economy.titleStorage = bonus.storage;
+    const promoted = this.realm.checkPromotion();
+    if (promoted) {
+      this.notify(`Novo título: ${promoted.name.toUpperCase()} — ${promoted.scale}.`, 6);
+      this.touch();
+    }
+    for (const entry of this.realm.checkMilestones()) {
+      this.notify(`Crônica: ${entry.title}`, 5);
+      this.touch();
+    }
+  }
+
+  /** Define a vocação de uma cidade sua. */
+  setVocation(territoryId: string, vocation: Territory['vocation']): boolean {
+    const t = this.state.territories[territoryId];
+    if (!t || t.ownerId !== this.state.playerKingdomId) return false;
+    if (t.vocation === vocation) return false;
+    t.vocation = vocation;
+    this.notify(`${t.name}: vocação definida.`, 2.5);
+    this.touch();
+    return true;
+  }
+
+  /** Abre uma entrada de crônica disparada por um evento. */
+  chronicle(id: string) {
+    const entry = this.realm.record(id);
+    if (entry) this.notify(`Crônica: ${entry.title}`, 5);
   }
 
   // -- chegada de coluna ----------------------------------------------------
@@ -295,6 +346,7 @@ export class Game {
     }
 
     const battle = this.battles.start(army, targetId);
+    if (army.ownerId === this.state.playerKingdomId) this.chronicle('first_battle');
     const isPlayer =
       army.ownerId === this.state.playerKingdomId || target.ownerId === this.state.playerKingdomId;
     if (isPlayer) {
@@ -346,6 +398,9 @@ export class Game {
       if (castle) castle.hp = Math.max(castle.maxHp * 0.35, castle.maxHp * 0.6);
 
       if (attackerArmy.ownerId === this.state.playerKingdomId) {
+        this.state.stats.battlesWon++;
+        this.state.stats.territoriesTaken++;
+        this.chronicle('first_conquest');
         this.renderer?.overlay.addEffect({
           kind: 'conquest',
           x: battle.position.x,
@@ -356,6 +411,9 @@ export class Game {
         this.notify(`VITÓRIA! ${territory.name.toUpperCase()} é seu.`, 5);
         this.select(battle.territoryId);
       } else if (previousOwner === this.state.playerKingdomId) {
+        this.state.stats.battlesLost++;
+        this.state.stats.territoriesLost++;
+        this.chronicle('lost_land');
         this.notify(`DERROTA: ${territory.name.toUpperCase()} caiu.`, 6);
       } else {
         // Conquista entre terceiros: entra no diário do mundo, sem interromper.
@@ -389,8 +447,11 @@ export class Game {
       }
 
       if (battle.attacker.kingdomId === this.state.playerKingdomId) {
+        this.state.stats.battlesLost++;
+        this.chronicle('first_defeat');
         this.notify(`Ataque a ${territory?.name ?? 'inimigo'} fracassou.`, 5);
       } else if (battle.defender.kingdomId === this.state.playerKingdomId) {
+        this.state.stats.battlesWon++;
         this.notify(`Ataque a ${territory?.name ?? 'seu território'} rechaçado!`, 5);
       }
     } else if (stackSize(battle.defender.units) > 0 && territory?.ownerId) {
@@ -416,6 +477,9 @@ export class Game {
       state: this.state,
       selectedId: this.selectedId,
       selectedBuildingId: this.selectedBuildingId,
+      selectedArmyId: this.selectedArmyId,
+      armyTargets: this.armyTargets,
+      dragTargetId: this.dragTargetId,
       hoveredId: this.hoveredId,
       claimable: this.claimable,
       fps: this.fps,
@@ -496,6 +560,8 @@ export class Game {
     if (changed) {
       this.focusedDepositId = null;
       this.selectedBuildingId = null;
+      this.selectedArmyId = null;
+      this.armyTargets = new Set();
     }
     this.claimable = new Set();
     if (id) {
@@ -518,6 +584,24 @@ export class Game {
    */
   selectAt(screenX: number, screenY: number) {
     const world = this.camera.screenToWorld(screenX, screenY);
+
+    // Exército tem prioridade: é o que o jogador mais quer pegar no mapa.
+    const army = this.armyAt(world);
+    if (army) {
+      this.selectArmy(army.id);
+      return;
+    }
+    // Com um exército selecionado, tocar num destino aceso já é a ordem.
+    if (this.selectedArmyId) {
+      const t = this.territoryAt(world);
+      if (t && this.armyTargets.has(t.id)) {
+        this.dragTargetId = t.id;
+        this.touch();
+        return;
+      }
+      this.selectArmy(null);
+    }
+
     // Alvo generoso: no celular o dedo não tem a precisão do mouse.
     const radius = (this.coarsePointer ? 74 : 52) / Math.max(0.4, this.camera.zoom);
 
@@ -577,6 +661,82 @@ export class Game {
     this.camera.focus(castle?.position ?? t.center, zoom);
   }
 
+  // -- exército no mapa -----------------------------------------------------
+
+  /** Exército do jogador sob um ponto do mundo, se houver. */
+  armyAt(world: Vec2): Army | null {
+    const reach = (this.coarsePointer ? 78 : 56) / Math.max(0.4, this.camera.zoom);
+    let best: Army | null = null;
+    let bestDist = reach;
+    for (const army of Object.values(this.state.armies)) {
+      if (army.ownerId !== this.state.playerKingdomId) continue;
+      if (army.state === 'fighting') continue;
+      const d = Math.hypot(army.position.x - world.x, army.position.y - world.y);
+      if (d < bestDist) {
+        bestDist = d;
+        best = army;
+      }
+    }
+    return best;
+  }
+
+  /**
+   * Seleciona um exército e acende os destinos válidos.
+   * Vizinho próprio é reforço, vizinho alheio é ataque — a mesma marcha.
+   */
+  selectArmy(armyId: string | null) {
+    this.selectedArmyId = armyId;
+    this.armyTargets = new Set();
+    this.dragTo = null;
+    this.dragTargetId = null;
+
+    const army = armyId ? this.state.armies[armyId] : null;
+    if (!army || army.state !== 'garrison') {
+      this.touch();
+      return;
+    }
+    const from = this.state.territories[army.territoryId];
+    if (from) {
+      for (const n of from.neighbors) {
+        const t = this.state.territories[n];
+        if (t && !t.locked) this.armyTargets.add(n);
+      }
+    }
+    this.touch();
+  }
+
+  /** Destino é amigo? Muda o texto e tira a prévia de batalha. */
+  isFriendlyTarget(territoryId: string): boolean {
+    return this.state.territories[territoryId]?.ownerId === this.state.playerKingdomId;
+  }
+
+  /** Começa o arrasto se o toque pegou um exército do jogador. */
+  beginArmyDrag(screenX: number, screenY: number): boolean {
+    const world = this.camera.screenToWorld(screenX, screenY);
+    const army = this.armyAt(world);
+    if (!army || army.state !== 'garrison') return false;
+    this.selectArmy(army.id);
+    this.dragTo = world;
+    return true;
+  }
+
+  updateArmyDrag(screenX: number, screenY: number) {
+    if (!this.selectedArmyId) return;
+    const world = this.camera.screenToWorld(screenX, screenY);
+    this.dragTo = world;
+    const t = this.territoryAt(world);
+    this.dragTargetId = t && this.armyTargets.has(t.id) ? t.id : null;
+  }
+
+  /** Solta o arrasto. Devolve o destino válido sob o dedo, se houver. */
+  endArmyDrag(): string | null {
+    const target = this.dragTargetId;
+    this.dragTo = null;
+    this.dragTargetId = null;
+    this.touch();
+    return target;
+  }
+
   /** Abre a tela da construção (e leva a câmera até ela). */
   selectBuilding(buildingId: string | null) {
     this.selectedBuildingId = buildingId;
@@ -633,6 +793,7 @@ export class Game {
     }
     const b = this.buildings.build(territoryId, defId, depositId);
     if (!b) return false;
+    this.state.stats.buildingsRaised++;
     this.focusedDepositId = null;
     this.notify('Obra iniciada.', 2);
     this.touch();
@@ -791,6 +952,8 @@ export class Game {
       return false;
     }
     if (!this.trade.execute(territoryId, give, amount, receive)) return false;
+    this.state.stats.caravansSent++;
+    this.chronicle('first_trade');
     this.notify(`Caravana partiu: ${amount} → ${q.receiveAmount}.`, 3);
     this.touch();
     return true;
@@ -804,8 +967,9 @@ export class Game {
     const cost = { coin: 0, food: 0 };
     if (!t) return { cost, affordable: false, available: false, reason: 'Território desconhecido.' };
 
-    cost.coin = Math.round(CLAIM.coinBase + t.defense * CLAIM.coinPerDefense);
-    cost.food = Math.round(CLAIM.foodBase + t.population * CLAIM.foodPerPop);
+    const cut = 1 - this.realm.bonus().claimCut;
+    cost.coin = Math.round((CLAIM.coinBase + t.defense * CLAIM.coinPerDefense) * cut);
+    cost.food = Math.round((CLAIM.foodBase + t.population * CLAIM.foodPerPop) * cut);
 
     const status = this.territories.claimStatus(this.state.playerKingdomId, territoryId);
     if (!status.claimable) return { cost, affordable: false, available: false, reason: status.reason };
@@ -835,7 +999,12 @@ export class Game {
     const kingdom = this.playerKingdom;
     kingdom.resources.coin -= offer.cost.coin;
     kingdom.resources.food -= offer.cost.food;
-    return this.claimTerritory(territoryId, 'ECONOMIC');
+    const ok = this.claimTerritory(territoryId, 'ECONOMIC');
+    if (ok) {
+      this.state.stats.territoriesTaken++;
+      this.chronicle('first_claim');
+    }
+    return ok;
   }
 
   /**

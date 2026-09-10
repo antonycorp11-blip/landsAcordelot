@@ -14,6 +14,9 @@ import type { Bounds } from './TerrainLayer';
  * suprimento; a batalha acontece sobre o território, sem trocar de tela (§72).
  */
 export class ArmyLayer {
+  /** Exército em foco: ganha anel e pulsa. */
+  selectedArmyId: string | null = null;
+
   draw(ctx: CanvasRenderingContext2D, state: GameState, bounds: Bounds, zoom: number, time: number) {
     for (const army of Object.values(state.armies)) {
       if (army.state === 'fighting') continue;
@@ -73,6 +76,22 @@ export class ArmyLayer {
 
     const p = army.position;
     const bob = marching ? Math.sin(time * 6 + p.x * 0.02) * 1.6 : 0;
+
+    if (army.id === this.selectedArmyId) {
+      ctx.save();
+      ctx.strokeStyle = `rgba(232,195,90,${0.55 + Math.sin(time * 4) * 0.35})`;
+      ctx.lineWidth = 3 / zoom + 1.5;
+      ctx.beginPath();
+      ctx.ellipse(p.x, p.y + 3, 54, 24, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.strokeStyle = 'rgba(255,255,255,0.55)';
+      ctx.lineWidth = 1.6 / zoom + 0.8;
+      ctx.beginPath();
+      ctx.ellipse(p.x, p.y + 3, 62, 28, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
     const scale = zoom >= CAMERA.lodPeople ? 0.34 : 0.24;
     assets.drawShadow(ctx, p.x, p.y + 2, 34 * scale * 2.2);
     const isPlayer = kingdom?.ownerKind === 'PLAYER';

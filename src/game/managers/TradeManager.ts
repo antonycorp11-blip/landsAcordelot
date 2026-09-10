@@ -1,4 +1,4 @@
-import { TRADE } from '../config/balance';
+import { TRADE, VOCATIONS } from '../config/balance';
 import { BUILDING_DEFS } from '../data/defs';
 import type { GameState, ResourceKind, Territory } from '../types';
 
@@ -53,7 +53,8 @@ export class TradeManager {
   /** Cotação sem efeito colateral — a UI chama a cada digitação. */
   quote(t: Territory, give: ResourceKind, amount: number, receive: ResourceKind): TradeQuote {
     const level = this.marketLevel(t);
-    const spread = this.spreadFor(level);
+    const voc = VOCATIONS[t.vocation] ?? VOCATIONS.balanced;
+    const spread = Math.max(0.04, this.spreadFor(level) + voc.tradeSpread);
     const capacity = this.capacityFor(level);
     const offerValue = amount * this.valueOf(give);
     const base = {

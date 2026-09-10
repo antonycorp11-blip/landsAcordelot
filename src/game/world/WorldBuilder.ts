@@ -475,9 +475,31 @@ function buildDeposits(
  * A ordem é do castelo para fora, então a cidade cresce de dentro para a borda.
  */
 const CASTLE_KEEPOUT = { halfWidth: 230, top: 360, bottom: 110 };
-const SLOT_GAP = 146;
-const SLOT_GAP_DEPOSIT = 128;
 const MAX_SLOTS = 26;
+/** Abaixo disto o território fica injogável: relaxamos as regras e tentamos de novo. */
+const MIN_SLOTS = 8;
+
+interface SlotPass {
+  gap: number;
+  gapDeposit: number;
+  keepout: number;
+  allowMountains: boolean;
+  /** Último recurso: aceita até pico nevado, senão a região fica injogável. */
+  allowSnow?: boolean;
+}
+
+/**
+ * Passes de tolerância decrescente. O primeiro é o ideal: longe do castelo,
+ * bem espaçado, fora da rocha. Território de montanha não atendia nenhuma
+ * dessas condições e ficava com ZERO vagas — sem quartel, sem oficina, sem
+ * jogo. Então afrouxamos por etapas até dar para construir.
+ */
+const SLOT_PASSES: SlotPass[] = [
+  { gap: 146, gapDeposit: 128, keepout: 1, allowMountains: false },
+  { gap: 124, gapDeposit: 110, keepout: 0.8, allowMountains: true },
+  { gap: 100, gapDeposit: 92, keepout: 0.6, allowMountains: true },
+  { gap: 92, gapDeposit: 80, keepout: 0.45, allowMountains: true, allowSnow: true },
+];
 
 function buildCitySlots(
   id: string,
@@ -488,7 +510,27 @@ function buildCitySlots(
 ): Vec2[] {
   if (!anchor || !poly || poly.length < 3) return [];
   const bb = boundsOf(poly);
-  const rng = makeRng(hashString('slots_' + id));
+  const mine = deposits.filter((d) => d.territoryId === id);
+
+  let best: Vec2[] = [];
+  for (const pass of SLOT_PASSES) {
+    const found = sampleSlots(id, anchor, poly, bb, grid, mine, pass);
+    if (found.length > best.length) best = found;
+    if (best.length >= MIN_SLOTS) break;
+  }
+  return best;
+}
+
+function sampleSlots(
+  id: string,
+  anchor: Vec2,
+  poly: Vec2[],
+  bb: { minX: number; minY: number; maxX: number; maxY: number },
+  grid: WorldGrid,
+  deposits: DepositSeed[],
+  pass: SlotPass,
+): Vec2[] {
+  const rng = makeRng(hashString('slots_' + id + pass.gap));
   const step = 74;
 
   const candidates: Vec2[] = [];
@@ -502,30 +544,30 @@ function buildCitySlots(
       Math.hypot(a.x - anchor.x, a.y - anchor.y) - Math.hypot(b.x - anchor.x, b.y - anchor.y),
   );
 
-  const mine = deposits.filter((d) => d.territoryId === id);
   const slots: Vec2[] = [];
-
   for (const p of candidates) {
     if (slots.length >= MAX_SLOTS) break;
 
     const dx = p.x - anchor.x;
     const dy = p.y - anchor.y;
     if (
-      Math.abs(dx) < CASTLE_KEEPOUT.halfWidth &&
-      dy < CASTLE_KEEPOUT.bottom &&
-      dy > -CASTLE_KEEPOUT.top
+      Math.abs(dx) < CASTLE_KEEPOUT.halfWidth * pass.keepout &&
+      dy < CASTLE_KEEPOUT.bottom * pass.keepout &&
+      dy > -CASTLE_KEEPOUT.top * pass.keepout
     ) {
       continue;
     }
 
     const idx = sampleCell(grid, p.x, p.y);
     if (idx < 0 || !grid.land[idx]) continue;
-    if (grid.biome[idx] === BIOME_CODE.mountains || grid.biome[idx] === BIOME_CODE.snow) continue;
+    const biome = grid.biome[idx];
+    if (biome === BIOME_CODE.snow && !pass.allowSnow) continue;
+    if (biome === BIOME_CODE.mountains && !pass.allowMountains) continue;
     if (!pointInPolygon(p, poly)) continue;
-    if (mine.some((d) => Math.hypot(d.position.x - p.x, d.position.y - p.y) < SLOT_GAP_DEPOSIT)) {
+    if (deposits.some((d) => Math.hypot(d.position.x - p.x, d.position.y - p.y) < pass.gapDeposit)) {
       continue;
     }
-    if (slots.some((q) => Math.hypot(q.x - p.x, q.y - p.y) < SLOT_GAP)) continue;
+    if (slots.some((q) => Math.hypot(q.x - p.x, q.y - p.y) < pass.gap)) continue;
 
     slots.push(p);
   }

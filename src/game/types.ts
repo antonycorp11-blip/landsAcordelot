@@ -276,6 +276,13 @@ export interface Castle {
 // Território
 // ---------------------------------------------------------------------------
 
+/**
+ * Vocação da cidade. Território que não comporta quartel pode virar celeiro de
+ * pedra; quem refina não precisa extrair. Os recursos já são do reino inteiro,
+ * então especializar é escolher no que cada cidade é boa (§5).
+ */
+export type Vocation = 'balanced' | 'extraction' | 'refining' | 'military' | 'trade';
+
 export interface Territory {
   id: TerritoryId;
   name: string;
@@ -303,6 +310,8 @@ export interface Territory {
   citySlots: Vec2[];
   /** Segundos até a próxima caravana poder partir do mercado. */
   tradeCooldown: number;
+  /** Especialidade escolhida pelo jogador. */
+  vocation: Vocation;
 
   polygon: Vec2[];
   center: Vec2;
@@ -362,4 +371,33 @@ export interface GameState {
   /** Progresso do tutorial (índice do passo atual). */
   tutorialStep: number;
   tutorialDone: boolean;
+
+  /** Feitos acumulados — base do renome e da crônica. */
+  stats: RealmStats;
+  /** Índice do título alcançado em TITLES. */
+  titleIndex: number;
+  /** Ids das entradas de crônica já desbloqueadas, em ordem. */
+  chronicle: string[];
+}
+
+export interface RealmStats {
+  battlesWon: number;
+  battlesLost: number;
+  territoriesTaken: number;
+  territoriesLost: number;
+  buildingsRaised: number;
+  unitsTrained: number;
+  caravansSent: number;
+}
+
+export function emptyStats(): RealmStats {
+  return {
+    battlesWon: 0,
+    battlesLost: 0,
+    territoriesTaken: 0,
+    territoriesLost: 0,
+    buildingsRaised: 0,
+    unitsTrained: 0,
+    caravansSent: 0,
+  };
 }

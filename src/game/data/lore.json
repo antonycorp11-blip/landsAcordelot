@@ -63,5 +63,57 @@
       "text": "Territórios de outros reinos não se compram: monte uma expedição na aba MILITAR, escolha o alvo na fronteira e marche.",
       "hint": "A prévia mostra quantos soldados voltam. Vencer e valer a pena são coisas diferentes."
     }
+  ],
+  "chronicle": [
+    {
+      "id": "first_building",
+      "title": "A primeira pedra",
+      "text": "Erguer algo onde não havia nada é o primeiro ato de governo. O povo reparou."
+    },
+    {
+      "id": "first_refinery",
+      "title": "O ofício",
+      "text": "Madeira bruta é riqueza de lenhador. Tábua serrada é riqueza de reino — e agora Valdória sabe a diferença."
+    },
+    {
+      "id": "first_claim",
+      "title": "Sem uma espada erguida",
+      "text": "A primeira terra veio por acordo, não por cerco. Há quem chame isso de fraqueza. Há quem chame de talento."
+    },
+    {
+      "id": "first_battle",
+      "title": "O primeiro sangue",
+      "text": "Homens que plantavam no mês passado voltaram do campo em número menor. A conta da guerra é escrita nos nomes que faltam."
+    },
+    {
+      "id": "first_conquest",
+      "title": "Pela força",
+      "text": "O estandarte subiu sobre muralha alheia. O que se toma com ferro guarda-se com ferro — e isso custa todo dia."
+    },
+    {
+      "id": "first_defeat",
+      "title": "A lição",
+      "text": "A coluna voltou menor do que partiu, e sem a terra que foi buscar. Reis aprendem caro."
+    },
+    {
+      "id": "first_gold",
+      "title": "Cunhado em Valdória",
+      "text": "A primeira moeda saiu da prensa com o lírio gravado. De agora em diante o reino não pede emprestado: paga."
+    },
+    {
+      "id": "first_trade",
+      "title": "A estrada dos mercadores",
+      "text": "A caravana partiu carregada e voltou carregada de outra coisa. Foi assim que reinos pobres em tudo ficaram ricos em quase tudo."
+    },
+    {
+      "id": "five_territories",
+      "title": "Uma província",
+      "text": "Cinco terras sob um só estandarte já não é um castelo com vizinhos. É uma província — e províncias atraem olhares."
+    },
+    {
+      "id": "lost_land",
+      "title": "O que se perde",
+      "text": "Uma terra que era sua amanheceu com outra bandeira. O mapa não perdoa quem cresce mais rápido do que consegue defender."
+    }
   ]
 }

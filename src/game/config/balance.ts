@@ -89,9 +89,20 @@ export const AI_STARTING_RESOURCES: ResourceBag = {
 };
 
 export const BUILD = {
-  /** Custo do nível N = custo base * mult^(N-1). */
-  levelCostMult: 1.85,
-  levelTimeMult: 1.55,
+  /**
+   * Custo do nível N = custo base * mult^(N-1).
+   * Subir tem que doer: um prédio nível 4 custa ~15x o nível 1, o que faz o
+   * jogador escolher onde investir em vez de evoluir tudo por inércia.
+   */
+  levelCostMult: 2.45,
+  levelTimeMult: 1.7,
+  /**
+   * A partir do nível 2 a obra também cobra refinados, proporcional ao nível.
+   * É o que liga a cadeia produtiva à progressão: sem serraria e olaria
+   * rodando, nada evolui.
+   */
+  refinedPerLevel: { planks: 18, bricks: 12 } as Record<string, number>,
+  refinedFromLevel: 2,
   /** Produção do nível N = base * N. */
   levelOutputMult: 1,
   /** Devolução ao demolir. */
@@ -179,6 +190,88 @@ export const TRADE = {
   capacityByLevel: [0, 220, 420, 700, 1100],
   /** Intervalo entre caravanas, em segundos. */
   cooldownSeconds: 25,
+} as const;
+
+/**
+ * Vocações. Cada uma dá com uma mão e tira com a outra — é escolha, não upgrade.
+ * O jogador designa uma cidade para extrair e outra para refinar; o estoque já
+ * é comum ao reino, então o material flui sozinho entre elas.
+ */
+export const VOCATIONS = {
+  balanced: {
+    name: 'Equilibrada',
+    hint: 'Sem especialidade: tudo funciona no ritmo normal.',
+    extraction: 1,
+    refining: 1,
+    trainSpeed: 1,
+    morale: 0,
+    tradeSpread: 0,
+  },
+  extraction: {
+    name: 'Extração',
+    hint: 'Minas, pedreiras e lenhadores rendem muito mais; as oficinas rendem pouco.',
+    extraction: 1.35,
+    refining: 0.55,
+    trainSpeed: 1,
+    morale: 0,
+    tradeSpread: 0,
+  },
+  refining: {
+    name: 'Refino',
+    hint: 'Serraria, olaria, fundição e moeda rendem mais; o que sai do solo rende menos.',
+    extraction: 0.6,
+    refining: 1.35,
+    trainSpeed: 1,
+    morale: 0,
+    tradeSpread: 0,
+  },
+  military: {
+    name: 'Praça de armas',
+    hint: 'Treina mais rápido e a guarnição luta com mais firmeza; a produção civil cai.',
+    extraction: 0.8,
+    refining: 0.8,
+    trainSpeed: 0.65,
+    morale: 12,
+    tradeSpread: 0,
+  },
+  trade: {
+    name: 'Entreposto',
+    hint: 'Caravanas cobram menos e levam mais; a produção própria cai um pouco.',
+    extraction: 0.85,
+    refining: 0.85,
+    trainSpeed: 1,
+    morale: 0,
+    tradeSpread: -0.1,
+  },
+} as const;
+
+/**
+ * Títulos do reino (§5 — progressão de escala).
+ *
+ * Cada degrau é conquistado por renome e paga de volta em algo concreto:
+ * armazém maior, salário menor, tropa mais firme, anexação mais barata.
+ * Título que só muda o nome na tela não é progressão, é enfeite.
+ */
+export const TITLES = [
+  { renown: 0, name: 'Senhor', scale: 'Castelo', storage: 0, wageCut: 0, morale: 0, claimCut: 0 },
+  { renown: 450, name: 'Barão', scale: 'Baronia', storage: 900, wageCut: 0.05, morale: 2, claimCut: 0.05 },
+  { renown: 1100, name: 'Visconde', scale: 'Viscondado', storage: 2000, wageCut: 0.1, morale: 4, claimCut: 0.1 },
+  { renown: 2200, name: 'Conde', scale: 'Condado', storage: 3600, wageCut: 0.14, morale: 6, claimCut: 0.15 },
+  { renown: 4000, name: 'Marquês', scale: 'Marca', storage: 6000, wageCut: 0.18, morale: 8, claimCut: 0.2 },
+  { renown: 6800, name: 'Duque', scale: 'Ducado', storage: 9500, wageCut: 0.22, morale: 11, claimCut: 0.25 },
+  { renown: 10500, name: 'Grão-Duque', scale: 'Grão-Ducado', storage: 14000, wageCut: 0.26, morale: 14, claimCut: 0.3 },
+  { renown: 15500, name: 'Rei', scale: 'Reino de Acordelot', storage: 20000, wageCut: 0.3, morale: 18, claimCut: 0.35 },
+] as const;
+
+/** Peso de cada feito no cálculo do renome. */
+export const RENOWN = {
+  perTerritory: 120,
+  perPopulation: 0.05,
+  perBuilding: 14,
+  perCastleLevel: 45,
+  perBattleWon: 90,
+  perTerritoryTaken: 60,
+  perUnitTrained: 3,
 } as const;
 
 export const SAVE = {

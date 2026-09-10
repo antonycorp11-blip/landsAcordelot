@@ -3,6 +3,7 @@ import territoriesRaw from './data/territories.json';
 import type { KingdomDef, TerritoryDef } from './data/schema';
 import { BUILDING_DEFS } from './data/defs';
 import { AI_STARTING_RESOURCES, CASTLE_LEVELS, MILITARY, STARTING_RESOURCES, WORLD } from './config/balance';
+import { emptyStats } from './types';
 import type {
   Army,
   Building,
@@ -123,6 +124,7 @@ export function createWorld(): WorldBundle {
       depositIds: depositsByTerritory[d.id] ?? [],
       citySlots: world.citySlots[d.id] ?? [],
       tradeCooldown: 0,
+      vocation: 'balanced',
       polygon: world.polygons[d.id] ?? [],
       center: world.centers[d.id] ?? d.seed,
       area: world.areas[d.id] ?? 0,
@@ -148,6 +150,9 @@ export function createWorld(): WorldBundle {
     training: [],
     tutorialStep: 0,
     tutorialDone: false,
+    stats: emptyStats(),
+    titleIndex: 0,
+    chronicle: [],
   };
 
   seedStartingBuildings(state);

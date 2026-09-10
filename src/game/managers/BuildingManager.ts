@@ -39,6 +39,14 @@ export class BuildingManager {
       const v = def.cost[k];
       if (v) out[k] = Math.round(v * mult);
     }
+    // Obra de nível alto exige material beneficiado, não só o que sai do solo.
+    if (level >= BUILD.refinedFromLevel) {
+      const steps = level - BUILD.refinedFromLevel + 1;
+      for (const [k, base] of Object.entries(BUILD.refinedPerLevel)) {
+        const key = k as keyof ResourceBag;
+        out[key] = (out[key] ?? 0) + Math.round(base * steps * Math.pow(1.6, steps - 1));
+      }
+    }
     return out;
   }
 

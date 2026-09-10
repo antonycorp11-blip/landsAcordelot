@@ -1,4 +1,4 @@
-import { MARCH, MILITARY } from '../config/balance';
+import { MARCH, MILITARY, VOCATIONS } from '../config/balance';
 import { BUILDING_DEFS, UNIT_DEFS } from '../data/defs';
 import {
   RESOURCE_KINDS,
@@ -191,13 +191,16 @@ export class ArmyManager {
     for (const k of RESOURCE_KINDS) {
       if (check.cost[k]) kingdom.resources[k] = Math.max(0, kingdom.resources[k] - check.cost[k]!);
     }
+    // Praça de armas treina mais rápido.
+    const speed = (VOCATIONS[t.vocation] ?? VOCATIONS.balanced).trainSpeed;
+    const each = Math.max(3, Math.round(UNIT_DEFS[unit].trainTime * speed));
     this.state.training.push({
       id: nextId('trn'),
       territoryId,
       unit,
       count: n,
-      remaining: UNIT_DEFS[unit].trainTime,
-      total: UNIT_DEFS[unit].trainTime,
+      remaining: each,
+      total: each,
     });
     return true;
   }
@@ -234,7 +237,7 @@ export class ArmyManager {
       ownerId: t.ownerId,
       territoryId,
       units: {},
-      morale: MILITARY.startingMorale,
+      morale: MILITARY.startingMorale + (VOCATIONS[t.vocation] ?? VOCATIONS.balanced).morale,
       state: 'garrison',
       position: this.garrisonPosition(territoryId),
       path: null,
