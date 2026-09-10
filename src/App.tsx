@@ -12,6 +12,7 @@ import { IconBug } from './ui/icons';
 import { KingdomPanel } from './ui/KingdomPanel';
 import { LoreIntro } from './ui/LoreIntro';
 import { Minimap } from './ui/Minimap';
+import { SaveTools } from './ui/SavePanel';
 import { Tutorial } from './ui/Tutorial';
 import { TopBar } from './ui/TopBar';
 import { safeAreaReport, watchSafeArea } from './ui/safeArea';
@@ -87,7 +88,7 @@ const RAIL_ITEMS: {
     id: 'save',
     medal: 'diplomacia',
     label: 'Salvar',
-    title: 'Salvar reino',
+    title: 'Salvar o reino agora',
     run: (game) => game.saveNow(),
   },
   {
@@ -106,6 +107,24 @@ export function App() {
   const [rail, setRail] = useState<Rail>(null);
   const [dragging, setDragging] = useState(false);
   const [economyOpen, setEconomyOpen] = useState(false);
+  // O trilho é só atalho: quem já sabe onde tudo fica prefere a tela limpa.
+  const [railOpen, setRailOpen] = useState(() => {
+    try {
+      return localStorage.getItem('acordelot:rail') !== 'min';
+    } catch {
+      return true;
+    }
+  });
+  const toggleRail = () => {
+    setRailOpen((v) => {
+      try {
+        localStorage.setItem('acordelot:rail', v ? 'min' : 'open');
+      } catch {
+        /* sem storage: a preferência vale só para esta sessão */
+      }
+      return !v;
+    });
+  };
   const [started, setStarted] = useState(false);
   const [hasSave, setHasSave] = useState(false);
   const isDev = import.meta.env.DEV;
@@ -117,10 +136,12 @@ export function App() {
   useEffect(() => {
     let alive = true;
     const g = new Game();
-    setHasSave(g.saves.hasSave());
-    g.loadSave();
-    void assets.load().then(() => {
-      if (alive) setGame(g);
+    // O save vive em IndexedDB: a leitura é assíncrona e precisa terminar antes
+    // de o jogo aparecer, senão começaríamos do zero por cima do progresso.
+    void Promise.all([g.boot(), assets.load()]).then(() => {
+      if (!alive) return;
+      setHasSave(g.saves.hasSave());
+      setGame(g);
     });
     return () => {
       alive = false;
@@ -321,7 +342,11 @@ export function App() {
       )}
 
       {started && game && snap && (
-        <div className={`hud ${selected || rail || openBuilding ? 'panel-open' : ''}`}>
+        <div
+          className={`hud ${selected || rail || openBuilding ? 'panel-open' : ''} ${
+            railOpen ? '' : 'rail-min'
+          }`}
+        >
           <TopBar
             game={game}
             state={snap.state}
@@ -332,6 +357,15 @@ export function App() {
           {economyOpen && (
             <EconomyPanel game={game} state={snap.state} onClose={() => setEconomyOpen(false)} />
           )}
+
+          <button
+            className="rail-toggle"
+            onClick={toggleRail}
+            title={railOpen ? 'Recolher atalhos' : 'Mostrar atalhos'}
+            style={railOpen ? { left: 'calc(var(--rail) + 8px + var(--safe-l))' } : undefined}
+          >
+            {railOpen ? '‹' : '›'}
+          </button>
 
           <div className="rail">
             {RAIL_ITEMS.map((item) => {
@@ -407,7 +441,8 @@ export function App() {
                   perdas e marche. A coluna leva comida para a viagem — sem suprimento, a moral cai
                   e o exército debanda.
                 </div>
-                <div className="hint">O jogo salva sozinho a cada 20 segundos no navegador.</div>
+                <div className="section-title">Seu progresso</div>
+                <SaveTools game={game} />
                 <div className="hint">
                   Recorte da tela: <strong>{safeAreaReport.top}</strong> topo ·{' '}
                   <strong>{safeAreaReport.right}</strong> dir ·{' '}

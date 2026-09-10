@@ -888,6 +888,40 @@ button { font-family: inherit; }
   .econ-toggle { width: 28px; height: 27px; }
 }
 
+/* -------------------------------------------------------- caixa de save -- */
+
+.save-box {
+  width: 100%; height: 92px; margin-top: 10px; resize: vertical;
+  background: rgba(6, 13, 26, .7);
+  border: 1px solid rgba(232, 195, 90, .3);
+  border-radius: 8px; padding: 8px 10px;
+  color: var(--text); font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10.5px; line-height: 1.4;
+}
+.save-box:focus { outline: none; border-color: rgba(232, 195, 90, .7); }
+
+/* ------------------------------------------------ trilho recolhido -- */
+
+.rail-toggle {
+  position: absolute;
+  left: calc(8px + var(--safe-l));
+  top: calc(var(--top-h) + 14px + var(--safe-t));
+  width: 26px; height: 34px;
+  display: grid; place-items: center; cursor: pointer;
+  border-radius: 0 9px 9px 0;
+  background: linear-gradient(180deg, rgba(18, 36, 62, .95), rgba(7, 14, 26, .96));
+  box-shadow:
+    inset 0 0 0 1px rgba(232, 195, 90, .45),
+    0 6px 18px rgba(0, 0, 0, .45);
+  color: var(--gold-300); font-size: 13px; line-height: 1;
+  border: 0; z-index: 3;
+}
+.rail-toggle:hover { color: var(--gold-100); }
+
+/* Recolhido: o trilho sai de cena e os painéis reaproveitam a largura. */
+.hud.rail-min { --rail: 26px; }
+.hud.rail-min .rail { display: none; }
+
 /* --------------------------------------------------- aviso de nova versão -- */
 
 .update-bar {

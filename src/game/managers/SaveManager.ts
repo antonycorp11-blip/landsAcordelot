@@ -1,6 +1,7 @@
 import { SAVE } from '../config/balance';
 import { STATE_VERSION } from '../state';
 import type { Army, Battle, Building, GameState, TrainingOrder } from '../types';
+import { readSave, removeSave, requestPersistence, writeSave } from './storage';
 
 /**
  * SaveManager — save local (§44).
@@ -43,13 +44,25 @@ interface SavePayload {
 
 export class SaveManager {
   private timer = 0;
+  /** Último save lido do disco, guardado para o `load` continuar síncrono. */
+  private cached: string | null = null;
+  /** Save de versão anterior encontrado e arquivado, se houver. */
+  incompatibleFound = false;
+  persistent = false;
+  lastSavedAt = 0;
+
+  /**
+   * Lê o disco uma vez e pede armazenamento durável. Precisa ser chamado antes
+   * do primeiro `load`.
+   */
+  async init(): Promise<void> {
+    this.persistent = await requestPersistence();
+    this.cached = await readSave(SAVE.key);
+    if (this.cached) this.lastSavedAt = savedAtOf(this.cached);
+  }
 
   hasSave(): boolean {
-    try {
-      return localStorage.getItem(SAVE.key) !== null;
-    } catch {
-      return false;
-    }
+    return this.cached !== null;
   }
 
   save(state: GameState): boolean {
@@ -92,22 +105,21 @@ export class SaveManager {
     for (const a of Object.values(state.armies)) payload.armies[a.id] = a;
     for (const b of Object.values(state.battles)) payload.battles[b.id] = b;
 
-    try {
-      localStorage.setItem(SAVE.key, JSON.stringify(payload));
-      return true;
-    } catch {
-      return false;
-    }
+    // Guarda a versão anterior ANTES de trocar o cache: uma gravação ruim não
+    // pode levar junto o progresso inteiro.
+    const previous = this.cached;
+    const json = JSON.stringify(payload);
+    this.cached = json;
+    this.lastSavedAt = payload.savedAt;
+    void writeSave(SAVE.key, json).then((ok) => {
+      if (ok && previous) void writeSave(`${SAVE.key}:backup`, previous);
+    });
+    return true;
   }
 
   /** Aplica um save sobre um estado recém-construído. */
   load(state: GameState): boolean {
-    let raw: string | null = null;
-    try {
-      raw = localStorage.getItem(SAVE.key);
-    } catch {
-      return false;
-    }
+    const raw = this.cached;
     if (!raw) return false;
 
     let payload: SavePayload;
@@ -116,7 +128,14 @@ export class SaveManager {
     } catch {
       return false;
     }
-    if (payload.version !== STATE_VERSION) return false;
+    if (payload.version !== STATE_VERSION) {
+      // O formato mudou. Em vez de apagar o progresso do jogador, arquivamos
+      // com a versão no nome — dá para resgatar depois se valer a pena.
+      this.incompatibleFound = true;
+      void writeSave(`${SAVE.key}:v${payload.version}`, raw);
+      this.cached = null;
+      return false;
+    }
 
     state.time = payload.time ?? state.time;
     if (state.time.speed === 0) state.time.speed = 1;
@@ -183,10 +202,27 @@ export class SaveManager {
   }
 
   clear() {
+    this.cached = null;
+    this.lastSavedAt = 0;
+    void removeSave(SAVE.key);
+  }
+
+  /** Save atual como texto, para o jogador guardar fora do navegador. */
+  export(state: GameState): string {
+    this.save(state);
+    return this.cached ?? '';
+  }
+
+  /** Restaura a partir de um texto exportado. Não aplica: só troca o cache. */
+  importFrom(text: string): boolean {
     try {
-      localStorage.removeItem(SAVE.key);
+      const payload = JSON.parse(text) as SavePayload;
+      if (typeof payload.version !== 'number') return false;
+      this.cached = text;
+      void writeSave(SAVE.key, text);
+      return true;
     } catch {
-      /* ignora */
+      return false;
     }
   }
 
@@ -196,5 +232,14 @@ export class SaveManager {
       this.timer = 0;
       this.save(state);
     }
+  }
+}
+
+function savedAtOf(raw: string): number {
+  try {
+    const v = (JSON.parse(raw) as { savedAt?: number }).savedAt;
+    return typeof v === 'number' ? v : 0;
+  } catch {
+    return 0;
   }
 }

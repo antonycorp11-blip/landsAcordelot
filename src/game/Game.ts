@@ -105,6 +105,23 @@ export class Game {
 
   // -- ciclo de vida --------------------------------------------------------
 
+  /**
+   * Prepara o armazenamento e carrega o progresso. Precisa ser aguardado antes
+   * do `attach`, senão o jogo começaria do zero por cima de um save existente.
+   */
+  async boot(): Promise<void> {
+    await this.saves.init();
+    this.loadSave();
+  }
+
+  /**
+   * Grava agora. O iOS encerra o app sem avisar, então salvamos ao esconder a
+   * aba e ao sair — `beforeunload` não é confiável lá.
+   */
+  private saveOnHide = () => {
+    if (document.visibilityState === 'hidden') this.saves.save(this.state);
+  };
+
   attach(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d', { alpha: false })!;
@@ -131,6 +148,9 @@ export class Game {
     };
     this.raf = requestAnimationFrame(loop);
 
+    document.addEventListener('visibilitychange', this.saveOnHide);
+    window.addEventListener('pagehide', this.saveOnHide);
+
     // Simulação: relógio de parede em intervalo próprio. Assim o reino continua
     // vivo com a aba em segundo plano e recupera o tempo perdido ao voltar.
     this.simTimer = window.setInterval(() => this.simulateFromClock(), TIME.simIntervalMs);
@@ -138,6 +158,8 @@ export class Game {
 
   detach() {
     cancelAnimationFrame(this.raf);
+    document.removeEventListener('visibilitychange', this.saveOnHide);
+    window.removeEventListener('pagehide', this.saveOnHide);
     if (this.simTimer !== null) {
       clearInterval(this.simTimer);
       this.simTimer = null;
