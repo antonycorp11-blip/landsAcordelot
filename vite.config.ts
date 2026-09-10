@@ -7,8 +7,28 @@ import react from '@vitejs/plugin-react';
  */
 const buildId = Date.now().toString(36);
 
+/**
+ * Publica /build.json com o carimbo da build.
+ *
+ * Serve para responder, do celular e em um toque, "qual versão está no ar?" —
+ * foi a pergunta que custou caro quando um vercel.json inválido derrubou os
+ * deploys em silêncio e o site ficou parado numa versão antiga.
+ */
+function buildStamp() {
+  return {
+    name: 'build-stamp',
+    generateBundle(this: { emitFile: (f: { type: 'asset'; fileName: string; source: string }) => void }) {
+      this.emitFile({
+        type: 'asset',
+        fileName: 'build.json',
+        source: JSON.stringify({ buildId, builtAt: new Date().toISOString() }, null, 2),
+      });
+    },
+  };
+}
+
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), buildStamp()],
   define: {
     __BUILD_ID__: JSON.stringify(buildId),
   },

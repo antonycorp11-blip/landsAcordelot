@@ -18,6 +18,19 @@ O projeto é um app Vite estático. Na Vercel, o preset padrão já serve:
 - **Output Directory:** `dist`
 - **Install Command:** `npm install`
 
+### Conferir qual build está no ar
+
+Abra `https://<seu-dominio>/build.json` — devolve o `buildId` e a hora exata da
+publicação. Compare com a versão mostrada no painel **Ajuda** dentro do jogo.
+Se os dois baterem, você está na build mais recente; se o `build.json` estiver
+velho, o problema é no deploy e não no cache do aparelho.
+
+> **Cuidado com o `vercel.json`:** o schema tem `additionalProperties: false`.
+> Uma chave a mais (um `"comment"`, por exemplo) faz a Vercel **rejeitar a
+> configuração e falhar o build inteiro** — o site continua no ar servindo a
+> versão anterior, sem nenhum aviso na página. Valide com
+> `curl -s https://openapi.vercel.sh/vercel.json` antes de mexer.
+
 ### Como a atualização chega no aparelho
 
 PWA instalado é o caso mais chato: o aparelho guarda o que baixou e não
