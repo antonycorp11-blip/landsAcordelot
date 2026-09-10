@@ -1708,3 +1708,30 @@ canvas.map {
   0%, 100% { box-shadow: 0 0 0 3px rgba(232,195,90,.22), 0 0 22px 6px rgba(232,195,90,.35), 0 0 0 9999px rgba(4,10,20,.28); }
   50% { box-shadow: 0 0 0 6px rgba(232,195,90,.12), 0 0 30px 10px rgba(232,195,90,.5), 0 0 0 9999px rgba(4,10,20,.28); }
 }
+
+/* ---------------------------------------------------------------- conta -- */
+
+.account {
+  display: grid; gap: 9px; margin-bottom: 9px;
+  padding: 11px 12px; border-radius: 11px;
+  background: rgba(255,255,255,.04); border: 1px solid rgba(232,195,90,.2);
+}
+.acc-head { display: flex; align-items: flex-start; gap: 9px; }
+.acc-dot {
+  width: 9px; height: 9px; flex: 0 0 auto; margin-top: 4px; border-radius: 50%;
+}
+.acc-dot.ok { background: #6fd39a; box-shadow: 0 0 8px rgba(111,211,154,.7); }
+.acc-dot.anon { background: var(--gold-300); box-shadow: 0 0 8px rgba(232,195,90,.6); }
+.acc-title { font-size: 12.5px; font-weight: 700; word-break: break-word; }
+.acc-sub { font-size: 10.5px; color: var(--muted); line-height: 1.4; margin-top: 2px; }
+.acc-row { display: flex; gap: 6px; }
+.acc-input {
+  flex: 1; min-width: 0; padding: 8px 10px; border-radius: 8px;
+  background: rgba(6,13,26,.75); border: 1px solid rgba(232,195,90,.35);
+  color: var(--text); font-size: 13px;
+}
+.acc-input:focus { outline: none; border-color: rgba(232,195,90,.85); }
+.acc-status {
+  font-size: 11px; line-height: 1.45; color: var(--gold-100);
+  padding: 7px 9px; border-radius: 8px; background: rgba(232,195,90,.1);
+}

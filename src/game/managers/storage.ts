@@ -1,10 +1,17 @@
+import { SAVE } from '../config/balance';
+import { cloudEnabled, readCloud, writeCloud } from '../net/cloud';
+
 /**
  * Camada de armazenamento do save.
  *
  * localStorage sozinho não basta num PWA: no iOS ele é apagado por inatividade
  * e some sem aviso. Aqui gravamos em IndexedDB (mais durável) e espelhamos em
- * localStorage; na leitura vence o registro mais recente dos dois. Se um for
- * apagado, o outro reconstrói.
+ * localStorage; na leitura vence o registro mais recente dos três. Se um for
+ * apagado, os outros reconstroem.
+ *
+ * A nuvem é a terceira fonte, e é opcional: sem credencial configurada ela
+ * simplesmente não existe e o jogo segue exatamente como sempre seguiu. A
+ * regra de desempate é a mesma para todas — vence o `savedAt` mais novo.
  */
 
 const DB_NAME = 'acordelot';
@@ -107,18 +114,51 @@ function savedAtOf(raw: string | null): number {
   }
 }
 
-/** Lê das duas fontes e devolve a mais recente. */
+/**
+ * Só o save principal viaja para a nuvem.
+ *
+ * Reserva e arquivos de versões antigas são rede de segurança deste aparelho;
+ * mandá-los para o servidor gastaria banda e criaria a chance de um deles
+ * voltar por cima do progresso bom. A comparação é com a chave canônica, e
+ * não por formato: a chave principal também termina em `:v4`, e uma regra por
+ * sufixo excluiria justamente ela.
+ */
+function syncsToCloud(key: string): boolean {
+  return cloudEnabled() && key === SAVE.key;
+}
+
+/** Lê de todas as fontes e devolve a mais recente. */
 export async function readSave(key: string): Promise<string | null> {
+  const local = await readLocal(key);
+  if (!syncsToCloud(key)) return local;
+
+  const remote = await readCloud();
+  if (remote === null) return local;
+  if (local === null) return remote;
+  if (savedAtOf(remote) <= savedAtOf(local)) return local;
+
+  // A nuvem trouxe algo mais novo — outro aparelho jogou. Desce para os
+  // cofres locais na mesma hora, para o próximo boot não depender da rede.
+  lsSet(key, remote);
+  await idbSet(key, remote);
+  return remote;
+}
+
+async function readLocal(key: string): Promise<string | null> {
   const [fromIdb, fromLs] = [await idbGet(key), lsGet(key)];
   if (fromIdb === null) return fromLs;
   if (fromLs === null) return fromIdb;
   return savedAtOf(fromIdb) >= savedAtOf(fromLs) ? fromIdb : fromLs;
 }
 
-/** Grava nas duas fontes. Devolve true se ao menos uma aceitou. */
+/**
+ * Grava nas fontes locais e, se houver, na nuvem. Devolve true quando ao menos
+ * uma fonte local aceitou: perder a rede nunca pode ser perder o progresso.
+ */
 export async function writeSave(key: string, value: string): Promise<boolean> {
   const okLs = lsSet(key, value);
   const okIdb = await idbSet(key, value);
+  if (syncsToCloud(key)) void writeCloud(value);
   return okLs || okIdb;
 }
 

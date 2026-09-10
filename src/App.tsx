@@ -12,6 +12,7 @@ import { IconBug } from './ui/icons';
 import { KingdomPanel } from './ui/KingdomPanel';
 import { LoreIntro } from './ui/LoreIntro';
 import { Minimap } from './ui/Minimap';
+import { AccountPanel } from './ui/AccountPanel';
 import { SaveTools } from './ui/SavePanel';
 import { SendTroops } from './ui/SendTroops';
 import { CouncilDemand } from './ui/CouncilDemand';
@@ -542,6 +543,7 @@ export function App() {
                   e o exército debanda.
                 </div>
                 <div className="section-title">Seu progresso</div>
+                <AccountPanel />
                 <SaveTools game={game} />
                 <div className="hint">
                   Recorte da tela: <strong>{safeAreaReport.top}</strong> topo ·{' '}
