@@ -12,6 +12,20 @@ import {
   type Territory,
 } from '../types';
 
+export interface LedgerEntry {
+  label: string;
+  amount: number;
+}
+
+/** Origem e destino de um recurso, por minuto. */
+export interface ResourceLedger {
+  produced: number;
+  consumed: number;
+  net: number;
+  sources: LedgerEntry[];
+  sinks: LedgerEntry[];
+}
+
 /** Relatório econômico de um território — alimenta a UI e a simulação. */
 export interface TerritoryReport {
   /** Produção bruta por minuto (antes do consumo das oficinas). */
@@ -156,6 +170,74 @@ export class EconomyManager {
       soldiers: this.soldiersOf(t.id),
       armyUpkeep,
     };
+  }
+
+  /**
+   * Razão de cada recurso: quem coloca, quem tira e quanto sobra.
+   *
+   * Existe para responder "por que a pedra não sobe?" sem o jogador precisar
+   * abrir prédio por prédio. Cada linha aponta a origem e o destino de tudo.
+   */
+  ledger(kingdomId: KingdomId): Record<ResourceKind, ResourceLedger> {
+    const out = {} as Record<ResourceKind, ResourceLedger>;
+    for (const k of RESOURCE_KINDS) {
+      out[k] = { produced: 0, consumed: 0, net: 0, sources: [], sinks: [] };
+    }
+    const add = (list: LedgerEntry[], label: string, amount: number) => {
+      if (amount <= 0.01) return;
+      const found = list.find((e) => e.label === label);
+      if (found) found.amount += amount;
+      else list.push({ label, amount });
+    };
+
+    for (const t of Object.values(this.state.territories)) {
+      if (t.ownerId !== kingdomId) continue;
+
+      for (const id of t.buildingIds) {
+        const b = this.state.buildings[id];
+        if (!b || b.construction > 0) continue;
+        const def = BUILDING_DEFS[b.defId];
+        if (!def) continue;
+        const scale = this.buildingScale(b, t);
+        const rate = def.input ? scale * b.efficiency : scale;
+        const where = `${def.name} · ${t.name}`;
+
+        for (const k of RESOURCE_KINDS) {
+          const gain = (def.output?.[k] ?? 0) * rate;
+          if (gain > 0) {
+            out[k].produced += gain;
+            add(out[k].sources, where, gain);
+          }
+          const cost = (def.input?.[k] ?? 0) * rate;
+          if (cost > 0) {
+            out[k].consumed += cost;
+            add(out[k].sinks, where, cost);
+          }
+        }
+      }
+
+      const r = this.report(t);
+      out.coin.produced += r.taxes;
+      add(out.coin.sources, 'Impostos', r.taxes);
+      out.coin.consumed += r.wages;
+      add(out.coin.sinks, 'Salários', r.wages);
+      out.food.consumed += r.foodUpkeep;
+      add(out.food.sinks, 'Consumo da população', r.foodUpkeep);
+      for (const k of RESOURCE_KINDS) {
+        const up = r.armyUpkeep[k];
+        if (up > 0) {
+          out[k].consumed += up;
+          add(out[k].sinks, 'Manutenção militar', up);
+        }
+      }
+    }
+
+    for (const k of RESOURCE_KINDS) {
+      out[k].net = out[k].produced - out[k].consumed;
+      out[k].sources.sort((a, b) => b.amount - a.amount);
+      out[k].sinks.sort((a, b) => b.amount - a.amount);
+    }
+    return out;
   }
 
   /** Saldo por minuto de todo o reino — usado no HUD. */

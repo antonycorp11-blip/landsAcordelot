@@ -18,7 +18,7 @@ import { TopBar } from './ui/TopBar';
 import { safeAreaReport, watchSafeArea } from './ui/safeArea';
 import { UpdateWatcher } from './ui/UpdateWatcher';
 
-type Rail = 'kingdom' | 'campaigns' | 'help' | 'debug' | null;
+type Rail = 'kingdom' | 'campaigns' | 'help' | 'debug' | 'resources' | null;
 
 /**
  * Trilho lateral no formato do conceito: medalhão dourado + rótulo curto.
@@ -47,14 +47,21 @@ const RAIL_ITEMS: {
   {
     id: 'mundo',
     medal: 'mundo',
-    label: 'Mundo',
+    label: 'Capital',
     title: 'Voltar à capital',
     run: (_g, _r, _s, openCapital) => openCapital(),
   },
   {
-    id: 'stalled',
+    id: 'resources',
     medal: 'tecnologia',
-    label: 'Produção',
+    label: 'Recursos',
+    title: 'Origem e destino de cada recurso',
+    run: (_g, rail, setRail) => setRail(rail === 'resources' ? null : 'resources'),
+  },
+  {
+    id: 'stalled',
+    medal: 'relatorios',
+    label: 'Parados',
     title: 'Ir para a produção parada',
     run: (game, _r, _s, openCapital, snap) => {
       const stalled = game
@@ -85,15 +92,8 @@ const RAIL_ITEMS: {
     run: (_g, rail, setRail) => setRail(rail === 'campaigns' ? null : 'campaigns'),
   },
   {
-    id: 'save',
-    medal: 'diplomacia',
-    label: 'Salvar',
-    title: 'Salvar o reino agora',
-    run: (game) => game.saveNow(),
-  },
-  {
     id: 'help',
-    medal: 'relatorios',
+    medal: 'diplomacia',
     label: 'Ajuda',
     title: 'Como jogar',
     run: (_g, rail, setRail) => setRail(rail === 'help' ? null : 'help'),
@@ -354,8 +354,15 @@ export function App() {
             onToggleEconomy={() => setEconomyOpen((v) => !v)}
           />
 
-          {economyOpen && (
-            <EconomyPanel game={game} state={snap.state} onClose={() => setEconomyOpen(false)} />
+          {(economyOpen || rail === 'resources') && (
+            <EconomyPanel
+              game={game}
+              state={snap.state}
+              onClose={() => {
+                setEconomyOpen(false);
+                if (rail === 'resources') setRail(null);
+              }}
+            />
           )}
 
           <button

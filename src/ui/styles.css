@@ -804,7 +804,7 @@ button { font-family: inherit; }
   .rotate-hint { display: grid; }
 }
 
-/* ------------------------------------------------------ painel de economia -- */
+/* ------------------------------------------------------ painel de recursos -- */
 
 .econ-toggle {
   display: grid; place-items: center; position: relative;
@@ -819,54 +819,57 @@ button { font-family: inherit; }
   color: #fff; border-color: rgba(255,255,255,.4);
 }
 .econ-toggle .dot {
-  position: absolute; top: -3px; right: -3px;
-  width: 8px; height: 8px; border-radius: 50%;
-  background: var(--bad); border: 1.5px solid #0d131e;
+  position: absolute; top: -2px; right: -2px;
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--bad); box-shadow: 0 0 0 1.5px rgba(8,16,30,.95);
 }
 
-.econ-pop {
-  position: absolute; top: calc(var(--top-h) + 14px + var(--safe-t));
-  left: 50%; transform: translateX(-50%);
-  width: min(560px, calc(100vw - 24px));
-  max-height: calc(100% - var(--top-h) - 28px);
-  display: flex; flex-direction: column;
-  background: var(--panel); border: 1px solid var(--stroke);
-  border-radius: var(--radius); backdrop-filter: blur(16px);
-  box-shadow: 0 20px 50px rgba(0,0,0,.55); z-index: 3; overflow: hidden;
+/* A razão de cada recurso */
+.led { margin-bottom: 5px; }
+.led-head {
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  padding: 7px 9px; border-radius: 8px; cursor: pointer; text-align: left;
+  background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+  border: 1px solid rgba(232,195,90,.16);
+  color: var(--text); font-size: 12px;
 }
-.econ-head {
-  display: flex; align-items: center; gap: 10px;
-  padding: 11px 14px 9px; border-bottom: 1px solid var(--stroke); flex: 0 0 auto;
+.led-head:hover:not(:disabled) { background: rgba(232,195,90,.12); border-color: rgba(232,195,90,.4); }
+.led-head:disabled { cursor: default; opacity: .75; }
+.led.open .led-head { border-color: rgba(232,195,90,.5); background: rgba(232,195,90,.1); }
+.led-head .ico { display: inline-flex; width: 18px; flex: 0 0 18px; }
+.led-head .ico svg { width: 18px; height: 18px; }
+.led-head .nm { flex: 1; min-width: 0; }
+.led-head .stock { font-variant-numeric: tabular-nums; font-weight: 650; }
+.led-head .stock small { color: var(--muted); font-weight: 400; }
+.led-head .stock.full { color: var(--gold); }
+.led-head .flow { display: flex; gap: 5px; min-width: 96px; justify-content: flex-end; }
+.led-head .flow em {
+  font-style: normal; font-size: 10px; font-variant-numeric: tabular-nums;
+  padding: 1px 5px; border-radius: 4px; background: rgba(0,0,0,.28);
 }
-.econ-head .title { font-size: 14px; font-weight: 700; }
-.econ-head .sub { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .7px; margin-top: 2px; }
-.econ-head .close {
-  margin-left: auto; width: 26px; height: 26px; border-radius: 7px;
-  background: var(--panel-2); border: 1px solid var(--stroke);
-  color: var(--muted); font-size: 15px; cursor: pointer;
+.led-head .net {
+  width: 46px; text-align: right; font-variant-numeric: tabular-nums;
+  font-weight: 700; color: var(--muted);
 }
-.econ-body {
-  padding: 10px 14px 14px; overflow-y: auto;
-  display: grid; grid-template-columns: 1fr 1fr; gap: 8px 18px; align-items: start;
+.led-head .chev { color: var(--gold-300); font-size: 9px; width: 10px; }
+.pos { color: var(--good); }
+.neg { color: var(--bad); }
+
+.led-detail {
+  padding: 9px 10px; margin-top: -2px;
+  border: 1px solid rgba(232,195,90,.22); border-top: 0;
+  border-radius: 0 0 8px 8px; background: rgba(6,13,26,.45);
 }
-.econ-group:last-child { grid-column: 1 / -1; }
-.econ-cap {
-  font-size: 9.5px; text-transform: uppercase; letter-spacing: .9px;
-  color: var(--muted); margin: 6px 0 5px;
+.led-cap {
+  font-size: 9px; letter-spacing: .9px; text-transform: uppercase;
+  color: var(--muted); margin: 6px 0 3px;
 }
-.econ-line {
+.led-line {
   display: flex; align-items: center; gap: 8px;
-  padding: 5px 7px; border-radius: 7px; font-size: 12px;
+  font-size: 11.5px; padding: 3px 2px;
 }
-.econ-line:nth-child(even) { background: rgba(255,255,255,.03); }
-.econ-line .ico { display: inline-flex; width: 17px; }
-.econ-line .nm { flex: 1; min-width: 0; }
-.econ-line .stock { font-variant-numeric: tabular-nums; }
-.econ-line .stock small { color: var(--muted); }
-.econ-line .stock.full { color: var(--gold); }
-.econ-line .rt { width: 52px; text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
-.econ-line .rt.pos { color: var(--good); }
-.econ-line .rt.neg { color: var(--bad); }
+.led-line span { flex: 1; min-width: 0; color: #cbd7e8; }
+.led-line em { font-style: normal; font-variant-numeric: tabular-nums; font-weight: 600; }
 
 .econ-ok { font-size: 11.5px; color: var(--good); padding: 6px 2px; }
 .econ-issue {
@@ -875,18 +878,11 @@ button { font-family: inherit; }
   background: rgba(255,255,255,.04); border: 1px solid var(--stroke); color: var(--text);
   font-size: 12px;
 }
-.econ-issue:hover { background: rgba(255,255,255,.1); }
-.econ-issue.stopped { border-color: rgba(240,97,106,.4); }
-.econ-issue.starved { border-color: rgba(242,195,61,.35); }
+.econ-issue:hover { background: rgba(232,195,90,.12); }
+.econ-issue.stopped { border-color: rgba(240,97,106,.45); }
+.econ-issue.starved { border-color: rgba(242,195,61,.4); }
 .econ-issue .nm { flex: 1; min-width: 0; }
 .econ-issue .why { font-size: 10.5px; color: var(--muted); flex: 0 0 auto; }
-
-@media (max-height: 560px) {
-  .econ-pop { width: min(480px, calc(100vw - 20px)); }
-  .econ-body { padding: 8px 11px 11px; gap: 6px 12px; }
-  .econ-line { font-size: 11px; padding: 4px 6px; }
-  .econ-toggle { width: 28px; height: 27px; }
-}
 
 /* -------------------------------------------------------- caixa de save -- */
 
@@ -918,7 +914,6 @@ button { font-family: inherit; }
 }
 .rail-toggle:hover { color: var(--gold-100); }
 
-/* Recolhido: o trilho sai de cena e os painéis reaproveitam a largura. */
 .hud.rail-min { --rail: 26px; }
 .hud.rail-min .rail { display: none; }
 
@@ -939,4 +934,7 @@ button { font-family: inherit; }
 
 @media (max-height: 560px) {
   .update-bar { bottom: calc(8px + var(--safe-b)); font-size: 11.5px; padding: 8px 10px 8px 13px; }
+  .led-head { font-size: 11px; padding: 6px 7px; gap: 6px; }
+  .led-head .flow { min-width: 78px; }
+  .led-head .net { width: 40px; }
 }
