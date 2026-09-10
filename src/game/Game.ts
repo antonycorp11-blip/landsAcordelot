@@ -429,6 +429,31 @@ export class Game {
     return result.ok;
   }
 
+  /**
+   * Onde, na tela, fica o alvo de um passo do tutorial que aponta o mapa.
+   *
+   * Devolve nulo quando o alvo não existe ou está fora do quadro — o holofote
+   * simplesmente não aparece, em vez de apontar para o vazio.
+   */
+  tutorialPoint(value: string): Vec2 | null {
+    let world: Vec2 | null = null;
+    if (value === 'capital') {
+      const capital = this.playerCapital();
+      if (capital) {
+        const castle = capital.castleId ? this.state.castles[capital.castleId] : null;
+        world = castle?.position ?? capital.center;
+      }
+    } else if (value === 'claimable') {
+      const id = [...this.claimable][0];
+      const t = id ? this.state.territories[id] : null;
+      if (t) world = t.center;
+    }
+    if (!world) return null;
+    const p = this.camera.worldToScreen(world.x, world.y);
+    if (p.x < 0 || p.y < 0 || p.x > this.camera.viewW || p.y > this.camera.viewH) return null;
+    return p;
+  }
+
   /** O jogador terminou de ler o capítulo: o reino volta a andar. */
   closeSaga() {
     this.state.sagaPending = null;

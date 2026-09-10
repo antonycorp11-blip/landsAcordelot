@@ -13,55 +13,100 @@
       "id": "select_capital",
       "title": "Seu domínio",
       "text": "Valdória é tudo o que você tem. Clique no seu território para abrir o painel de administração.",
-      "hint": "O território com fronteira dourada é seu."
+      "hint": "O território com fronteira dourada é seu.",
+      "target": {
+        "kind": "map",
+        "value": "capital",
+        "label": "Sua capital"
+      }
     },
     {
       "id": "open_build",
       "title": "Os recursos do solo",
       "text": "Abra a aba CONSTRUIR. Cada depósito no mapa — floresta, pedra, minério, ouro — é um ponto onde se instala uma exploração.",
-      "hint": "Os depósitos livres aparecem marcados no mapa quando o território está selecionado."
+      "hint": "Os depósitos livres aparecem marcados no mapa quando o território está selecionado.",
+      "target": {
+        "kind": "selector",
+        "value": "tab-build",
+        "label": "Aba Construir"
+      }
     },
     {
       "id": "build_lumberjack",
       "title": "Madeira primeiro",
       "text": "Construa uma Cabana do Lenhador sobre um depósito de floresta. Sem madeira não existe nada depois dela.",
-      "hint": "Aba CONSTRUIR → depósito de floresta → Cabana do Lenhador."
+      "hint": "Aba CONSTRUIR → depósito de floresta → Cabana do Lenhador.",
+      "target": {
+        "kind": "selector",
+        "value": "tab-build",
+        "label": "Aba Construir"
+      }
     },
     {
       "id": "hire_worker",
       "title": "Braços para trabalhar",
       "text": "Um prédio vazio não produz. Contrate um trabalhador e aloque-o na cabana.",
-      "hint": "Aba TRABALHO → Contratar → depois use + na cabana."
+      "hint": "Aba TRABALHO → Contratar → depois use + na cabana.",
+      "target": {
+        "kind": "selector",
+        "value": "tab-work",
+        "label": "Aba Trabalho"
+      }
     },
     {
       "id": "build_sawmill",
       "title": "A primeira refinaria",
       "text": "Madeira bruta não constrói muralha. Erga uma Serraria: ela transforma madeira em tábuas.",
-      "hint": "Aba CONSTRUIR → Serraria (ocupa uma vaga urbana, não um depósito)."
+      "hint": "Aba CONSTRUIR → Serraria (ocupa uma vaga urbana, não um depósito).",
+      "target": {
+        "kind": "selector",
+        "value": "tab-build",
+        "label": "Aba Construir"
+      }
     },
     {
       "id": "build_barracks",
       "title": "Homens de armas",
       "text": "Levante um Quartel. Sem ele, nenhum súdito seu pega em armas.",
-      "hint": "O Quartel exige tábuas, tijolos e ferro — a cadeia inteira funcionando."
+      "hint": "O Quartel exige tábuas, tijolos e ferro — a cadeia inteira funcionando.",
+      "target": {
+        "kind": "selector",
+        "value": "tab-build",
+        "label": "Aba Construir"
+      }
     },
     {
       "id": "recruit",
       "title": "A primeira tropa",
       "text": "Recrute uma Milícia na aba MILITAR. Ela ficará estacionada no território, visível no mapa.",
-      "hint": "Cada soldado tira um habitante da força de trabalho e custa manutenção."
+      "hint": "Cada soldado tira um habitante da força de trabalho e custa manutenção.",
+      "target": {
+        "kind": "selector",
+        "value": "tab-army",
+        "label": "Aba Militar"
+      }
     },
     {
       "id": "claim",
       "title": "Expandir",
       "text": "Selecione um vizinho destacado em dourado e reivindique-o. Só se disputa terra que faz fronteira com a sua.",
-      "hint": "Territórios neutros aceitam negociação. Reinos rivais exigirão campanha militar."
+      "hint": "Territórios neutros aceitam negociação. Reinos rivais exigirão campanha militar.",
+      "target": {
+        "kind": "map",
+        "value": "claimable",
+        "label": "Vizinho em dourado"
+      }
     },
     {
       "id": "campaign",
       "title": "A guerra tem preço",
       "text": "Territórios de outros reinos não se compram: monte uma expedição na aba MILITAR, escolha o alvo na fronteira e marche.",
-      "hint": "A prévia mostra quantos soldados voltam. Vencer e valer a pena são coisas diferentes."
+      "hint": "A prévia mostra quantos soldados voltam. Vencer e valer a pena são coisas diferentes.",
+      "target": {
+        "kind": "selector",
+        "value": "tab-army",
+        "label": "Aba Militar"
+      }
     }
   ],
   "chronicle": [

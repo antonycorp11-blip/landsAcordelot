@@ -455,6 +455,7 @@ export function App() {
               return (
                 <button
                   key={item.id}
+                  data-tut={`rail-${item.id}`}
                   className={rail === item.id ? 'active' : ''}
                   title={item.title}
                   onClick={() => item.run(game, rail, setRail, openCapital, snap)}

@@ -1678,3 +1678,33 @@ canvas.map {
 .saga-via.conquest { color: #ffb3ad; background: rgba(216,69,63,.18); border: 1px solid rgba(216,69,63,.5); }
 .saga-via.friendship { color: #a8f0cd; background: rgba(63,185,143,.16); border: 1px solid rgba(63,185,143,.5); }
 .btn.wide { display: block; width: 100%; margin-top: 15px; }
+
+/* ------------------------------------------------- holofote do tutorial -- */
+
+.tut-spot {
+  position: absolute; z-index: 8; pointer-events: none;
+  border-radius: 12px;
+  border: 2px solid rgba(232,195,90,.95);
+  box-shadow:
+    0 0 0 3px rgba(232,195,90,.22),
+    0 0 22px 6px rgba(232,195,90,.35),
+    0 0 0 9999px rgba(4,10,20,.28);
+  animation: tut-pulse 1.5s ease-in-out infinite;
+}
+.tut-tag {
+  position: absolute; left: 50%; top: -11px; transform: translate(-50%, -100%);
+  white-space: nowrap; padding: 4px 9px; border-radius: 999px;
+  font-size: 10px; font-weight: 780; letter-spacing: .5px;
+  color: #0e1b2e; background: var(--gold-100);
+  box-shadow: 0 4px 12px rgba(0,0,0,.5);
+}
+.tut-tag::after {
+  content: ''; position: absolute; left: 50%; bottom: -4px; transform: translateX(-50%);
+  border-left: 5px solid transparent; border-right: 5px solid transparent;
+  border-top: 5px solid var(--gold-100);
+}
+
+@keyframes tut-pulse {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(232,195,90,.22), 0 0 22px 6px rgba(232,195,90,.35), 0 0 0 9999px rgba(4,10,20,.28); }
+  50% { box-shadow: 0 0 0 6px rgba(232,195,90,.12), 0 0 30px 10px rgba(232,195,90,.5), 0 0 0 9999px rgba(4,10,20,.28); }
+}

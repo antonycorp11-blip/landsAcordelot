@@ -180,7 +180,12 @@ export function CityPanel({
 
       <div className="tabs">
         {TABS.filter((t) => isPlayer || t.id === 'view' || t.id === 'borders').map((t) => (
-          <button key={t.id} className={tab === t.id ? 'active' : ''} onClick={() => setTab(t.id)}>
+          <button
+            key={t.id}
+            data-tut={`tab-${t.id}`}
+            className={tab === t.id ? 'active' : ''}
+            onClick={() => setTab(t.id)}
+          >
             {t.label}
           </button>
         ))}

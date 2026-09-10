@@ -21,6 +21,18 @@ export interface TutorialStepDef {
   title: string;
   text: string;
   hint: string;
+  /**
+   * Para onde o passo aponta.
+   *
+   * `selector` casa com um `data-tut` na interface; `map` aponta um lugar do
+   * mundo. Ler o que fazer e achar onde fazer são dois problemas diferentes, e
+   * o segundo é o que trava quem está começando.
+   */
+  target?: {
+    kind: 'selector' | 'map';
+    value: string;
+    label: string;
+  };
 }
 
 export interface ChronicleDef {
