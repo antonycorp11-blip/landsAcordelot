@@ -35,6 +35,7 @@ interface SavePayload {
   tutorialDone: boolean;
   stats?: GameState['stats'];
   waves?: number;
+  relations?: GameState['relations'];
   titleIndex?: number;
   chronicle?: string[];
   stage?: GameState['stage'];
@@ -86,6 +87,7 @@ export class SaveManager {
       tutorialDone: state.tutorialDone,
       stats: state.stats,
       waves: state.waves,
+      relations: state.relations,
       titleIndex: state.titleIndex,
       chronicle: state.chronicle,
       stage: state.stage,
@@ -187,6 +189,7 @@ export class SaveManager {
     state.chronicle = payload.chronicle ?? [];
     state.stage = payload.stage ?? 'kingdom';
     state.waves = payload.waves ?? 0;
+    state.relations = payload.relations ?? {};
     state.stateName = payload.stateName ?? null;
     state.governorId = payload.governorId ?? null;
     state.generalId = payload.generalId ?? null;

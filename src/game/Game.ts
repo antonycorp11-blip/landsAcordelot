@@ -4,6 +4,7 @@ import { AIManager } from './managers/AIManager';
 import { ArmyManager, stackSize, type MarchCheck, type UnitStack } from './managers/ArmyManager';
 import { BattleManager, type BattlePreview } from './managers/BattleManager';
 import { CouncilManager } from './managers/CouncilManager';
+import { DiplomacyManager, type DiplomacyOffer } from './managers/DiplomacyManager';
 import { RealmManager } from './managers/RealmManager';
 import { BuildingManager } from './managers/BuildingManager';
 import { Camera } from './managers/Camera';
@@ -62,6 +63,7 @@ export class Game {
   readonly trade: TradeManager;
   readonly realm: RealmManager;
   readonly council: CouncilManager;
+  readonly diplomacy: DiplomacyManager;
   readonly saves: SaveManager;
 
   private renderer: Renderer | null = null;
@@ -111,7 +113,16 @@ export class Game {
     this.buildings = new BuildingManager(this.state, this.economy);
     this.armies = new ArmyManager(this.state, this.economy, this.world);
     this.battles = new BattleManager(this.state);
-    this.ai = new AIManager(this.state, this.economy, this.buildings, this.armies, this.battles);
+    this.diplomacy = new DiplomacyManager(this.state);
+    this.diplomacy.sync();
+    this.ai = new AIManager(
+      this.state,
+      this.economy,
+      this.buildings,
+      this.armies,
+      this.battles,
+      this.diplomacy,
+    );
     this.trade = new TradeManager(this.state);
     this.realm = new RealmManager(this.state);
     this.council = new CouncilManager(this.state);
@@ -295,6 +306,7 @@ export class Game {
     this.trade.tick(simDt);
     this.ai.tick(simDt);
     this.checkRealm();
+    this.diplomacy.tick(simDt);
 
     // O conselho traz uma demanda: o jogo pausa e espera a decisão.
     const demand = this.council.tick(simDt);
@@ -355,6 +367,19 @@ export class Game {
     );
     this.setSpeed(1);
     this.touch();
+  }
+
+  /** Leva uma proposta à mesa de um vizinho. */
+  diplomaticAct(kingdomId: string, offerId: DiplomacyOffer['id']): boolean {
+    const result = this.diplomacy.act(kingdomId, offerId);
+    this.notify(result.message, 5);
+    if (result.ok) {
+      this.selectedArmyId = null;
+      this.armyTargets = new Set();
+      this.saves.save(this.state);
+    }
+    this.touch();
+    return result.ok;
   }
 
   /** Responde a demanda aberta do conselho. */
@@ -455,6 +480,10 @@ export class Game {
     if (battle.winner === 'attacker' && territory && attackerArmy) {
       const previousOwner = territory.ownerId;
       this.territories.transferOwnership(battle.territoryId, attackerArmy.ownerId, 'MILITARY');
+      // Só a sua conquista mexe na sua mesa; briga entre vizinhos não.
+      if (attackerArmy.ownerId === this.state.playerKingdomId && previousOwner) {
+        this.diplomacy.onTerritoryTaken(previousOwner);
+      }
 
       attackerArmy.state = 'garrison';
       attackerArmy.territoryId = battle.territoryId;
@@ -773,7 +802,10 @@ export class Game {
     if (from) {
       for (const n of from.neighbors) {
         const t = this.state.territories[n];
-        if (t && !t.locked) this.armyTargets.add(n);
+        if (!t || t.locked) continue;
+        // Pacto assinado fecha a porta: o alvo nem acende.
+        if (this.diplomacy.attackBlocked(army.ownerId, t.ownerId)) continue;
+        this.armyTargets.add(n);
       }
     }
     this.touch();
@@ -1093,7 +1125,12 @@ export class Game {
       return false;
     }
     const t = this.state.territories[id];
+    const previousOwner = t.ownerId;
     if (!this.territories.transferOwnership(id, kingdomId, reason)) return false;
+    // Tomar terra de alguém rompe o que estava assinado com ele.
+    if (previousOwner && previousOwner !== kingdomId) {
+      this.diplomacy.onTerritoryTaken(previousOwner);
+    }
 
     const castle = t.castleId ? this.state.castles[t.castleId] : null;
     const pos = castle?.position ?? t.center;

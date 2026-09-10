@@ -1,8 +1,9 @@
-import { AI } from '../config/balance';
+import { AI, DIPLOMACY } from '../config/balance';
 import { BUILDING_LIST, UNIT_LIST } from '../data/defs';
 import type { Building, Deposit, GameState, Kingdom, Territory, UnitKind } from '../types';
 import type { ArmyManager, UnitStack } from './ArmyManager';
 import { stackSize } from './ArmyManager';
+import type { DiplomacyManager } from './DiplomacyManager';
 import type { BattleManager } from './BattleManager';
 import type { BuildingManager } from './BuildingManager';
 import type { EconomyManager } from './EconomyManager';
@@ -28,6 +29,7 @@ export class AIManager {
     private buildings: BuildingManager,
     private armies: ArmyManager,
     private battles: BattleManager,
+    private diplomacy: DiplomacyManager,
   ) {}
 
   tick(dtSeconds: number) {
@@ -63,7 +65,11 @@ export class AIManager {
     if (Math.random() < profile.recruit) this.tryRecruit(kingdom, owned);
 
     // 4. Campanha.
-    if (Math.random() < profile.attack) this.tryAttack(kingdom, owned);
+    // Em guerra declarada a IA vai para cima com mais frequência: um pacto
+    // rompido tem de doer, senão declarar guerra é só um rótulo.
+    const rel = this.diplomacy.relation(kingdom.id);
+    const chance = profile.attack + (rel?.pact === 'war' ? DIPLOMACY.aiWarAttackBonus : 0);
+    if (Math.random() < chance) this.tryAttack(kingdom, owned);
   }
 
   /** Contrata e aloca trabalhadores até encher as vagas que consegue pagar. */
@@ -189,6 +195,7 @@ export class AIManager {
       for (const nid of from.neighbors) {
         const to = this.state.territories[nid];
         if (!to || to.ownerId === kingdom.id || to.locked) continue;
+        if (this.diplomacy.attackBlocked(kingdom.id, to.ownerId)) continue;
         if (!this.armies.checkMarch(from.id, nid, send, kingdom.id).ok) continue;
 
         const preview = this.battles.preview(send, garrison.morale, nid);

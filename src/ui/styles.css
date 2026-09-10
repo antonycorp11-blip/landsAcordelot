@@ -1160,3 +1160,74 @@ button { font-family: inherit; }
   .council-opt { padding: 8px 10px; }
   .council-opt .ol { font-size: 11.5px; }
 }
+
+/* ------------------------------------------------------- diplomacia -- */
+
+.medal.glyph {
+  display: grid; place-items: center;
+  font-size: 17px; font-weight: 800; color: var(--gold-100);
+  background: radial-gradient(circle at 38% 32%, #2c4a7a 0%, #16294a 60%, #0d1a30 100%);
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(232,195,90,.55), 0 2px 6px rgba(0,0,0,.5);
+}
+
+.dip-panel .panel-body { display: grid; gap: 10px; }
+
+.dip-card {
+  padding: 11px 12px; border-radius: 11px;
+  background: rgba(255,255,255,.035);
+  border: 1px solid rgba(232,195,90,.18);
+}
+.dip-head { display: flex; align-items: center; gap: 9px; }
+.dip-flag {
+  width: 15px; height: 19px; flex: 0 0 auto; border-radius: 2px 2px 4px 4px;
+  border: 1px solid; box-shadow: 0 2px 5px rgba(0,0,0,.5);
+}
+.dip-id { flex: 1; min-width: 0; }
+.dip-name { display: block; font-size: 13.5px; font-weight: 720; letter-spacing: .2px; }
+.dip-sub { display: block; font-size: 10.5px; color: var(--muted); line-height: 1.35; }
+
+.dip-pact {
+  flex: 0 0 auto; font-size: 9.5px; font-weight: 780; letter-spacing: .9px;
+  text-transform: uppercase; padding: 3px 8px; border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.16); color: #cfdaea;
+}
+.dip-pact.p-war { color: #ffb3ad; border-color: rgba(216,69,63,.6); background: rgba(216,69,63,.16); }
+.dip-pact.p-truce { color: #ffe6a8; border-color: rgba(232,195,90,.5); background: rgba(232,195,90,.12); }
+.dip-pact.p-alliance { color: #a8f0cd; border-color: rgba(63,185,143,.6); background: rgba(63,185,143,.16); }
+.dip-pact.p-vassal { color: #cbbcff; border-color: rgba(143,122,224,.6); background: rgba(143,122,224,.16); }
+
+.dip-mood { display: flex; align-items: center; gap: 8px; margin: 9px 0 2px; }
+.dip-bar {
+  position: relative; flex: 1; height: 5px; border-radius: 999px;
+  background: linear-gradient(90deg, #8e2420 0%, #33405c 50%, #b8912f 100%);
+}
+.dip-bar i {
+  position: absolute; top: 50%; width: 10px; height: 10px; margin-left: -5px;
+  transform: translateY(-50%); border-radius: 50%;
+  background: #f2f6ff; box-shadow: 0 0 0 2px rgba(8,16,30,.9), 0 2px 5px rgba(0,0,0,.6);
+}
+.dip-mood span { font-size: 11px; font-weight: 720; color: var(--muted); min-width: 26px; text-align: right; }
+.dip-mood span.good { color: #6fd39a; }
+.dip-mood span.bad { color: #e08a8a; }
+
+.dip-offers { display: grid; gap: 5px; margin-top: 9px; }
+.dip-offer {
+  display: flex; align-items: center; gap: 9px; text-align: left; cursor: pointer;
+  padding: 8px 10px; border-radius: 8px; color: var(--text);
+  background: rgba(255,255,255,.05); border: 1px solid rgba(232,195,90,.2);
+}
+.dip-offer:hover:not(:disabled) { background: rgba(232,195,90,.14); border-color: rgba(232,195,90,.6); }
+.dip-offer .ol { flex: 1; font-size: 12px; font-weight: 650; }
+.dip-offer .oc { font-size: 10.5px; color: var(--muted); text-align: right; }
+.dip-offer.locked { opacity: .5; cursor: not-allowed; }
+.dip-offer.danger:hover:not(:disabled) {
+  background: rgba(216,69,63,.18); border-color: rgba(216,69,63,.7);
+}
+
+@media (max-height: 560px) {
+  .dip-card { padding: 8px 9px; }
+  .dip-name { font-size: 12px; }
+  .dip-offer { padding: 6px 8px; }
+  .dip-offer .ol { font-size: 11px; }
+}

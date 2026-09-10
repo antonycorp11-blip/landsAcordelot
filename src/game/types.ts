@@ -383,6 +383,8 @@ export interface GameState {
   stage: RealmStage;
   /** Quantas ondas do País já foram reveladas (0 = só o reino inicial). */
   waves: number;
+  /** Relação com cada reino estrangeiro, por id. */
+  relations: Record<string, Relation>;
   /** Nome dado pelo jogador ao Estado, quando promovido. */
   stateName: string | null;
   /** Governador e general escolhidos, com a ordem que cada um segue. */
@@ -395,6 +397,30 @@ export interface GameState {
 }
 
 export type RealmStage = 'kingdom' | 'state';
+
+/**
+ * O que existe entre você e um vizinho.
+ *
+ * `neutral` é o estado natural: ninguém prometeu nada e qualquer um pode
+ * marchar. Trégua, aliança e vassalagem travam o ataque nos dois sentidos —
+ * é o que faz assinar um pacto custar alguma coisa de verdade.
+ */
+export type PactKind = 'neutral' | 'truce' | 'alliance' | 'vassal' | 'war';
+
+export interface Relation {
+  kingdomId: KingdomId;
+  /** -100 (ódio) a 100 (devoção). */
+  attitude: number;
+  pact: PactKind;
+  /** Dias que faltam para a trégua vencer; 0 quando não tem prazo. */
+  pactDays: number;
+  /** Casamento real: laço que não vence e abre a aliança. */
+  married: boolean;
+  /** Moedas por minuto que um vassalo manda para a sua capital. */
+  tribute: number;
+  /** Segundos até poder mandar outro presente. */
+  giftCooldown: number;
+}
 
 /** Ordem permanente ao governador — cidade, povo e extração. */
 export type CivilPolicy = 'celeiros' | 'ordem' | 'crescimento';

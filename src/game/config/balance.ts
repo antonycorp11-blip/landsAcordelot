@@ -415,3 +415,30 @@ export const AI = {
     NONE: { build: 0, recruit: 0, attack: 0 },
   } as Record<string, { build: number; recruit: number; attack: number }>,
 } as const;
+
+/**
+ * Diplomacia (§17, §19).
+ *
+ * A pergunta continua não sendo "eu ganho?", e sim "vale o que custa?". Um
+ * pacto compra fronteira tranquila mas fecha uma porta de conquista; um
+ * casamento sai caro e amarra você a guerras que não são suas.
+ */
+export const DIPLOMACY = {
+  /** Para onde a simpatia caminha sozinha, por pacto. */
+  baseline: { neutral: 0, truce: 15, alliance: 45, vassal: 20, war: -60 } as const,
+  /** Pontos de simpatia por minuto na direção da linha de base. */
+  driftPerMinute: 1.4,
+  /** Quanto cai ao tomar uma província deles. */
+  attitudePerTerritoryTaken: -32,
+
+  gift: { coin: 400, attitude: 14, cooldownSeconds: 90 },
+  truce: { coin: 600, minAttitude: 10, days: 60 },
+  marriage: { coin: 2500, minAttitude: 40, attitude: 25, dowryCoin: 1200 },
+  alliance: { coin: 1500, minAttitude: 70 },
+  /** Vassalagem se compra com força, não com carinho. */
+  vassal: { powerRatio: 2.2, tributePerMinute: 55, attitude: -20 },
+  war: { attitude: -45 },
+
+  /** A IA em guerra ataca com mais frequência. */
+  aiWarAttackBonus: 0.35,
+} as const;

@@ -15,13 +15,14 @@ import { Minimap } from './ui/Minimap';
 import { SaveTools } from './ui/SavePanel';
 import { SendTroops } from './ui/SendTroops';
 import { CouncilDemand } from './ui/CouncilDemand';
+import { DiplomacyPanel } from './ui/DiplomacyPanel';
 import { StatePromotion } from './ui/StatePromotion';
 import { Tutorial } from './ui/Tutorial';
 import { TopBar } from './ui/TopBar';
 import { safeAreaReport, watchSafeArea } from './ui/safeArea';
 import { UpdateWatcher } from './ui/UpdateWatcher';
 
-type Rail = 'kingdom' | 'campaigns' | 'help' | 'debug' | 'resources' | null;
+type Rail = 'kingdom' | 'campaigns' | 'help' | 'debug' | 'resources' | 'diplomacy' | null;
 
 /**
  * Trilho lateral no formato do conceito: medalhão dourado + rótulo curto.
@@ -29,9 +30,13 @@ type Rail = 'kingdom' | 'campaigns' | 'help' | 'debug' | 'resources' | null;
  */
 const RAIL_ITEMS: {
   id: string;
-  medal: string;
+  /** Medalhão desenhado; `null` cai no glifo. */
+  medal: string | null;
+  glyph?: string;
   label: string;
   title: string;
+  /** Item que só aparece em certa altura da partida. */
+  when?: (snap: GameSnapshot) => boolean;
   run: (
     game: Game,
     rail: Rail,
@@ -95,8 +100,18 @@ const RAIL_ITEMS: {
     run: (_g, rail, setRail) => setRail(rail === 'campaigns' ? null : 'campaigns'),
   },
   {
-    id: 'help',
+    id: 'diplomacy',
     medal: 'diplomacia',
+    label: 'Diplomacia',
+    title: 'A mesa: pactos, casamentos e tributos',
+    // Só faz sentido depois que existe vizinho de fato, e isso é o Estado.
+    when: (snap) => snap.state.stage === 'state',
+    run: (_g, rail, setRail) => setRail(rail === 'diplomacy' ? null : 'diplomacy'),
+  },
+  {
+    id: 'help',
+    medal: null,
+    glyph: '?',
     label: 'Ajuda',
     title: 'Como jogar',
     run: (_g, rail, setRail) => setRail(rail === 'help' ? null : 'help'),
@@ -427,7 +442,7 @@ export function App() {
           </button>
 
           <div className="rail">
-            {RAIL_ITEMS.map((item) => {
+            {RAIL_ITEMS.filter((item) => !item.when || item.when(snap)).map((item) => {
               const badge =
                 item.id === 'campaigns' ? inField : item.id === 'stalled' ? idleWarnings : 0;
               return (
@@ -437,7 +452,11 @@ export function App() {
                   title={item.title}
                   onClick={() => item.run(game, rail, setRail, openCapital, snap)}
                 >
-                  <img className="medal" src={assetUrl(`/ui/rail_${item.medal}.webp`)} alt="" />
+                  {item.medal ? (
+                    <img className="medal" src={assetUrl(`/ui/rail_${item.medal}.webp`)} alt="" />
+                  ) : (
+                    <span className="medal glyph">{item.glyph}</span>
+                  )}
                   <span className="tag">{item.label}</span>
                   {badge > 0 && <span className="badge">{badge}</span>}
                 </button>
@@ -459,6 +478,10 @@ export function App() {
 
           {rail === 'kingdom' && (
             <KingdomPanel game={game} state={snap.state} onClose={() => setRail(null)} />
+          )}
+
+          {rail === 'diplomacy' && (
+            <DiplomacyPanel game={game} state={snap.state} onClose={() => setRail(null)} />
           )}
 
           {rail === 'campaigns' && (

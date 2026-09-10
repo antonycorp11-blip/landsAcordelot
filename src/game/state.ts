@@ -315,6 +315,7 @@ export function createWorld(waves = 0): WorldBundle {
     chronicle: [],
     stage: 'kingdom',
     waves: 0,
+    relations: {},
     stateName: null,
     governorId: null,
     generalId: null,
