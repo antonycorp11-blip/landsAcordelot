@@ -12,7 +12,7 @@ import { SaveManager } from './managers/SaveManager';
 import { TradeManager } from './managers/TradeManager';
 import { TerritoryManager } from './managers/TerritoryManager';
 import { Renderer } from './render/Renderer';
-import { createWorld } from './state';
+import { createWorld, expandWorld, MAX_WAVES } from './state';
 import type {
   Army,
   Battle,
@@ -51,7 +51,7 @@ type Listener = (s: GameSnapshot) => void;
 
 export class Game {
   readonly state: GameState;
-  readonly world: BuiltWorld;
+  world: BuiltWorld;
   readonly camera: Camera;
   readonly territories: TerritoryManager;
   readonly economy: EconomyManager;
@@ -172,6 +172,10 @@ export class Game {
   }
 
   detach() {
+    // Um jogo que nunca foi ligado ao canvas não tem progresso a gravar. Sem
+    // esta guarda, o descarte do React em desenvolvimento grava um reino
+    // recém-criado por cima do save de verdade.
+    const wasAttached = this.canvas !== null;
     cancelAnimationFrame(this.raf);
     document.removeEventListener('visibilitychange', this.saveOnHide);
     window.removeEventListener('pagehide', this.saveOnHide);
@@ -179,7 +183,7 @@ export class Game {
       clearInterval(this.simTimer);
       this.simTimer = null;
     }
-    this.saves.save(this.state);
+    if (wasAttached) this.saves.save(this.state);
     this.renderer = null;
     this.ctx = null;
     this.canvas = null;
@@ -340,7 +344,15 @@ export class Game {
     warPolicy: GameState['warPolicy'],
   ) {
     this.realm.foundState(name, governorId, generalId, civilPolicy, warPolicy);
-    this.notify(`O Estado de ${this.state.stateName} está fundado.`, 7);
+    // Fundar o Estado é o momento em que o mapa deixa de terminar na borda:
+    // os primeiros vizinhos aparecem, e com eles a fronteira volta a existir.
+    const grew = this.revealNextWave();
+    this.notify(
+      grew
+        ? `O Estado de ${this.state.stateName} está fundado. O mapa cresceu.`
+        : `O Estado de ${this.state.stateName} está fundado.`,
+      8,
+    );
     this.setSpeed(1);
     this.touch();
   }
@@ -1193,9 +1205,50 @@ export class Game {
   }
 
   loadSave(): boolean {
+    // Primeiro o mapa cresce até a escala em que o save foi gravado; só então
+    // o save entra. Na ordem inversa, as províncias do País ainda não existem
+    // e tudo o que você conquistou lá fora seria descartado em silêncio.
+    const waves = this.saves.peekWaves();
+    if (waves > 0) this.rebuildWorld(waves);
     const ok = this.saves.load(this.state);
     if (ok) this.select(null);
     return ok;
+  }
+
+  /**
+   * Reconstrói a geometria para um número de ondas e religa quem depende dela.
+   *
+   * Chamado em dois momentos: ao carregar um save que já estava no País, e na
+   * hora em que o mapa cresce de verdade. A diferença entre os dois é só o
+   * deslocamento — ao carregar ele dá zero, porque as posições salvas já estão
+   * nas coordenadas certas.
+   */
+  private rebuildWorld(waves: number) {
+    const { world, dx, dy } = expandWorld(this.state, waves);
+    this.world = world;
+    this.armies.world = world;
+    this.camera.setBounds(world.width, world.height);
+    this.camera.nudge(dx, dy);
+    if (this.canvas) this.renderer = new Renderer(this.world, this.camera);
+    this.resize();
+    this.select(null);
+    this.selectedArmyId = null;
+    this.selectedBuildingId = null;
+    this.touch();
+  }
+
+  /**
+   * Revela a próxima onda de vizinhos (§5).
+   *
+   * O País não chega inteiro: cada onda traz os Estados que fazem fronteira
+   * com o que você já domina. Devolve falso quando não há mais mundo pronto.
+   */
+  revealNextWave(): boolean {
+    const next = this.state.waves + 1;
+    if (next > MAX_WAVES) return false;
+    this.rebuildWorld(next);
+    this.saves.save(this.state);
+    return true;
   }
 
   resetSave() {

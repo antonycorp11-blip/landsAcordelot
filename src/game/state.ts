@@ -15,6 +15,7 @@ import type {
   Kingdom,
   Territory,
   UnitKind,
+  Vec2,
 } from './types';
 import {
   KINGDOM_FRAME,
@@ -94,6 +95,92 @@ export const STATE_VERSION = 4;
 export interface WorldBundle {
   state: GameState;
   world: BuiltWorld;
+}
+
+/** Quadro ativo para um dado número de ondas reveladas. */
+export function frameFor(waves: number): WorldFrame {
+  return composition(waves).frame;
+}
+
+/**
+ * Cresce o mapa sem recomeçar o jogo (§5, §97).
+ *
+ * Reconstrói a geometria com o quadro maior e transplanta o reino vivo para
+ * dentro dela: o relevo do quadro original é idêntico, então basta deslocar o
+ * que guarda posição absoluta e reler a geometria por id. Os territórios novos
+ * entram inteiros — castelo, oficinas e guarnição — vindos da geração nova.
+ *
+ * Devolve o deslocamento aplicado, que a câmera precisa para não saltar.
+ */
+export function expandWorld(live: GameState, waves: number): { world: BuiltWorld; dx: number; dy: number } {
+  const before = frameFor(live.waves);
+  const fresh = createWorld(waves);
+  const after = frameFor(waves);
+  const dx = after.originX - before.originX;
+  const dy = after.originY - before.originY;
+
+  const shift = (p: Vec2) => {
+    p.x += dx;
+    p.y += dy;
+  };
+
+  for (const b of Object.values(live.buildings)) shift(b.position);
+  for (const a of Object.values(live.armies)) {
+    shift(a.position);
+    if (a.path) for (const p of a.path) shift(p);
+  }
+
+  // Depósitos: o conjunto novo manda na posição, o antigo manda no que já
+  // estava construído em cima. O id é derivado do conteúdo, então casa.
+  const occupied = new Map<string, string | null>();
+  for (const [id, d] of Object.entries(live.deposits)) occupied.set(id, d.buildingId);
+  live.deposits = fresh.state.deposits;
+  for (const [id, buildingId] of occupied) {
+    const d = live.deposits[id];
+    if (d && buildingId && live.buildings[buildingId]) d.buildingId = buildingId;
+  }
+
+  // Territórios que já existiam: geometria nova, história antiga.
+  for (const t of Object.values(live.territories)) {
+    const src = fresh.state.territories[t.id];
+    if (!src) continue;
+    t.polygon = src.polygon;
+    t.center = src.center;
+    t.area = src.area;
+    t.citySlots = src.citySlots;
+    t.depositIds = src.depositIds;
+    t.neighbors = src.neighbors;
+    const castle = t.castleId ? live.castles[t.castleId] : null;
+    const srcCastle = src.castleId ? fresh.state.castles[src.castleId] : null;
+    if (castle && srcCastle) castle.position = srcCastle.position;
+  }
+
+  // Vizinhos novos entram inteiros: reino, província, castelo, oficinas e
+  // guarnição. O que já era seu não é tocado.
+  const arrivals = new Set(
+    Object.keys(fresh.state.territories).filter((id) => !live.territories[id]),
+  );
+
+  for (const [id, k] of Object.entries(fresh.state.kingdoms)) {
+    if (!live.kingdoms[id]) live.kingdoms[id] = k;
+  }
+  for (const id of arrivals) {
+    live.territories[id] = fresh.state.territories[id];
+    const castleId = fresh.state.territories[id].castleId;
+    if (castleId) live.castles[castleId] = fresh.state.castles[castleId];
+  }
+  for (const [id, b] of Object.entries(fresh.state.buildings)) {
+    if (arrivals.has(b.territoryId)) live.buildings[id] = b;
+  }
+  for (const [id, a] of Object.entries(fresh.state.armies)) {
+    if (a.territoryId && arrivals.has(a.territoryId)) live.armies[id] = a;
+  }
+
+  live.waves = waves;
+  live.meta.width = fresh.world.width;
+  live.meta.height = fresh.world.height;
+
+  return { world: fresh.world, dx, dy };
 }
 
 /** Constrói geometria + estado inicial a partir dos JSONs de dados. */
@@ -227,6 +314,7 @@ export function createWorld(waves = 0): WorldBundle {
     titleIndex: 0,
     chronicle: [],
     stage: 'kingdom',
+    waves: 0,
     stateName: null,
     governorId: null,
     generalId: null,

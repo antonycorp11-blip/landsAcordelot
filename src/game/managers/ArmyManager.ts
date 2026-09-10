@@ -63,7 +63,7 @@ export class ArmyManager {
   constructor(
     private state: GameState,
     private economy: EconomyManager,
-    private world: BuiltWorld,
+    public world: BuiltWorld,
   ) {
     for (const road of world.roads) {
       this.routes.set(`${road.a}|${road.b}`, road.points);

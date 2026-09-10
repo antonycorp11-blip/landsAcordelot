@@ -381,6 +381,8 @@ export interface GameState {
 
   /** Escala atual do domínio (§5). */
   stage: RealmStage;
+  /** Quantas ondas do País já foram reveladas (0 = só o reino inicial). */
+  waves: number;
   /** Nome dado pelo jogador ao Estado, quando promovido. */
   stateName: string | null;
   /** Governador e general escolhidos, com a ordem que cada um segue. */

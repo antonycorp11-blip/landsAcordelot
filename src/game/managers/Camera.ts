@@ -34,6 +34,25 @@ export class Camera {
     return { x: this.x + (sx - this.viewW / 2) / this.zoom, y: this.y + (sy - this.viewH / 2) / this.zoom };
   }
 
+  /**
+   * Zoom mínimo: o suficiente para o mundo inteiro caber na tela.
+   *
+   * Era um número fixo, o que bastava enquanto o mapa tinha um tamanho só.
+   * Com o País, afastar até o limite ainda deixava metade do continente
+   * fora do quadro — e um mapa que você não consegue ver inteiro não serve
+   * para decidir para onde marchar.
+   */
+  private floorZoom(): number {
+    const fit = Math.min(this.viewW / this.worldW, this.viewH / this.worldH) * 0.98;
+    return Math.max(0.06, Math.min(CAMERA.minZoom, fit));
+  }
+
+  /** O mapa cresceu: a câmera passa a poder ir mais longe (§5). */
+  setBounds(width: number, height: number) {
+    this.worldW = width;
+    this.worldH = height;
+  }
+
   worldToScreen(wx: number, wy: number): Vec2 {
     return { x: (wx - this.x) * this.zoom + this.viewW / 2, y: (wy - this.y) * this.zoom + this.viewH / 2 };
   }
@@ -59,7 +78,7 @@ export class Camera {
   zoomAt(sx: number, sy: number, factor: number) {
     const before = this.screenToWorld(sx, sy);
     this.targetZoom = null;
-    this.zoom = clamp(this.zoom * factor, CAMERA.minZoom, CAMERA.maxZoom);
+    this.zoom = clamp(this.zoom * factor, this.floorZoom(), CAMERA.maxZoom);
     const after = this.screenToWorld(sx, sy);
     this.x += before.x - after.x;
     this.y += before.y - after.y;
@@ -69,15 +88,24 @@ export class Camera {
   focus(p: Vec2, zoom?: number) {
     this.targetX = p.x;
     this.targetY = p.y;
-    if (zoom !== undefined) this.targetZoom = clamp(zoom, CAMERA.minZoom, CAMERA.maxZoom);
+    if (zoom !== undefined) this.targetZoom = clamp(zoom, this.floorZoom(), CAMERA.maxZoom);
     this.vx = 0;
     this.vy = 0;
+  }
+
+  /** O mundo andou embaixo da câmera: acompanha, sem salto na tela. */
+  nudge(dx: number, dy: number) {
+    if (dx === 0 && dy === 0) return;
+    this.x += dx;
+    this.y += dy;
+    if (this.targetX !== null) this.targetX += dx;
+    if (this.targetY !== null) this.targetY += dy;
   }
 
   jumpTo(p: Vec2, zoom?: number) {
     this.x = p.x;
     this.y = p.y;
-    if (zoom !== undefined) this.zoom = clamp(zoom, CAMERA.minZoom, CAMERA.maxZoom);
+    if (zoom !== undefined) this.zoom = clamp(zoom, this.floorZoom(), CAMERA.maxZoom);
     this.targetX = null;
     this.targetY = null;
     this.targetZoom = null;

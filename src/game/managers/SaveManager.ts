@@ -34,6 +34,7 @@ interface SavePayload {
   tutorialStep: number;
   tutorialDone: boolean;
   stats?: GameState['stats'];
+  waves?: number;
   titleIndex?: number;
   chronicle?: string[];
   stage?: GameState['stage'];
@@ -84,6 +85,7 @@ export class SaveManager {
       tutorialStep: state.tutorialStep,
       tutorialDone: state.tutorialDone,
       stats: state.stats,
+      waves: state.waves,
       titleIndex: state.titleIndex,
       chronicle: state.chronicle,
       stage: state.stage,
@@ -137,6 +139,24 @@ export class SaveManager {
     return true;
   }
 
+  /**
+   * Em que escala o save foi gravado, sem aplicar nada.
+   *
+   * O mundo precisa crescer ANTES de o save entrar: se as províncias do País
+   * ainda não existem no estado, o `load` as ignora e uma conquista sua além
+   * da fronteira volta calada para o dono antigo.
+   */
+  peekWaves(): number {
+    if (!this.cached) return 0;
+    try {
+      const payload = JSON.parse(this.cached) as SavePayload;
+      if (payload.version !== STATE_VERSION) return 0;
+      return payload.waves ?? 0;
+    } catch {
+      return 0;
+    }
+  }
+
   /** Aplica um save sobre um estado recém-construído. */
   load(state: GameState): boolean {
     const raw = this.cached;
@@ -166,6 +186,7 @@ export class SaveManager {
     state.titleIndex = payload.titleIndex ?? 0;
     state.chronicle = payload.chronicle ?? [];
     state.stage = payload.stage ?? 'kingdom';
+    state.waves = payload.waves ?? 0;
     state.stateName = payload.stateName ?? null;
     state.governorId = payload.governorId ?? null;
     state.generalId = payload.generalId ?? null;
